@@ -1,0 +1,71 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "installclientdeps",
+      "type": "npm",
+      "script": "install",
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      },
+      "path": "."
+    },
+    {
+      "label": "startclient",
+      "type": "npm",
+      "script": "dev",
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "base": "$vite",
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "VITE v",
+            "endsPattern": "Network:"
+          }
+        }
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      },
+      "dependsOn": ["installclientdeps"],
+      "path": "./"
+    },
+    {
+      "label": "build",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/server/Server.sln",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary;ForceNoAlign"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "publish",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "publish",
+        "${workspaceFolder}/server/Server.sln",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary;ForceNoAlign"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "watch",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/server/Server.sln"
+      ],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}
