@@ -50,6 +50,7 @@ builder.Services
   );
 
 builder.Services.AddAuthorization();
+builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 
 
 // add mongo db for persistence
@@ -62,7 +63,6 @@ builder.Services.AddSingleton<MongoDbContext>();
 // add as scoped as we want a new instance per request
 builder.Services.AddScoped<IUserRepository, MongoUserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-
 
 // build the app
 var app = builder.Build();

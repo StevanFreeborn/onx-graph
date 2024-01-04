@@ -2,9 +2,13 @@ global using System.Text;
 
 global using Asp.Versioning;
 
+global using FluentValidation;
+
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
+global using Microsoft.AspNetCore.Mvc;
+
 
 global using MongoDB.Bson.Serialization;
 global using MongoDB.Bson.Serialization.IdGenerators;
