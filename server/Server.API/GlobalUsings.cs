@@ -2,6 +2,7 @@ global using System.Text;
 
 global using Asp.Versioning;
 
+global using FluentResults;
 global using FluentValidation;
 
 global using Microsoft.AspNetCore.Authentication.JwtBearer;

@@ -1,3 +1,7 @@
+using System.Net;
+
+using FluentResults;
+
 namespace Server.API.Authentication;
 
 /// <summary>
@@ -7,11 +11,6 @@ static class AuthController
 {
   internal static async Task<IResult> Register([AsParameters] RegisterRequest req)
   {
-    // in order to register a user we need:
-    // - request with user data
-    //   - email
-    //   - password
-
     var validationResult = await req.Validator.ValidateAsync(req.Dto);
 
     if (validationResult.IsValid == false)
@@ -19,22 +18,22 @@ static class AuthController
       return Results.ValidationProblem(validationResult.ToDictionary());
     }
 
-    // need to validate the request
-    // - email is valid
-    // - password is valid
+    var registrationResult = await req.UserService.RegisterUserAsync(req.Dto.ToUser());
 
-    // need to check if the user already exists
-    // - if the user exists, return an error
+    if (registrationResult.IsFailed)
+    {
+      return Results.Problem(
+        title: "Registration failed",
+        detail: "Unable to register user. See errors for details.",
+        statusCode: (int)HttpStatusCode.Conflict,
+        extensions: new Dictionary<string, object?> { { "Errors", registrationResult.Errors } }
+      );
+    }
 
-    // need to generate a unique username
-    // - email username + random number
-
-    // need to hash the password
-    // - bcrypt
-
-    // need to save the user to the database
-
-    return Results.Ok();
+    return Results.Created(
+      uri: $"/users/{registrationResult.Value}",
+      value: new RegisterUserResponse(registrationResult.Value)
+    );
   }
 
   internal static Task<IResult> Login()

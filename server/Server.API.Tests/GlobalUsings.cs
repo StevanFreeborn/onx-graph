@@ -11,3 +11,9 @@ global using FluentValidation;
 global using FluentValidation.Results;
 
 global using Microsoft.AspNetCore.Mvc;
+
+global using System.Net;
+
+global using FluentResults;
+
+global using Microsoft.AspNetCore.Http.HttpResults;
