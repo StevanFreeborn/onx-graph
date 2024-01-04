@@ -79,19 +79,7 @@ var versionSet = app.NewApiVersionSet()
 
 
 // map endpoints
-app
-  .MapGet("/", (ILogger<Program> logger) =>
-  {
-    logger.LogInformation("Hello World!");
-    return "Hello World!";
-  })
-  .WithOpenApi(o => new(o)
-  {
-    Summary = "Get the root",
-  })
-  .WithApiVersionSet(versionSet)
-  .MapToApiVersion(versionOne);
-
+app.MapAuthEndpoints();
 
 // wire up authentication and authorization
 app.UseAuthentication();
