@@ -51,10 +51,18 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+
 // add mongo db for persistence
 // add as singleton as client should be reused
 builder.Services.ConfigureOptions<MongoDbOptionsSetup>();
 builder.Services.AddSingleton<MongoDbContext>();
+
+
+// add identity to dependency injection
+// add as scoped as we want a new instance per request
+builder.Services.AddScoped<IUserRepository, MongoUserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 
 // build the app
 var app = builder.Build();
