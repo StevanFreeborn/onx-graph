@@ -5,7 +5,13 @@ namespace Server.API.Persistence.Mongo;
 /// </summary>
 class MongoDbContext
 {
+  private const string UsersCollectionName = "users";
   private readonly MongoDbOptions _options;
+
+  /// <summary>
+  /// The users collection
+  /// </summary>
+  public IMongoCollection<User> Users { get; init; }
 
   /// <summary>
   /// Creates a new <see cref="MongoDbContext"/> instance
@@ -18,5 +24,6 @@ class MongoDbContext
     _options = options.Value;
     var client = new MongoClient(_options.ConnectionString);
     var database = client.GetDatabase(_options.DatabaseName);
+    Users = database.GetCollection<User>(UsersCollectionName);
   }
 }
