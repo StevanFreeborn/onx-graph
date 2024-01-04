@@ -9,3 +9,5 @@ global using Microsoft.IdentityModel.Tokens;
 global using Serilog;
 
 global using Server.API.Authentication;
+global using Server.API.Persistence.Mongo;
+global using MongoDB.Driver;
