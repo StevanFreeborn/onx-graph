@@ -6,12 +6,12 @@ namespace Server.API.Persistence.Mongo;
 class MongoDbOptions
 {
   /// <summary>
-  /// The connection string
+  /// Gets or sets the connection string
   /// </summary>
   public string ConnectionString { get; set; } = string.Empty;
 
   /// <summary>
-  /// The database name
+  /// Gets or sets the database name
   /// </summary>
   public string DatabaseName { get; set; } = string.Empty;
 }

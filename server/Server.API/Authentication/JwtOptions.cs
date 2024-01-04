@@ -6,22 +6,22 @@ namespace Server.API.Authentication;
 class JwtOptions
 {
   /// <summary>
-  /// The secret used to sign the JWT
+  /// Gets or sets the secret used to sign the JWT
   /// </summary>
   public string Secret { get; set; } = string.Empty;
 
   /// <summary>
-  /// The issuer of the JWT
+  /// Gets or sets the issuer of the JWT
   /// </summary>
   public string Issuer { get; set; } = string.Empty;
 
   /// <summary>
-  /// The audience of the JWT
+  /// Gets or sets the audience of the JWT
   /// </summary>
   public string Audience { get; set; } = string.Empty;
 
   /// <summary>
-  /// The expiry of the JWT in minutes
+  /// Gets or sets the expiry of the JWT in minutes
   /// </summary>
   public int ExpiryInMinutes { get; set; }
 }
