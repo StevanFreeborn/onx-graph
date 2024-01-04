@@ -51,6 +51,10 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+// add mongo db for persistence
+// add as singleton as client should be reused
+builder.Services.ConfigureOptions<MongoDbOptionsSetup>();
+builder.Services.AddSingleton<MongoDbContext>();
 
 // build the app
 var app = builder.Build();
