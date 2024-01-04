@@ -8,6 +8,7 @@ class UserService(IUserRepository userRepository) : IUserService
 
   public Task<Result<string>> RegisterUserAsync(User user)
   {
+    // TODO: implement this method
     // need to check if the user already exists
     // - if the user exists, return an error
 
