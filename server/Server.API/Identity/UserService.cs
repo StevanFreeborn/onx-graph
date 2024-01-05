@@ -2,23 +2,47 @@ using FluentResults;
 
 namespace Server.API.Identity;
 
-class UserService(IUserRepository userRepository) : IUserService
+class UserService(
+  IUserRepository userRepository,
+  ILogger<UserService> logger
+) : IUserService
 {
   private readonly IUserRepository _userRepository = userRepository;
+  private readonly ILogger<UserService> _logger = logger;
 
-  public Task<Result<string>> RegisterUserAsync(User user)
+  public async Task<Result<string>> RegisterUserAsync(User user)
   {
-    // TODO: implement this method
-    // need to check if the user already exists
-    // - if the user exists, return an error
+    var existingUser = await _userRepository.GetUserByEmailAsync(user.Email);
 
-    // need to generate a unique username
-    // - email username + random number
+    if (existingUser is null)
+    {
+      return Result.Fail(new UserAlreadyExistError(user.Email));
+    }
 
-    // need to hash the password
-    // - bcrypt
+    var username = await GenerateUniqueUsernameAsync(user.Email);
+    var passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
-    // need to save the user to the database
-    throw new NotImplementedException();
+    user.Username = username;
+    user.Password = passwordHash;
+
+    User createdUser = await _userRepository.CreateUserAsync(user);
+
+    return Result.Ok(createdUser.Id);
+  }
+
+  private async Task<string> GenerateUniqueUsernameAsync(string email)
+  {
+    var random = new Random();
+    var randomNumber = random.Next(0, 1000);
+    var username = $"{email.Split('@')[0]}{randomNumber}";
+    var existingUser = await _userRepository.GetUserByUsernameAsync(username);
+
+    if (existingUser is not null)
+    {
+      _logger.LogInformation($"Username {username} already exists. Generating another.");
+      return await GenerateUniqueUsernameAsync(email);
+    }
+
+    return username;
   }
 }
