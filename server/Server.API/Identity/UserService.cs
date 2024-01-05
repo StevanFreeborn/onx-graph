@@ -14,7 +14,7 @@ class UserService(
   {
     var existingUser = await _userRepository.GetUserByEmailAsync(user.Email);
 
-    if (existingUser is null)
+    if (existingUser is not null)
     {
       return Result.Fail(new UserAlreadyExistError(user.Email));
     }
