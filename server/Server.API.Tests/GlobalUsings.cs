@@ -17,3 +17,4 @@ global using System.Net;
 global using FluentResults;
 
 global using Microsoft.AspNetCore.Http.HttpResults;
+global using Microsoft.Extensions.Logging;
