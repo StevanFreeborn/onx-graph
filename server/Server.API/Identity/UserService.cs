@@ -1,5 +1,3 @@
-using FluentResults;
-
 namespace Server.API.Identity;
 
 class UserService(
