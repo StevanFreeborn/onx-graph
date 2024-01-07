@@ -22,3 +22,8 @@ global using Xunit;
 
 global using Server.API.Persistence.Mongo;
 global using Testcontainers.MongoDb;
+
+global using Microsoft.Extensions.Options;
+global using Server.API.Tests.Integration.Fixtures;
+global using MongoDB.Driver;
+global using Bogus;

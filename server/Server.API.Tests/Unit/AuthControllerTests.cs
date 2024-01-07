@@ -1,3 +1,5 @@
+using ValidationResult = FluentValidation.Results.ValidationResult;
+
 namespace Server.API.Tests.Unit;
 
 public class AuthControllerTests

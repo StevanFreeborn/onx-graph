@@ -11,13 +11,17 @@ class MongoUserRepository(MongoDbContext context) : IUserRepository
     return user;
   }
 
-  public Task<User?> GetUserByEmailAsync(string email)
+  public async Task<User?> GetUserByEmailAsync(string email)
   {
-    throw new NotImplementedException();
+    return await _context.Users
+      .Find(u => u.Email == email)
+      .SingleOrDefaultAsync();
   }
 
-  public Task<User?> GetUserByUsernameAsync(string username)
+  public async Task<User?> GetUserByUsernameAsync(string username)
   {
-    throw new NotImplementedException();
+    return await _context.Users
+      .Find(u => u.Username == username)
+      .SingleOrDefaultAsync();
   }
 }
