@@ -19,3 +19,6 @@ global using Server.API.Authentication;
 global using Server.API.Identity;
 
 global using Xunit;
+
+global using Server.API.Persistence.Mongo;
+global using Testcontainers.MongoDb;
