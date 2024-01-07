@@ -5,9 +5,10 @@ class MongoUserRepository(MongoDbContext context) : IUserRepository
 {
   private readonly MongoDbContext _context = context;
 
-  public Task<User> CreateUserAsync(User user)
+  public async Task<User> CreateUserAsync(User user)
   {
-    throw new NotImplementedException();
+    await _context.Users.InsertOneAsync(user);
+    return user;
   }
 
   public Task<User?> GetUserByEmailAsync(string email)
