@@ -1,4 +1,7 @@
+global using System.Net;
+global using System.Reflection;
 global using System.Text;
+global using System.Text.Json;
 
 global using Asp.Versioning;
 
@@ -19,10 +22,5 @@ global using Serilog;
 
 global using Server.API.Authentication;
 global using Server.API.Identity;
-global using Server.API.Persistence.Mongo;
-
-global using System.Net;
-global using System.Text.Json;
-
 global using Server.API.Middleware;
-global using System.Reflection;
+global using Server.API.Persistence.Mongo;
