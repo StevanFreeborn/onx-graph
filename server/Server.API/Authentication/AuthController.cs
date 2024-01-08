@@ -39,6 +39,17 @@ static class AuthController
 
   internal static Task<IResult> Login()
   {
+    // TODO: Implement
+
+    // validate request. should have email and password
+    // verify user exists
+    // verify password is correct
+    // generate jwt
+    // generate refresh token
+    // save refresh token
+    // set cookie with refresh token
+    // return jwt
+
     throw new NotImplementedException();
   }
 
