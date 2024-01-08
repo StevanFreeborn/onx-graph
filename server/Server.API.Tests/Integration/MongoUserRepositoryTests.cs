@@ -1,3 +1,5 @@
+using Server.API.Tests.Data;
+
 namespace Server.API.Tests.Integration;
 
 public class MongoUserRepositoryTests(TestDb testDb)
@@ -5,11 +7,6 @@ public class MongoUserRepositoryTests(TestDb testDb)
 {
   private readonly MongoDbContext _context = testDb.Context;
   private readonly MongoUserRepository _sut = new(testDb.Context);
-  private readonly Faker<User> _testUsers = new Faker<User>()
-    .RuleFor(u => u.Id, f => ObjectId.GenerateNewId().ToString())
-    .RuleFor(u => u.Email, f => f.Person.Email)
-    .RuleFor(u => u.Username, f => f.Person.UserName)
-    .RuleFor(u => u.Password, f => f.Internet.Password());
 
   public void Dispose()
   {
@@ -20,7 +17,7 @@ public class MongoUserRepositoryTests(TestDb testDb)
   [Fact]
   public async Task CreateUserAsync_WhenCalled_ItShouldCreateUser()
   {
-    var newUser = _testUsers.Generate();
+    var newUser = FakeDataFactory.TestUser.Generate();
 
     var result = await _sut.CreateUserAsync(newUser);
 
@@ -36,7 +33,7 @@ public class MongoUserRepositoryTests(TestDb testDb)
   [Fact]
   public async Task GetUserByEmailAsync_WhenUserExists_ItShouldReturnUser()
   {
-    var testUser = _testUsers.Generate();
+    var testUser = FakeDataFactory.TestUser.Generate();
 
     await _context.Users.InsertOneAsync(testUser);
 
@@ -49,7 +46,7 @@ public class MongoUserRepositoryTests(TestDb testDb)
   [Fact]
   public async Task GetUserByEmailAsync_WhenUserDoesNotExist_ItShouldReturnNull()
   {
-    var testUser = _testUsers.Generate();
+    var testUser = FakeDataFactory.TestUser.Generate();
 
     var result = await _sut.GetUserByEmailAsync(testUser.Email);
 
@@ -59,7 +56,7 @@ public class MongoUserRepositoryTests(TestDb testDb)
   [Fact]
   public async Task GetUserByUsernameAsync_WhenUserExists_ItShouldReturnUser()
   {
-    var testUser = _testUsers.Generate();
+    var testUser = FakeDataFactory.TestUser.Generate();
 
     await _context.Users.InsertOneAsync(testUser);
 
@@ -72,7 +69,7 @@ public class MongoUserRepositoryTests(TestDb testDb)
   [Fact]
   public async Task GetUserByUsernameAsync_WhenUserDoesNotExist_ItShouldReturnNull()
   {
-    var testUser = _testUsers.Generate();
+    var testUser = FakeDataFactory.TestUser.Generate();
 
     var result = await _sut.GetUserByUsernameAsync(testUser.Username);
 

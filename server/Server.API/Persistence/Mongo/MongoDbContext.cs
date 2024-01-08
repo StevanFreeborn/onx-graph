@@ -20,6 +20,7 @@ class MongoDbContext
   /// <returns>A <see cref="MongoDbContext"/> instance</returns>
   public MongoDbContext(IOptions<MongoDbOptions> options)
   {
+    MongoClassMapper.RegisterClassMappings();
     _options = options.Value;
     var client = new MongoClient(_options.ConnectionString);
     var database = client.GetDatabase(_options.DatabaseName);

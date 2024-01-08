@@ -28,6 +28,7 @@ class RegisterDtoValidator : AbstractValidator<RegisterDto>
       .NotEmpty()
       .EmailAddress()
       .WithMessage("Email must be a valid email address.");
+
     // At least one uppercase letter - (?=.*[A-Z])
     // At least one lowercase letter - (?=.*[a-z])
     // At least one number - (?=.*\d)

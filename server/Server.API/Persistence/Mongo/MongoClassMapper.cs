@@ -10,7 +10,7 @@ public static class MongoClassMapper
   /// </summary>
   public static void RegisterClassMappings()
   {
-    BsonClassMap.RegisterClassMap<User>(
+    BsonClassMap.TryRegisterClassMap<User>(
       cm =>
       {
         cm.AutoMap();

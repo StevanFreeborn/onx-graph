@@ -59,7 +59,6 @@ builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 
 // add mongo db for persistence
 // add as singleton as client should be reused
-MongoClassMapper.RegisterClassMappings();
 builder.Services.ConfigureOptions<MongoDbOptionsSetup>();
 builder.Services.AddSingleton<MongoDbContext>();
 

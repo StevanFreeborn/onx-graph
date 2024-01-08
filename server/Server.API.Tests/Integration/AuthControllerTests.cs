@@ -2,6 +2,8 @@ using System.Net.Http.Json;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using Server.API.Tests.Data;
+
 namespace Server.API.Tests.Integration;
 
 public class AuthControllerTests : IClassFixture<TestServerFactory>, IDisposable
@@ -24,11 +26,7 @@ public class AuthControllerTests : IClassFixture<TestServerFactory>, IDisposable
   [Fact]
   public async Task Register_WhenCalledAndGivenValidEmailAndPassword_ItShouldReturn201StatusCodeWithRegisteredUsersId()
   {
-    var newUser = new
-    {
-      email = "test@test.com",
-      password = "@Password1",
-    };
+    var newUser = FakeDataFactory.TestUser.Generate();
 
     var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
 
@@ -43,11 +41,8 @@ public class AuthControllerTests : IClassFixture<TestServerFactory>, IDisposable
   [Fact]
   public async Task Register_WhenCalledAndGivenInvalidPassword_ItShouldReturn400StatusCodeWithValidationProblemDetails()
   {
-    var newUser = new
-    {
-      email = "test@test",
-      password = "password",
-    };
+    var newUser = FakeDataFactory.TestUser.Generate();
+    newUser.Password = "invalid_password";
 
     var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
 
@@ -62,11 +57,8 @@ public class AuthControllerTests : IClassFixture<TestServerFactory>, IDisposable
   [Fact]
   public async Task Register_WhenCalledAndGivenInvalidEmail_ItShouldReturn400StatusCodeWithValidationProblemDetails()
   {
-    var newUser = new
-    {
-      email = "test",
-      password = "@Password1",
-    };
+    var newUser = FakeDataFactory.TestUser.Generate();
+    newUser.Email = "invalid_email";
 
     var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
 
@@ -81,11 +73,7 @@ public class AuthControllerTests : IClassFixture<TestServerFactory>, IDisposable
   [Fact]
   public async Task Register_WhenCalledAndGivenEmailForExistingUser_ItShouldReturn409StatusCodeWithProblemDetails()
   {
-    var alreadyExistingUser = new User
-    {
-      Email = "test@test.com",
-      Password = "@Password1",
-    };
+    var alreadyExistingUser = FakeDataFactory.TestUser.Generate();
 
     await _context.Users.InsertOneAsync(alreadyExistingUser);
 
