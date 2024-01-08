@@ -1,5 +1,9 @@
 namespace Server.API.Identity;
 
+/// <summary>
+/// A service for managing users.
+/// </summary>
+/// <inheritdoc cref="IUserService"/>
 class UserService(
   IUserRepository userRepository,
   ILogger<UserService> logger

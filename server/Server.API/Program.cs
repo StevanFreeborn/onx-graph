@@ -22,7 +22,11 @@ builder.Services.AddApiVersioning(opts =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(opts =>
+{
+  var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+  opts.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 
 // add authentication and authorization
@@ -55,6 +59,7 @@ builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 
 // add mongo db for persistence
 // add as singleton as client should be reused
+MongoClassMapper.RegisterClassMappings();
 builder.Services.ConfigureOptions<MongoDbOptionsSetup>();
 builder.Services.AddSingleton<MongoDbContext>();
 
@@ -70,6 +75,10 @@ var app = builder.Build();
 
 // add request logging middleware
 app.UseSerilogRequestLogging();
+
+
+// add error handling middleware
+app.UseMiddleware<ErrorMiddleware>();
 
 
 // add swagger when developing
@@ -100,3 +109,9 @@ app.UseAuthorization();
 
 // run the app
 app.Run();
+
+
+/// <summary>
+/// The main entry point for the application.
+/// </summary>
+public partial class Program { }

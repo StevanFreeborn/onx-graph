@@ -1,20 +1,15 @@
 namespace Server.API.Tests.Integration;
 
-public class MongoUserRepositoryTests : IClassFixture<TestDb>, IDisposable
+public class MongoUserRepositoryTests(TestDb testDb)
+    : IClassFixture<TestDb>, IDisposable
 {
-  private readonly MongoDbContext _context;
-  private readonly MongoUserRepository _sut;
+  private readonly MongoDbContext _context = testDb.Context;
+  private readonly MongoUserRepository _sut = new(testDb.Context);
   private readonly Faker<User> _testUsers = new Faker<User>()
     .RuleFor(u => u.Id, f => ObjectId.GenerateNewId().ToString())
     .RuleFor(u => u.Email, f => f.Person.Email)
     .RuleFor(u => u.Username, f => f.Person.UserName)
     .RuleFor(u => u.Password, f => f.Internet.Password());
-
-  public MongoUserRepositoryTests(TestDb testDb)
-  {
-    _sut = new(testDb.Context);
-    _context = testDb.Context;
-  }
 
   public void Dispose()
   {

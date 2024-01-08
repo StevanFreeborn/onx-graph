@@ -1,7 +1,3 @@
-using System.Net;
-
-using FluentResults;
-
 namespace Server.API.Authentication;
 
 /// <summary>
@@ -9,6 +5,11 @@ namespace Server.API.Authentication;
 /// </summary>
 static class AuthController
 {
+  /// <summary>
+  /// Registers a new user.
+  /// </summary>
+  /// <param name="req">The request as an <see cref="RegisterRequest"/> instance.</param>
+  /// <returns>A <see cref="Task"/> of <see cref="IResult"/>.</returns>
   internal static async Task<IResult> Register([AsParameters] RegisterRequest req)
   {
     var validationResult = await req.Validator.ValidateAsync(req.Dto);

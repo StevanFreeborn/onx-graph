@@ -1,6 +1,10 @@
 
 namespace Server.API.Identity;
 
+/// <summary>
+/// A repository for managing users in MongoDB.
+/// </summary>
+/// <inheritdoc cref="IUserRepository"/>
 class MongoUserRepository(MongoDbContext context) : IUserRepository
 {
   private readonly MongoDbContext _context = context;

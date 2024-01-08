@@ -2,7 +2,7 @@ namespace Server.API.Tests.Integration.Fixtures;
 
 public class TestDb : IDisposable
 {
-  private readonly MongoDbContainer _container;
+  private readonly MongoDbContainer _container = new MongoDbBuilder().Build();
   internal MongoDbContext Context { get; init; }
 
   public TestDb()

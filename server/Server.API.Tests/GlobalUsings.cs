@@ -27,3 +27,6 @@ global using Microsoft.Extensions.Options;
 global using Server.API.Tests.Integration.Fixtures;
 global using MongoDB.Driver;
 global using Bogus;
+
+global using Microsoft.AspNetCore.Mvc.Testing;
+global using Microsoft.AspNetCore.Hosting;

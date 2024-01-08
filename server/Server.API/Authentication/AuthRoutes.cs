@@ -14,6 +14,10 @@ static class AuthRoutes
 
     group
       .MapPost("register", AuthController.Register)
+      .Produces<RegisterUserResponse>((int)HttpStatusCode.Created)
+      .ProducesValidationProblem()
+      .Produces<ProblemDetails>((int)HttpStatusCode.Conflict)
+      .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("RegisterUser")
       .WithDescription("Register a new user");
 
