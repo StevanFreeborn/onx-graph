@@ -9,3 +9,13 @@ class InvalidLoginError : Error
   {
   }
 }
+
+/// <summary>
+/// An error indicating that an attempt to login failed.
+/// </summary>
+class LoginFailedError : Error
+{
+  internal LoginFailedError() : base("Login failed")
+  {
+  }
+}

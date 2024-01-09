@@ -36,7 +36,7 @@ class UserService(
 
     if (refreshTokenResult.IsFailed)
     {
-      return Result.Fail(new InvalidLoginError());
+      return Result.Fail(new LoginFailedError());
     }
 
     return Result.Ok((accessToken, refreshTokenResult.Value));
