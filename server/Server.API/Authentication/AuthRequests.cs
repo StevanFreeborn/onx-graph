@@ -3,7 +3,7 @@ namespace Server.API.Authentication;
 /// <summary>
 /// Represents the data needed to register
 /// </summary>
-internal record RegisterDto(string Email, string Password)
+record RegisterDto(string Email, string Password)
 {
   internal RegisterDto() : this(string.Empty, string.Empty) { }
 
@@ -47,5 +47,39 @@ class RegisterDtoValidator : AbstractValidator<RegisterDto>
 record RegisterRequest(
   [FromBody] RegisterDto Dto,
   [FromServices] IValidator<RegisterDto> Validator,
+  [FromServices] IUserService UserService
+);
+
+/// <summary>
+/// Represents the data needed to login
+/// </summary>
+record LoginDto(string Email, string Password)
+{
+  internal LoginDto() : this(string.Empty, string.Empty) { }
+}
+
+/// <summary>
+/// Validator for <see cref="LoginDto"/>
+/// </summary>
+class LoginDtoValidator : AbstractValidator<LoginDto>
+{
+  public LoginDtoValidator()
+  {
+    RuleFor(dto => dto.Email)
+      .NotEmpty()
+      .EmailAddress()
+      .WithMessage("Email must be a valid email address.");
+
+    RuleFor(dto => dto.Password).NotEmpty();
+  }
+}
+
+/// <summary>
+/// Represents a login request
+/// </summary>
+record LoginRequest(
+  HttpContext Context,
+  [FromBody] LoginDto Dto,
+  [FromServices] IValidator<LoginDto> Validator,
   [FromServices] IUserService UserService
 );

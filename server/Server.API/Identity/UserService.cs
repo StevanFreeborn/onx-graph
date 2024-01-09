@@ -1,3 +1,4 @@
+
 namespace Server.API.Identity;
 
 /// <summary>
@@ -11,6 +12,11 @@ class UserService(
 {
   private readonly IUserRepository _userRepository = userRepository;
   private readonly ILogger<UserService> _logger = logger;
+
+  public Task<Result<(string AccessToken, RefreshToken RefreshToken)>> LoginUserAsync(string username, string password)
+  {
+    throw new NotImplementedException();
+  }
 
   public async Task<Result<string>> RegisterUserAsync(User user)
   {

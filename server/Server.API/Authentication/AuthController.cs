@@ -37,20 +37,38 @@ static class AuthController
     );
   }
 
-  internal static Task<IResult> Login()
+  /// <summary>
+  /// Logs in a user.
+  /// </summary>
+  /// <param name="req">The request as a <see cref="LoginRequest"/> instance.</param>
+  /// <returns>A <see cref="Task"/> of <see cref="IResult"/>.</returns>
+  internal static async Task<IResult> Login([AsParameters] LoginRequest req)
   {
-    // TODO: Implement
+    var validationResult = await req.Validator.ValidateAsync(req.Dto);
 
-    // validate request. should have email and password
-    // verify user exists
-    // verify password is correct
-    // generate jwt
-    // generate refresh token
-    // save refresh token
-    // set cookie with refresh token
-    // return jwt
+    if (validationResult.IsValid == false)
+    {
+      return Results.ValidationProblem(validationResult.ToDictionary());
+    }
 
-    throw new NotImplementedException();
+    var loginResult = await req.UserService.LoginUserAsync(req.Dto.Email, req.Dto.Password);
+
+    if (loginResult.IsFailed)
+    {
+      return Results.Problem(
+        title: "Login failed",
+        detail: "Unable to login user. See errors for details.",
+        statusCode: (int)HttpStatusCode.Unauthorized,
+        extensions: new Dictionary<string, object?> { { "Errors", loginResult.Errors } }
+      );
+    }
+
+    req.Context.Response.SetRefreshTokenCookie(
+      loginResult.Value.RefreshToken.Token,
+      loginResult.Value.RefreshToken.ExpiresAt
+    );
+
+    return Results.Ok(new LoginUserResponse(loginResult.Value.AccessToken));
   }
 
   internal static Task<IResult> Logout()

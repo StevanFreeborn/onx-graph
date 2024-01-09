@@ -23,6 +23,10 @@ static class AuthRoutes
 
     group
       .MapPost("login", AuthController.Login)
+      .Produces<LoginUserResponse>((int)HttpStatusCode.OK)
+      .ProducesValidationProblem()
+      .Produces<ProblemDetails>((int)HttpStatusCode.Unauthorized)
+      .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("LoginUser")
       .WithDescription("Login a user");
 

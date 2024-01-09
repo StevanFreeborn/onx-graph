@@ -1,3 +1,4 @@
+
 namespace Server.API.Identity;
 
 /// <summary>
@@ -5,6 +6,8 @@ namespace Server.API.Identity;
 /// </summary>
 interface IUserService
 {
+  Task<Result<(string AccessToken, RefreshToken RefreshToken)>> LoginUserAsync(string username, string password);
+
   /// <summary>
   /// Registers a new user.
   /// </summary>
