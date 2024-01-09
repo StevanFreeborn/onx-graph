@@ -22,5 +22,20 @@ public static class MongoClassMapper
         cm.MapProperty(u => u.UpdatedAt).SetElementName("updatedAt");
       }
     );
+
+    BsonClassMap.TryRegisterClassMap<RefreshToken>(
+      cm =>
+      {
+        cm.AutoMap();
+        cm.MapIdProperty(rt => rt.Id).SetIdGenerator(StringObjectIdGenerator.Instance);
+        cm.MapProperty(rt => rt.UserId).SetElementName("userId");
+        cm.MapProperty(rt => rt.Token).SetElementName("token");
+        cm.MapProperty(rt => rt.ExpiresAt).SetElementName("expiresAt");
+        cm.MapProperty(rt => rt.Revoked).SetElementName("revoked");
+        cm.MapProperty(rt => rt.TokenType).SetElementName("tokenType");
+        cm.MapProperty(rt => rt.CreatedAt).SetElementName("createdAt");
+        cm.MapProperty(rt => rt.UpdatedAt).SetElementName("updatedAt");
+      }
+    );
   }
 }

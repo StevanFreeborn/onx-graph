@@ -336,7 +336,7 @@ public class AuthControllerTests
   }
 
   [Fact]
-  public async Task Login_WhenEmailOrPasswordIsIncorrect_ItShouldReturnAProblemDetailWith401StatusCode()
+  public async Task Login_WhenLoginFails_ItShouldReturnAProblemDetailWith401StatusCode()
   {
     var dto = new LoginDto("test", "@Password1234");
     var validationResult = new ValidationResult();
@@ -345,7 +345,7 @@ public class AuthControllerTests
       .Setup(v => v.ValidateAsync(It.IsAny<LoginDto>(), default))
       .ReturnsAsync(validationResult);
 
-    var loginResult = Result.Fail(new UserDoesNotExistError(dto.Email));
+    var loginResult = Result.Fail(new InvalidLoginError());
 
     _userServiceMock
       .Setup(u => u.LoginUserAsync(It.IsAny<string>(), It.IsAny<string>()))

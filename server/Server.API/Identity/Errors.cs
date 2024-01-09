@@ -9,13 +9,3 @@ class UserAlreadyExistError : Error
   {
   }
 }
-
-/// <summary>
-/// An indicating that a user does not exist.
-/// </summary>
-class UserDoesNotExistError : Error
-{
-  internal UserDoesNotExistError(string email) : base($"User does not exist with email: {email}")
-  {
-  }
-}

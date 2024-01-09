@@ -6,16 +6,40 @@ namespace Server.API.Identity;
 /// </summary>
 /// <inheritdoc cref="IUserService"/>
 class UserService(
+  ITokenService tokenService,
   IUserRepository userRepository,
   ILogger<UserService> logger
 ) : IUserService
 {
+  private readonly ITokenService _tokenService = tokenService;
   private readonly IUserRepository _userRepository = userRepository;
   private readonly ILogger<UserService> _logger = logger;
 
-  public Task<Result<(string AccessToken, RefreshToken RefreshToken)>> LoginUserAsync(string username, string password)
+  public async Task<Result<(string AccessToken, RefreshToken RefreshToken)>> LoginUserAsync(string email, string password)
   {
-    throw new NotImplementedException();
+    var existingUser = await _userRepository.GetUserByEmailAsync(email);
+
+    if (existingUser is null)
+    {
+      return Result.Fail(new InvalidLoginError());
+    }
+
+    var passwordValid = BCrypt.Net.BCrypt.Verify(password, existingUser.Password);
+
+    if (passwordValid is false)
+    {
+      return Result.Fail(new InvalidLoginError());
+    }
+
+    var accessToken = _tokenService.GenerateAccessToken(existingUser);
+    var refreshTokenResult = await _tokenService.GenerateRefreshToken(existingUser.Id);
+
+    if (refreshTokenResult.IsFailed)
+    {
+      return Result.Fail(new InvalidLoginError());
+    }
+
+    return Result.Ok((accessToken, refreshTokenResult.Value));
   }
 
   public async Task<Result<string>> RegisterUserAsync(User user)

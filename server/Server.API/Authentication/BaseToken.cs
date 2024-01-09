@@ -11,6 +11,11 @@ record BaseToken
   public string Id { get; init; } = string.Empty;
 
   /// <summary>
+  /// The user's id that the token belongs to
+  /// </summary>
+  public string UserId { get; init; } = string.Empty;
+
+  /// <summary>
   /// The token
   /// </summary>
   public string Token { get; init; } = string.Empty;

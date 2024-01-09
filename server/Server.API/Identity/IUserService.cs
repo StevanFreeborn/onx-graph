@@ -6,7 +6,13 @@ namespace Server.API.Identity;
 /// </summary>
 interface IUserService
 {
-  Task<Result<(string AccessToken, RefreshToken RefreshToken)>> LoginUserAsync(string username, string password);
+  /// <summary>
+  /// Logs in a user.
+  /// </summary>
+  /// <param name="email">The email of the user to log in.</param>
+  /// <param name="password">The password of the user to log in.</param>
+  /// <returns>A <see cref="Result{T}"/> indicating the outcome of the operation.</returns>
+  Task<Result<(string AccessToken, RefreshToken RefreshToken)>> LoginUserAsync(string email, string password);
 
   /// <summary>
   /// Registers a new user.
