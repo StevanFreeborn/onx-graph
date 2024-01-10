@@ -1,6 +1,10 @@
 
 namespace Server.API.Authentication;
 
+/// <summary>
+/// A repository for managing tokens in MongoDB.
+/// </summary>
+/// <inheritdoc cref="ITokenRepository"/>
 class MongoTokenRepository(MongoDbContext context) : ITokenRepository
 {
   private readonly MongoDbContext _context = context;
