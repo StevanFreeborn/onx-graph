@@ -4,8 +4,13 @@ namespace Server.API.Authentication;
 /// A service for managing tokens.
 /// </summary>
 /// <inheritdoc cref="ITokenService"/>
-class TokenService(IOptions<JwtOptions> jwtOptions, TimeProvider timeProvider) : ITokenService
+class TokenService(
+  ITokenRepository tokenRepository,
+  IOptions<JwtOptions> jwtOptions,
+  TimeProvider timeProvider
+) : ITokenService
 {
+  private readonly ITokenRepository _tokenRepository = tokenRepository;
   private readonly JwtOptions _jwtOptions = jwtOptions.Value;
   private readonly TimeProvider _timeProvider = timeProvider;
 
@@ -41,8 +46,48 @@ class TokenService(IOptions<JwtOptions> jwtOptions, TimeProvider timeProvider) :
     return jwtToken;
   }
 
-  public Task<Result<RefreshToken>> GenerateRefreshToken(string id)
+  public async Task<Result<RefreshToken>> GenerateRefreshToken(string userId)
   {
-    throw new NotImplementedException();
+    var expiresAt = _timeProvider
+      .GetUtcNow()
+      .AddHours(12)
+      .UtcDateTime;
+
+    var token = new RefreshToken
+    {
+      Id = Guid.NewGuid().ToString(),
+      UserId = userId,
+      Token = GenerateToken(),
+      ExpiresAt = expiresAt
+    };
+
+    try
+    {
+      var createdToken = await _tokenRepository.CreateTokenAsync(token);
+      return Result.Ok(token);
+    }
+    catch (Exception ex)
+    {
+      return Result.Fail(
+        new GenerateRefreshTokenError().CausedBy(ex)
+      );
+    }
+  }
+
+  private string GenerateToken()
+  {
+    var randomBytes = new byte[32];
+    using var rng = RandomNumberGenerator.Create();
+    rng.GetBytes(randomBytes);
+    var token = Convert.ToBase64String(randomBytes);
+    return RemoveNonAlphaNumericCharacters(token);
+  }
+
+  private string RemoveNonAlphaNumericCharacters(string input)
+  {
+    var pattern = @"[^A-Za-z0-9]";
+    var replacement = string.Empty;
+    var output = Regex.Replace(input, pattern, replacement);
+    return output;
   }
 }

@@ -7,5 +7,5 @@ namespace Server.API.Authentication;
 interface ITokenService
 {
   string GenerateAccessToken(User existingUser);
-  Task<Result<RefreshToken>> GenerateRefreshToken(string id);
+  Task<Result<RefreshToken>> GenerateRefreshToken(string userId);
 }

@@ -24,9 +24,6 @@ class UserService(
       return Result.Fail(new InvalidLoginError());
     }
 
-    Console.WriteLine($"Password: {password}");
-    Console.WriteLine($"Existing user password: {existingUser.Password}");
-
     var passwordValid = BCrypt.Net.BCrypt.Verify(password, existingUser.Password);
 
     if (passwordValid is false)
@@ -39,7 +36,7 @@ class UserService(
 
     if (refreshTokenResult.IsFailed)
     {
-      _logger.LogError("Failed to generate refresh token.");
+      _logger.LogError("Failed to generate refresh token: {Errors}", refreshTokenResult.Errors);
       return Result.Fail(new LoginFailedError());
     }
 

@@ -19,3 +19,13 @@ class LoginFailedError : Error
   {
   }
 }
+
+/// <summary>
+/// An error indicating that a refresh token was not generated.
+/// </summary>
+class GenerateRefreshTokenError : Error
+{
+  internal GenerateRefreshTokenError() : base("Failed to generate refresh token")
+  {
+  }
+}

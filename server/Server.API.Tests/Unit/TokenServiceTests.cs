@@ -1,9 +1,8 @@
-using System.Security.Cryptography;
-
 namespace Server.API.Tests.Unit;
 
 public class TokenServiceTests
 {
+  private readonly Mock<ITokenRepository> _tokenRepositoryMock = new();
   private readonly Mock<IOptions<JwtOptions>> _jwtOptionsMock = new();
   private readonly Mock<TimeProvider> _timeProviderMock = new();
 
@@ -21,6 +20,7 @@ public class TokenServiceTests
       .Returns(DateTime.UtcNow);
 
     var sut = new TokenService(
+      _tokenRepositoryMock.Object,
       _jwtOptionsMock.Object,
       _timeProviderMock.Object
     );

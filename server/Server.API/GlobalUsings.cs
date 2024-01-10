@@ -26,3 +26,6 @@ global using Server.API.Authentication;
 global using Server.API.Identity;
 global using Server.API.Middleware;
 global using Server.API.Persistence.Mongo;
+
+global using System.Security.Cryptography;
+global using System.Text.RegularExpressions;
