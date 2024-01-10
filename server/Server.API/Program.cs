@@ -70,6 +70,10 @@ builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<IUserRepository, MongoUserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+// add time provider
+builder.Services.AddSingleton(TimeProvider.System);
+
+
 // build the app
 var app = builder.Build();
 
