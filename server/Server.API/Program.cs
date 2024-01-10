@@ -54,6 +54,7 @@ builder.Services
   );
 
 builder.Services.AddAuthorization();
+builder.Services.AddScoped<ITokenRepository, MongoTokenRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
@@ -69,6 +70,7 @@ builder.Services.AddSingleton<MongoDbContext>();
 // add as scoped as we want a new instance per request
 builder.Services.AddScoped<IUserRepository, MongoUserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
 
 // add time provider
 builder.Services.AddSingleton(TimeProvider.System);
