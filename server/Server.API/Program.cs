@@ -54,7 +54,9 @@ builder.Services
   );
 
 builder.Services.AddAuthorization();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
+builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
 
 
 // add mongo db for persistence

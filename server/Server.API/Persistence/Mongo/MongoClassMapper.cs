@@ -23,7 +23,7 @@ public static class MongoClassMapper
       }
     );
 
-    BsonClassMap.TryRegisterClassMap<RefreshToken>(
+    BsonClassMap.TryRegisterClassMap<BaseToken>(
       cm =>
       {
         cm.AutoMap();
