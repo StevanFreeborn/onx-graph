@@ -4,12 +4,21 @@ using Xunit.Abstractions;
 
 namespace Server.API.Tests.Unit;
 
-public class UserServiceTests(ITestOutputHelper outputHelper)
+public class UserServiceTests
 {
   private readonly Mock<ITokenService> _tokenServiceMock = new();
   private readonly Mock<IUserRepository> _userRepositoryMock = new();
   private readonly Mock<ILogger<UserService>> _loggerMock = new();
-  private readonly ITestOutputHelper _outputHelper = outputHelper;
+  private readonly UserService _sut;
+
+  public UserServiceTests(ITestOutputHelper outputHelper)
+  {
+    _sut = new UserService(
+      _tokenServiceMock.Object,
+      _userRepositoryMock.Object,
+      _loggerMock.Object
+    );
+  }
 
   [Fact]
   public async Task RegisterUserAsync_WhenUserAlreadyExists_ItShouldReturnUserAlreadyExistError()
@@ -18,13 +27,7 @@ public class UserServiceTests(ITestOutputHelper outputHelper)
       .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
       .ReturnsAsync(Mock.Of<User>());
 
-    var sut = new UserService(
-      _tokenServiceMock.Object,
-      _userRepositoryMock.Object,
-      _loggerMock.Object
-    );
-
-    var result = await sut.RegisterUserAsync(Mock.Of<User>());
+    var result = await _sut.RegisterUserAsync(Mock.Of<User>());
 
     result.IsFailed.Should().BeTrue();
     result.Errors.Should()
@@ -60,13 +63,7 @@ public class UserServiceTests(ITestOutputHelper outputHelper)
       .Setup(u => u.CreateUserAsync(It.IsAny<User>()))
       .ReturnsAsync(createdUser);
 
-    var sut = new UserService(
-      _tokenServiceMock.Object,
-      _userRepositoryMock.Object,
-      _loggerMock.Object
-    );
-
-    var result = await sut.RegisterUserAsync(newUser);
+    var result = await _sut.RegisterUserAsync(newUser);
 
     result.IsSuccess.Should().BeTrue();
     result.Value.Should().NotBeEmpty();
@@ -80,13 +77,7 @@ public class UserServiceTests(ITestOutputHelper outputHelper)
       .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
       .ReturnsAsync(null as User);
 
-    var sut = new UserService(
-      _tokenServiceMock.Object,
-      _userRepositoryMock.Object,
-      _loggerMock.Object
-    );
-
-    var result = await sut.LoginUserAsync("test@test.com", "@Password1234");
+    var result = await _sut.LoginUserAsync("test@test.com", "@Password1234");
 
     result.IsFailed.Should().BeTrue();
     result.Errors
@@ -106,13 +97,7 @@ public class UserServiceTests(ITestOutputHelper outputHelper)
       .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
       .ReturnsAsync(existingUser);
 
-    var sut = new UserService(
-      _tokenServiceMock.Object,
-      _userRepositoryMock.Object,
-      _loggerMock.Object
-    );
-
-    var result = await sut.LoginUserAsync(existingUser.Email, "not the password");
+    var result = await _sut.LoginUserAsync(existingUser.Email, "not the password");
 
     result.IsFailed.Should().BeTrue();
     result.Errors
@@ -136,13 +121,7 @@ public class UserServiceTests(ITestOutputHelper outputHelper)
       .Setup(t => t.GenerateRefreshToken(It.IsAny<string>()))
       .ReturnsAsync(Result.Fail("Failed to generate refresh token."));
 
-    var sut = new UserService(
-      _tokenServiceMock.Object,
-      _userRepositoryMock.Object,
-      _loggerMock.Object
-    );
-
-    var result = await sut.LoginUserAsync(existingUser.Email, password);
+    var result = await _sut.LoginUserAsync(existingUser.Email, password);
 
     result.IsFailed.Should().BeTrue();
     result.Errors
@@ -174,16 +153,7 @@ public class UserServiceTests(ITestOutputHelper outputHelper)
         ExpiresAt = DateTime.UtcNow.AddDays(7),
       }));
 
-    var sut = new UserService(
-      _tokenServiceMock.Object,
-      _userRepositoryMock.Object,
-      _loggerMock.Object
-    );
-
-    _outputHelper.WriteLine($"Existing password: {existingUser.Password}");
-    _outputHelper.WriteLine($"Password: {password}");
-
-    var result = await sut.LoginUserAsync(existingUser.Email, password);
+    var result = await _sut.LoginUserAsync(existingUser.Email, password);
 
     result.IsSuccess.Should().BeTrue();
     result.Value.AccessToken.Should().NotBeEmpty();

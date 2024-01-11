@@ -5,6 +5,16 @@ public class TokenServiceTests
   private readonly Mock<ITokenRepository> _tokenRepositoryMock = new();
   private readonly Mock<IOptions<JwtOptions>> _jwtOptionsMock = new();
   private readonly Mock<TimeProvider> _timeProviderMock = new();
+  private readonly TokenService _sut;
+
+  public TokenServiceTests()
+  {
+    _sut = new TokenService(
+      _tokenRepositoryMock.Object,
+      _jwtOptionsMock.Object,
+      _timeProviderMock.Object
+    );
+  }
 
   [Fact]
   public void GenerateAccessToken_WhenCalled_ShouldReturnAccessToken()
@@ -19,15 +29,9 @@ public class TokenServiceTests
       .Setup(t => t.GetUtcNow())
       .Returns(DateTime.UtcNow);
 
-    var sut = new TokenService(
-      _tokenRepositoryMock.Object,
-      _jwtOptionsMock.Object,
-      _timeProviderMock.Object
-    );
-
     var user = FakeDataFactory.TestUser.Generate();
 
-    var result = sut.GenerateAccessToken(user);
+    var result = _sut.GenerateAccessToken(user);
 
     result.Should().NotBeNullOrEmpty();
 
