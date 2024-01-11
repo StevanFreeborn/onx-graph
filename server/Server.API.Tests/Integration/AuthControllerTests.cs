@@ -5,6 +5,7 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   public void Dispose()
   {
     context.Users.DeleteMany(_ => true);
+    context.Tokens.DeleteMany(_ => true);
     GC.SuppressFinalize(this);
   }
 
@@ -13,13 +14,11 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   {
     var (password, user) = FakeDataFactory.TestUser.Generate();
 
-    var newUser = new
+    var registerResponse = await _client.PostAsJsonAsync("/auth/register", new
     {
       email = user.Email,
-      password,
-    };
-
-    var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
+      password
+    });
 
     registerResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
@@ -39,13 +38,11 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
 
-    var newUser = new
+    var registerResponse = await _client.PostAsJsonAsync("/auth/register", new
     {
       email = user.Email,
       password = "invalid_password",
-    };
-
-    var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
+    });
 
     registerResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
@@ -63,15 +60,13 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   [Fact]
   public async Task Register_WhenCalledAndGivenInvalidEmail_ItShouldReturn400StatusCodeWithValidationProblemDetails()
   {
-    var (password, user) = FakeDataFactory.TestUser.Generate();
+    var (password, _) = FakeDataFactory.TestUser.Generate();
 
-    var newUser = new
+    var registerResponse = await _client.PostAsJsonAsync("/auth/register", new
     {
       email = "invalid_email",
-      password,
-    };
-
-    var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
+      password
+    });
 
     registerResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
@@ -93,13 +88,11 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
 
     await context.Users.InsertOneAsync(alreadyExistingUser);
 
-    var newUser = new
+    var registerResponse = await _client.PostAsJsonAsync("/auth/register", new
     {
       email = alreadyExistingUser.Email,
       password = userPassword,
-    };
-
-    var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
+    });
 
     registerResponse.StatusCode
       .Should()
@@ -142,5 +135,139 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
     loginResponseBody?.AccessToken
       .Should()
       .NotBeNullOrEmpty();
+  }
+
+  [Fact]
+  public async Task Login_WhenCalledAndGivenInvalidEmail_ItShouldReturn400StatusCodeWithValidationProblemDetails()
+  {
+    var (userPassword, existingUser) = FakeDataFactory.TestUser.Generate();
+
+    await context.Users.InsertOneAsync(existingUser);
+
+    var loginResponse = await _client.PostAsJsonAsync("/auth/login", new
+    {
+      email = "invalid_email",
+      password = userPassword,
+    });
+
+    loginResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.BadRequest);
+
+    var loginResponseBody = await loginResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+
+    loginResponseBody
+      .Should()
+      .NotBeNull();
+
+    loginResponseBody?.Errors
+      .Should()
+      .NotBeNullOrEmpty();
+  }
+
+  [Fact]
+  public async Task Login_WhenCalledAndGivenIncorrectEmail_ItShouldReturn401StatusCodeWithProblemDetails()
+  {
+    var (userPassword, existingUser) = FakeDataFactory.TestUser.Generate();
+
+    await context.Users.InsertOneAsync(existingUser);
+
+    var loginResponse = await _client.PostAsJsonAsync("/auth/login", new
+    {
+      email = "incorrect@test.com",
+      password = userPassword,
+    });
+
+    loginResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.Unauthorized);
+
+    var loginResponseBody = await loginResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    loginResponseBody
+      .Should()
+      .NotBeNull();
+
+    loginResponseBody?.Title
+      .Should()
+      .Be("Login failed");
+
+    loginResponseBody?.Detail
+      .Should()
+      .Be("Unable to login user. See errors for details.");
+
+    loginResponseBody?.Extensions
+      .Should()
+      .ContainKey("Errors");
+  }
+
+  [Fact]
+  public async Task Login_WhenCalledAndGivenIncorrectPassword_ItShouldReturn401StatusCodeWithProblemDetails()
+  {
+    var (userPassword, existingUser) = FakeDataFactory.TestUser.Generate();
+
+    await context.Users.InsertOneAsync(existingUser);
+
+    var loginResponse = await _client.PostAsJsonAsync("/auth/login", new
+    {
+      email = existingUser.Email,
+      password = "incorrect_password",
+    });
+
+    loginResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.Unauthorized);
+
+    var loginResponseBody = await loginResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    loginResponseBody
+      .Should()
+      .NotBeNull();
+
+    loginResponseBody?.Title
+      .Should()
+      .Be("Login failed");
+
+    loginResponseBody?.Detail
+      .Should()
+      .Be("Unable to login user. See errors for details.");
+
+    loginResponseBody?.Extensions
+      .Should()
+      .ContainKey("Errors");
+  }
+
+  [Fact]
+  public async Task Login_WhenCalledAndGivenEmailForNonExistingUser_ItShouldReturn401StatusCodeWithProblemDetails()
+  {
+    var (userPassword, user) = FakeDataFactory.TestUser.Generate();
+
+    var loginResponse = await _client.PostAsJsonAsync("/auth/login", new
+    {
+      email = user.Email,
+      password = userPassword,
+    });
+
+    loginResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.Unauthorized);
+
+    var loginResponseBody = await loginResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    loginResponseBody
+      .Should()
+      .NotBeNull();
+
+    loginResponseBody?.Title
+      .Should()
+      .Be("Login failed");
+
+    loginResponseBody?.Detail
+      .Should()
+      .Be("Unable to login user. See errors for details.");
+
+    loginResponseBody?.Extensions
+      .Should()
+      .ContainKey("Errors");
   }
 }
