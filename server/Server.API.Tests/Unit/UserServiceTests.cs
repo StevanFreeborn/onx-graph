@@ -11,7 +11,7 @@ public class UserServiceTests
   private readonly Mock<ILogger<UserService>> _loggerMock = new();
   private readonly UserService _sut;
 
-  public UserServiceTests(ITestOutputHelper outputHelper)
+  public UserServiceTests()
   {
     _sut = new UserService(
       _tokenServiceMock.Object,
