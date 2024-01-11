@@ -6,20 +6,11 @@ using Server.API.Tests.Data;
 
 namespace Server.API.Tests.Integration;
 
-public class AuthControllerTests : IClassFixture<TestServerFactory>, IDisposable
+public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory), IDisposable
 {
-  private readonly MongoDbContext _context;
-  private readonly HttpClient _client;
-
-  public AuthControllerTests(TestServerFactory serverFactory)
-  {
-    _context = serverFactory.Services.GetRequiredService<MongoDbContext>();
-    _client = serverFactory.CreateClient();
-  }
-
   public void Dispose()
   {
-    _context.Users.DeleteMany(_ => true);
+    context.Users.DeleteMany(_ => true);
     GC.SuppressFinalize(this);
   }
 
@@ -75,7 +66,7 @@ public class AuthControllerTests : IClassFixture<TestServerFactory>, IDisposable
   {
     var alreadyExistingUser = FakeDataFactory.TestUser.Generate();
 
-    await _context.Users.InsertOneAsync(alreadyExistingUser);
+    await context.Users.InsertOneAsync(alreadyExistingUser);
 
     var newUser = new
     {

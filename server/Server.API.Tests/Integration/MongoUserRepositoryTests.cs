@@ -1,5 +1,3 @@
-using Server.API.Tests.Data;
-
 namespace Server.API.Tests.Integration;
 
 public class MongoUserRepositoryTests(TestDb testDb)
