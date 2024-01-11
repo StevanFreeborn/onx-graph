@@ -27,9 +27,9 @@ public class TestServerFactory
     {
       services.Configure<JwtOptions>(options =>
       {
-        options.Secret = "Test";
-        options.Audience = "Test";
-        options.Issuer = "Test";
+        options.Secret = "qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q=";
+        options.Audience = "TestAudience";
+        options.Issuer = "TestIssuer";
         options.ExpiryInMinutes = 5;
       });
       services.Configure<MongoDbOptions>(options =>

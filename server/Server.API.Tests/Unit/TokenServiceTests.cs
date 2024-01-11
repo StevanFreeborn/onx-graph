@@ -9,6 +9,12 @@ public class TokenServiceTests
 
   public TokenServiceTests()
   {
+    var jwtOptions = FakeDataFactory.JwtOption.Generate();
+
+    _jwtOptionsMock
+      .Setup(j => j.Value)
+      .Returns(jwtOptions);
+
     _sut = new TokenService(
       _tokenRepositoryMock.Object,
       _jwtOptionsMock.Object,
@@ -19,17 +25,11 @@ public class TokenServiceTests
   [Fact]
   public void GenerateAccessToken_WhenCalled_ShouldReturnAccessToken()
   {
-    var jwtOptions = FakeDataFactory.JwtOption.Generate();
-
-    _jwtOptionsMock
-      .Setup(j => j.Value)
-      .Returns(jwtOptions);
-
     _timeProviderMock
       .Setup(t => t.GetUtcNow())
       .Returns(DateTime.UtcNow);
 
-    var user = FakeDataFactory.TestUser.Generate();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
 
     var result = _sut.GenerateAccessToken(user);
 
@@ -40,16 +40,16 @@ public class TokenServiceTests
 
     token.Issuer
       .Should()
-      .Be(jwtOptions.Issuer);
+      .Be(_jwtOptionsMock.Object.Value.Issuer);
 
     token.Audiences.
       Should()
-      .Contain(jwtOptions.Audience);
+      .Contain(_jwtOptionsMock.Object.Value.Audience);
 
     token.ValidTo
       .Should()
       .BeCloseTo(
-        token.ValidFrom.AddMinutes(jwtOptions.ExpiryInMinutes),
+        token.ValidFrom.AddMinutes(_jwtOptionsMock.Object.Value.ExpiryInMinutes),
         TimeSpan.FromSeconds(5)
       );
 

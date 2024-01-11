@@ -15,7 +15,7 @@ public class MongoUserRepositoryTests(TestDb testDb)
   [Fact]
   public async Task CreateUserAsync_WhenCalled_ItShouldCreateUser()
   {
-    var newUser = FakeDataFactory.TestUser.Generate();
+    var (_, newUser) = FakeDataFactory.TestUser.Generate();
 
     var result = await _sut.CreateUserAsync(newUser);
 
@@ -35,7 +35,7 @@ public class MongoUserRepositoryTests(TestDb testDb)
   [Fact]
   public async Task GetUserByEmailAsync_WhenUserExists_ItShouldReturnUser()
   {
-    var testUser = FakeDataFactory.TestUser.Generate();
+    var (_, testUser) = FakeDataFactory.TestUser.Generate();
 
     await _context.Users.InsertOneAsync(testUser);
 
@@ -53,7 +53,7 @@ public class MongoUserRepositoryTests(TestDb testDb)
   [Fact]
   public async Task GetUserByEmailAsync_WhenUserDoesNotExist_ItShouldReturnNull()
   {
-    var testUser = FakeDataFactory.TestUser.Generate();
+    var (_, testUser) = FakeDataFactory.TestUser.Generate();
 
     var result = await _sut.GetUserByEmailAsync(testUser.Email);
 
@@ -65,7 +65,7 @@ public class MongoUserRepositoryTests(TestDb testDb)
   [Fact]
   public async Task GetUserByUsernameAsync_WhenUserExists_ItShouldReturnUser()
   {
-    var testUser = FakeDataFactory.TestUser.Generate();
+    var (_, testUser) = FakeDataFactory.TestUser.Generate();
 
     await _context.Users.InsertOneAsync(testUser);
 
@@ -83,7 +83,7 @@ public class MongoUserRepositoryTests(TestDb testDb)
   [Fact]
   public async Task GetUserByUsernameAsync_WhenUserDoesNotExist_ItShouldReturnNull()
   {
-    var testUser = FakeDataFactory.TestUser.Generate();
+    var (_, testUser) = FakeDataFactory.TestUser.Generate();
 
     var result = await _sut.GetUserByUsernameAsync(testUser.Username);
 

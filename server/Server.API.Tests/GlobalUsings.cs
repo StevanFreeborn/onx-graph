@@ -33,3 +33,4 @@ global using Server.API.Tests.Integration.Fixtures;
 global using Testcontainers.MongoDb;
 
 global using Xunit;
+global using System.Net.Http.Json;

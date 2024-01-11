@@ -39,9 +39,9 @@
     "DatabaseName": "DatabaseName"
   },
   "JwtOptions": {
-    "Secret": "Secret",
-    "Issuer": "Issuer",
-    "Audience": "Audience",
-    "ExpiryInMinutes": 0
+    "Secret": "qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q=",
+    "Issuer": "TestIssuer",
+    "Audience": "TestAudience",
+    "ExpiryInMinutes": 5
   }
 }

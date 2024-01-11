@@ -1,9 +1,3 @@
-using System.Net.Http.Json;
-
-using Microsoft.Extensions.DependencyInjection;
-
-using Server.API.Tests.Data;
-
 namespace Server.API.Tests.Integration;
 
 public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory), IDisposable
@@ -17,7 +11,13 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   [Fact]
   public async Task Register_WhenCalledAndGivenValidEmailAndPassword_ItShouldReturn201StatusCodeWithRegisteredUsersId()
   {
-    var newUser = FakeDataFactory.TestUser.Generate();
+    var (password, user) = FakeDataFactory.TestUser.Generate();
+
+    var newUser = new
+    {
+      email = user.Email,
+      password,
+    };
 
     var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
 
@@ -37,8 +37,13 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   [Fact]
   public async Task Register_WhenCalledAndGivenInvalidPassword_ItShouldReturn400StatusCodeWithValidationProblemDetails()
   {
-    var newUser = FakeDataFactory.TestUser.Generate();
-    newUser.Password = "invalid_password";
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    var newUser = new
+    {
+      email = user.Email,
+      password = "invalid_password",
+    };
 
     var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
 
@@ -58,8 +63,13 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   [Fact]
   public async Task Register_WhenCalledAndGivenInvalidEmail_ItShouldReturn400StatusCodeWithValidationProblemDetails()
   {
-    var newUser = FakeDataFactory.TestUser.Generate();
-    newUser.Email = "invalid_email";
+    var (password, user) = FakeDataFactory.TestUser.Generate();
+
+    var newUser = new
+    {
+      email = "invalid_email",
+      password,
+    };
 
     var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
 
@@ -79,14 +89,14 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   [Fact]
   public async Task Register_WhenCalledAndGivenEmailForExistingUser_ItShouldReturn409StatusCodeWithProblemDetails()
   {
-    var alreadyExistingUser = FakeDataFactory.TestUser.Generate();
+    var (userPassword, alreadyExistingUser) = FakeDataFactory.TestUser.Generate();
 
     await context.Users.InsertOneAsync(alreadyExistingUser);
 
     var newUser = new
     {
       email = alreadyExistingUser.Email,
-      password = alreadyExistingUser.Password,
+      password = userPassword,
     };
 
     var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
@@ -100,5 +110,37 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
     registerResponseBody
       .Should()
       .NotBeNull();
+  }
+
+  [Fact]
+  public async Task Login_WhenCalledAndGivenValidEmailAndPassword_ItShouldReturn200StatusCodeWithAccessTokenAndRefreshToken()
+  {
+    var (userPassword, existingUser) = FakeDataFactory.TestUser.Generate();
+
+    await context.Users.InsertOneAsync(existingUser);
+
+    var loginResponse = await _client.PostAsJsonAsync("/auth/login", new
+    {
+      email = existingUser.Email,
+      password = userPassword,
+    });
+
+    loginResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.OK);
+
+    loginResponse.Headers
+      .Should()
+      .Contain(h => h.Key == "Set-Cookie" && h.Value.Any(v => v.Contains("onxRefreshToken")));
+
+    var loginResponseBody = await loginResponse.Content.ReadFromJsonAsync<LoginUserResponse>();
+
+    loginResponseBody
+      .Should()
+      .NotBeNull();
+
+    loginResponseBody?.AccessToken
+      .Should()
+      .NotBeNullOrEmpty();
   }
 }

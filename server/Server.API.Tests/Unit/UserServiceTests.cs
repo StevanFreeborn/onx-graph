@@ -91,7 +91,7 @@ public class UserServiceTests
   [Fact]
   public async Task LoginUserAsync_WhenPasswordIsInvalid_ItShouldReturnInvalidLoginError()
   {
-    var existingUser = FakeDataFactory.TestUser.Generate();
+    var (_, existingUser) = FakeDataFactory.TestUser.Generate();
     var password = existingUser.Password;
     var hashedPassword = BCrypt.Net.BCrypt.HashPassword(existingUser.Password);
     existingUser.Password = hashedPassword;
@@ -114,10 +114,7 @@ public class UserServiceTests
   [Fact]
   public async Task LoginUserAsync_WhenRefreshTokenFailsToGenerate_ItShouldReturnLoginFailedError()
   {
-    var existingUser = FakeDataFactory.TestUser.Generate();
-    var password = existingUser.Password;
-    var hashedPassword = BCrypt.Net.BCrypt.HashPassword(existingUser.Password);
-    existingUser.Password = hashedPassword;
+    var (password, existingUser) = FakeDataFactory.TestUser.Generate();
 
     _userRepositoryMock
       .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
@@ -141,10 +138,7 @@ public class UserServiceTests
   [Fact]
   public async Task LoginUserAsync_WhenPasswordIsValid_ItShouldReturnAccessTokenAndRefreshToken()
   {
-    var existingUser = FakeDataFactory.TestUser.Generate();
-    var password = existingUser.Password;
-    var hashedPassword = BCrypt.Net.BCrypt.HashPassword(existingUser.Password);
-    existingUser.Password = hashedPassword;
+    var (password, existingUser) = FakeDataFactory.TestUser.Generate();
 
     _userRepositoryMock
       .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
