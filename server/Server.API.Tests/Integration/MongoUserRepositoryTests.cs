@@ -19,13 +19,17 @@ public class MongoUserRepositoryTests(TestDb testDb)
 
     var result = await _sut.CreateUserAsync(newUser);
 
-    result.Id.Should().NotBeNullOrEmpty();
+    result.Id
+      .Should()
+      .NotBeNullOrEmpty();
 
     var createdUser = await _context.Users
       .Find(u => u.Id == result.Id)
       .SingleOrDefaultAsync();
 
-    createdUser.Should().NotBeNull();
+    createdUser
+      .Should()
+      .NotBeNull();
   }
 
   [Fact]
@@ -37,8 +41,13 @@ public class MongoUserRepositoryTests(TestDb testDb)
 
     var result = await _sut.GetUserByEmailAsync(testUser.Email);
 
-    result.Should().NotBeNull();
-    result?.Email.Should().Be(testUser.Email);
+    result
+      .Should()
+      .NotBeNull();
+
+    result?.Email
+      .Should()
+      .Be(testUser.Email);
   }
 
   [Fact]
@@ -48,7 +57,9 @@ public class MongoUserRepositoryTests(TestDb testDb)
 
     var result = await _sut.GetUserByEmailAsync(testUser.Email);
 
-    result.Should().BeNull();
+    result
+      .Should()
+      .BeNull();
   }
 
   [Fact]
@@ -60,8 +71,13 @@ public class MongoUserRepositoryTests(TestDb testDb)
 
     var result = await _sut.GetUserByUsernameAsync(testUser.Username);
 
-    result.Should().NotBeNull();
-    result?.Username.Should().Be(testUser.Username);
+    result
+      .Should()
+      .NotBeNull();
+
+    result?.Username
+      .Should()
+      .Be(testUser.Username);
   }
 
   [Fact]
@@ -71,6 +87,8 @@ public class MongoUserRepositoryTests(TestDb testDb)
 
     var result = await _sut.GetUserByUsernameAsync(testUser.Username);
 
-    result.Should().BeNull();
+    result
+      .Should()
+      .BeNull();
   }
 }

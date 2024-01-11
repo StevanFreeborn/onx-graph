@@ -25,8 +25,13 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
 
     var registerResponseBody = await registerResponse.Content.ReadFromJsonAsync<RegisterUserResponse>();
 
-    registerResponseBody.Should().NotBeNull();
-    registerResponseBody?.Id.Should().NotBeNullOrEmpty();
+    registerResponseBody
+      .Should()
+      .NotBeNull();
+
+    registerResponseBody?.Id
+      .Should()
+      .NotBeNullOrEmpty();
   }
 
   [Fact]
@@ -41,8 +46,13 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
 
     var registerResponseBody = await registerResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
 
-    registerResponseBody.Should().NotBeNull();
-    registerResponseBody?.Errors.Should().NotBeNullOrEmpty();
+    registerResponseBody
+      .Should()
+      .NotBeNull();
+
+    registerResponseBody?.Errors
+      .Should()
+      .NotBeNullOrEmpty();
   }
 
   [Fact]
@@ -57,8 +67,13 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
 
     var registerResponseBody = await registerResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
 
-    registerResponseBody.Should().NotBeNull();
-    registerResponseBody?.Errors.Should().NotBeNullOrEmpty();
+    registerResponseBody
+      .Should()
+      .NotBeNull();
+
+    registerResponseBody?.Errors
+      .Should()
+      .NotBeNullOrEmpty();
   }
 
   [Fact]
@@ -76,10 +91,14 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
 
     var registerResponse = await _client.PostAsJsonAsync("/auth/register", newUser);
 
-    registerResponse.StatusCode.Should().Be(HttpStatusCode.Conflict);
+    registerResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.Conflict);
 
     var registerResponseBody = await registerResponse.Content.ReadFromJsonAsync<ProblemDetails>();
 
-    registerResponseBody.Should().NotBeNull();
+    registerResponseBody
+      .Should()
+      .NotBeNull();
   }
 }

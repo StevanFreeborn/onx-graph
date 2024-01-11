@@ -79,7 +79,10 @@ public class UserServiceTests
 
     var result = await _sut.LoginUserAsync("test@test.com", "@Password1234");
 
-    result.IsFailed.Should().BeTrue();
+    result.IsFailed
+      .Should()
+      .BeTrue();
+
     result.Errors
       .Should()
       .Contain(e => e is InvalidLoginError);
@@ -99,7 +102,10 @@ public class UserServiceTests
 
     var result = await _sut.LoginUserAsync(existingUser.Email, "not the password");
 
-    result.IsFailed.Should().BeTrue();
+    result.IsFailed
+      .Should()
+      .BeTrue();
+
     result.Errors
       .Should()
       .Contain(e => e is InvalidLoginError);
@@ -123,7 +129,10 @@ public class UserServiceTests
 
     var result = await _sut.LoginUserAsync(existingUser.Email, password);
 
-    result.IsFailed.Should().BeTrue();
+    result.IsFailed
+      .Should()
+      .BeTrue();
+
     result.Errors
       .Should()
       .Contain(e => e is LoginFailedError);
@@ -155,10 +164,30 @@ public class UserServiceTests
 
     var result = await _sut.LoginUserAsync(existingUser.Email, password);
 
-    result.IsSuccess.Should().BeTrue();
-    result.Value.AccessToken.Should().NotBeEmpty();
-    result.Value.RefreshToken.Should().NotBeNull();
-    result.Value.RefreshToken.Token.Should().NotBeEmpty();
-    result.Value.RefreshToken.ExpiresAt.Should().BeAfter(DateTime.UtcNow);
+    result.IsSuccess
+      .Should()
+      .BeTrue();
+
+    result.Value
+      .AccessToken
+      .Should()
+      .NotBeEmpty();
+
+    result.Value
+      .RefreshToken
+      .Should()
+      .NotBeNull();
+
+    result.Value
+      .RefreshToken
+      .Token
+      .Should()
+      .NotBeEmpty();
+
+    result.Value
+      .RefreshToken
+      .ExpiresAt
+      .Should()
+      .BeAfter(DateTime.UtcNow);
   }
 }

@@ -84,8 +84,8 @@ public class TokenServiceTests
     var emailClaim = token.Claims
       .First(c => c.Type == JwtRegisteredClaimNames.Email);
 
-
     emailClaim.Value
-      .Should().Be(user.Email);
+      .Should()
+      .Be(user.Email);
   }
 }

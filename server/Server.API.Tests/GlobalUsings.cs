@@ -1,5 +1,6 @@
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Net;
+global using System.Security.Cryptography;
 
 global using Bogus;
 
@@ -32,4 +33,3 @@ global using Server.API.Tests.Integration.Fixtures;
 global using Testcontainers.MongoDb;
 
 global using Xunit;
-global using System.Security.Cryptography;
