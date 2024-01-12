@@ -34,3 +34,4 @@ global using Testcontainers.MongoDb;
 
 global using Xunit;
 global using System.Net.Http.Json;
+global using System.Security.Claims;

@@ -83,3 +83,11 @@ record LoginRequest(
   [FromServices] IValidator<LoginDto> Validator,
   [FromServices] IUserService UserService
 );
+
+/// <summary>
+/// Represents logout request
+/// </summary>
+record LogoutRequest(
+  HttpContext Context,
+  [FromServices] ITokenService TokenService
+);

@@ -71,9 +71,29 @@ static class AuthController
     return Results.Ok(new LoginUserResponse(loginResult.Value.AccessToken));
   }
 
-  internal static Task<IResult> Logout()
+  internal static async Task<IResult> Logout([AsParameters] LogoutRequest req)
   {
-    throw new NotImplementedException();
+    var userId = req.Context.GetUserId();
+
+    if (userId is null)
+    {
+      return Results.Problem(
+        title: "Unable to logout user",
+        detail: "No user is logged in",
+        statusCode: 401
+      );
+    }
+
+    var refreshToken = req.Context.Request.GetRefreshTokenCookie();
+
+    if (string.IsNullOrWhiteSpace(refreshToken) == false)
+    {
+      await req.TokenService.RevokeRefreshTokenAsync(userId, refreshToken);
+      await req.TokenService.RemoveAllInvalidRefreshTokensAsync(userId);
+    }
+
+    req.Context.Response.SetRefreshTokenCookie(string.Empty, DateTime.UtcNow.AddDays(-1));
+    return Results.Ok();
   }
 
   internal static Task<IResult> RefreshToken()

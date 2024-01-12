@@ -1,3 +1,5 @@
+using Microsoft.IdentityModel.JsonWebTokens;
+
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 

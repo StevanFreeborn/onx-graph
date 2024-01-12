@@ -19,4 +19,8 @@ interface ITokenService
   /// <param name="userId">The id of the user to generate the token for.</param>
   /// <returns>The generated refresh token as a <see cref="Result{T}"/>.</returns>
   Task<Result<RefreshToken>> GenerateRefreshToken(string userId);
+
+  Task RemoveAllInvalidRefreshTokensAsync(string userId);
+
+  Task RevokeRefreshTokenAsync(string userId, string refreshToken);
 }

@@ -6,6 +6,7 @@ public class AuthControllerTests
 {
   private readonly Mock<HttpContext> _httpContextMock = new();
   private readonly Mock<IUserService> _userServiceMock = new();
+  private readonly Mock<ITokenService> _tokenServiceMock = new();
   private readonly Mock<IValidator<RegisterDto>> _registerDtoValidatorMock = new();
   private readonly Mock<IValidator<LoginDto>> _loginDtoValidatorMock = new();
 
@@ -426,5 +427,142 @@ public class AuthControllerTests
     var response = okResult.Value?.AccessToken
       .Should()
       .Be(loginResult.Value.AccessToken);
+  }
+
+  [Fact]
+  public async Task Logout_WhenUserIsNotAuthenticated_ItShouldReturnAProblemDetailWith401StatusCode()
+  {
+    _httpContextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal());
+
+    var req = new LogoutRequest(
+      _httpContextMock.Object,
+      _tokenServiceMock.Object
+    );
+
+    var result = await AuthController.Logout(req);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.Unauthorized);
+  }
+
+  [Fact]
+  public async Task Logout_WhenUserIsAuthenticated_ItShouldReturn200StatusCodeAndIfNoRefreshTokenItShouldNotCallTokenService()
+  {
+    var claims = new[]
+    {
+      new Claim(ClaimTypes.NameIdentifier, "test"),
+    };
+
+    _httpContextMock
+      .Setup(c => c.User)
+      .Returns(
+        new ClaimsPrincipal(
+          new ClaimsIdentity(claims)
+        )
+      );
+
+    _httpContextMock
+      .Setup(c => c.Request.Cookies)
+      .Returns(new Mock<IRequestCookieCollection>().Object);
+
+    _httpContextMock
+      .Setup(c => c.Response.Cookies)
+      .Returns(new Mock<IResponseCookies>().Object);
+
+    var req = new LogoutRequest(
+      _httpContextMock.Object,
+      _tokenServiceMock.Object
+    );
+
+    var result = await AuthController.Logout(req);
+
+    result.Should()
+      .BeOfType<Ok>();
+
+    result.As<Ok>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.OK);
+
+    _tokenServiceMock
+      .Verify(
+        t => t.RevokeRefreshTokenAsync(It.IsAny<string>(), It.IsAny<string>()),
+        Times.Never
+      );
+
+    _tokenServiceMock
+      .Verify(
+        t => t.RemoveAllInvalidRefreshTokensAsync(It.IsAny<string>()),
+        Times.Never
+      );
+  }
+
+  [Fact]
+  public async Task Logout_WhenUserIsAuthenticated_ItShouldReturn200StatusCodeAndIfRefreshTokenIsProvidedItShouldCallTokenService()
+  {
+    var claims = new[]
+    {
+      new Claim(ClaimTypes.NameIdentifier, "test"),
+    };
+
+    _httpContextMock
+      .Setup(c => c.User)
+      .Returns(
+        new ClaimsPrincipal(
+          new ClaimsIdentity(claims)
+        )
+      );
+
+    var refreshToken = Guid.NewGuid().ToString();
+
+    var requestCookieCollectionMock = new Mock<IRequestCookieCollection>();
+
+    requestCookieCollectionMock
+      .Setup(c => c[It.IsAny<string>()])
+      .Returns(refreshToken);
+
+    _httpContextMock
+      .Setup(c => c.Request.Cookies)
+      .Returns(
+        requestCookieCollectionMock.Object
+      );
+
+    _httpContextMock
+      .Setup(c => c.Response.Cookies)
+      .Returns(new Mock<IResponseCookies>().Object);
+
+    var req = new LogoutRequest(
+      _httpContextMock.Object,
+      _tokenServiceMock.Object
+    );
+
+    var result = await AuthController.Logout(req);
+
+    result.Should()
+      .BeOfType<Ok>();
+
+    result.As<Ok>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.OK);
+
+    _tokenServiceMock
+      .Verify(
+        t => t.RevokeRefreshTokenAsync(It.IsAny<string>(), It.IsAny<string>()),
+        Times.Once
+      );
+
+    _tokenServiceMock
+      .Verify(
+        t => t.RemoveAllInvalidRefreshTokensAsync(It.IsAny<string>()),
+        Times.Once
+      );
   }
 }

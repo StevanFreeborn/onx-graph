@@ -74,6 +74,16 @@ class TokenService(
     }
   }
 
+  public Task RemoveAllInvalidRefreshTokensAsync(string userId)
+  {
+    throw new NotImplementedException();
+  }
+
+  public Task RevokeRefreshTokenAsync(string userId, string refreshToken)
+  {
+    throw new NotImplementedException();
+  }
+
   private string GenerateToken()
   {
     var randomBytes = new byte[32];
