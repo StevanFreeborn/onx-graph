@@ -1,5 +1,3 @@
-using Microsoft.IdentityModel.JsonWebTokens;
-
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
@@ -11,6 +9,7 @@ builder.Host.UseSerilog(
     .Enrich.FromLogContext()
 );
 
+builder.Services.AddProblemDetails();
 
 // add versioning
 var versionOne = new ApiVersion(1, 0);
@@ -84,6 +83,10 @@ var app = builder.Build();
 
 // add request logging middleware
 app.UseSerilogRequestLogging();
+
+
+// add problem details middleware
+app.UseStatusCodePages();
 
 
 // add error handling middleware
