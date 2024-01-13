@@ -74,14 +74,24 @@ class TokenService(
     }
   }
 
-  public Task RemoveAllInvalidRefreshTokensAsync(string userId)
-  {
-    throw new NotImplementedException();
-  }
+  public async Task RemoveAllInvalidRefreshTokensAsync(string userId) => await _tokenRepository.RemoveAllInvalidRefreshTokensAsync(userId);
 
-  public Task RevokeRefreshTokenAsync(string userId, string refreshToken)
+  public async Task RevokeRefreshTokenAsync(string userId, string refreshToken)
   {
-    throw new NotImplementedException();
+    var token = await _tokenRepository.GetTokenAsync(refreshToken);
+
+    if (token is null || token.UserId != userId)
+    {
+      return;
+    }
+
+    var updatedToken = token with
+    {
+      Revoked = true,
+      UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime
+    };
+
+    await _tokenRepository.UpdateTokenAsync(updatedToken);
   }
 
   private string GenerateToken()
