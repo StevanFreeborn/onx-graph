@@ -44,7 +44,7 @@
     <Exec Command="reportgenerator -reports:./TestResults/coverage/*.xml -targetdir:./TestResults/coverage/report/ -reporttypes:Html_Dark" />
   </Target>
 
-  <Target Name="OpenTestReport" AfterTargets="GenerateCoverageResultAfterTest">
+  <Target Name="OpenTestReport" AfterTargets="GenerateHtmlCoverageReport">
     <Exec Command="start ./TestResults/coverage/report/index.html" />
   </Target>
 
