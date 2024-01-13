@@ -1,4 +1,4 @@
 {
   "dotnet.defaultSolution": "server/Server.sln",
-  "cSpell.words": ["Bson", "Hmac", "Pinia", "Testcontainers"]
+  "cSpell.words": ["Bson", "Hmac", "Instantiator", "Pinia", "Testcontainers"]
 }
