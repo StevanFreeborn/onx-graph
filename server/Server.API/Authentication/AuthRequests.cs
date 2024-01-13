@@ -91,3 +91,11 @@ record LogoutRequest(
   HttpContext Context,
   [FromServices] ITokenService TokenService
 );
+
+/// <summary>
+/// Represents a request to refresh a token
+/// </summary>
+record RefreshTokenRequest(
+  HttpContext Context,
+  [FromServices] ITokenService TokenService
+);

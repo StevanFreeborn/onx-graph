@@ -41,6 +41,7 @@ public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     builder.ConfigureServices(
       services =>
+      {
         services.PostConfigure<JwtBearerOptions>(
           JwtBearerDefaults.AuthenticationScheme,
           options =>
@@ -51,9 +52,31 @@ public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
               IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(TestJwtTokenBuilder.TestJwtSecret)
               ),
+              ValidateIssuer = true,
+              ValidateAudience = true,
+              ValidateLifetime = true,
+              ValidateIssuerSigningKey = true,
+              ClockSkew = TimeSpan.FromSeconds(0),
             }
-        )
-    );
+        );
+        services.PostConfigure<JwtBearerOptions>(
+          "AllowExpiredToken",
+          options =>
+            options.TokenValidationParameters = new()
+            {
+              ValidIssuer = TestJwtTokenBuilder.TestJwtIssuer,
+              ValidAudience = TestJwtTokenBuilder.TestJwtAudience,
+              IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(TestJwtTokenBuilder.TestJwtSecret)
+              ),
+              ValidateIssuer = true,
+              ValidateAudience = true,
+              ValidateLifetime = false,
+              ValidateIssuerSigningKey = true,
+              ClockSkew = TimeSpan.FromSeconds(0),
+            }
+        );
+      });
   }
 
   new public async Task DisposeAsync()

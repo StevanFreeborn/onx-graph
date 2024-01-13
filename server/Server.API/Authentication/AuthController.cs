@@ -96,7 +96,7 @@ static class AuthController
     return Results.Ok();
   }
 
-  internal static Task<IResult> RefreshToken()
+  internal static Task<IResult> RefreshToken([AsParameters] RefreshTokenRequest req)
   {
     throw new NotImplementedException();
   }

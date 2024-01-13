@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
@@ -52,9 +54,39 @@ builder.Services
       ValidateIssuerSigningKey = true,
       ClockSkew = TimeSpan.FromSeconds(0),
     }
+  )
+  .AddJwtBearer(
+    "AllowExpiredToken",
+    o => o.TokenValidationParameters = new TokenValidationParameters
+    {
+      ValidIssuer = jwtOptions.Issuer,
+      ValidAudience = jwtOptions.Audience,
+      IssuerSigningKey = new SymmetricSecurityKey(
+        Encoding.UTF8.GetBytes(jwtOptions.Secret)
+      ),
+      ValidateIssuer = true,
+      ValidateAudience = true,
+      ValidateLifetime = false,
+      ValidateIssuerSigningKey = true,
+      ClockSkew = TimeSpan.FromSeconds(0),
+    }
   );
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+  .SetDefaultPolicy(
+    new AuthorizationPolicyBuilder()
+      .RequireAuthenticatedUser()
+      .Build()
+  )
+  .AddPolicy(
+    "AllowExpiredToken",
+    policy =>
+    {
+      policy.AuthenticationSchemes = ["AllowExpiredToken"];
+      policy.RequireAuthenticatedUser();
+    }
+  );
+
 builder.Services.AddScoped<ITokenRepository, MongoTokenRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();

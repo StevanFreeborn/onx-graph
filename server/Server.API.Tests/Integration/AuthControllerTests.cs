@@ -1,3 +1,5 @@
+using Bogus.DataSets;
+
 namespace Server.API.Tests.Integration;
 
 public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory), IDisposable
@@ -328,5 +330,44 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
     revokedToken
       .Should()
       .BeNull();
+  }
+
+  [Fact]
+  public async Task RefreshToken_WhenCalledWithoutAccessToken_ItShouldReturn401StatusCodeWithProblemDetails()
+  {
+    var refreshTokenResponse = await _client.PostAsync("/auth/refresh-token", null);
+
+    refreshTokenResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.Unauthorized);
+
+    var refreshTokenResponseBody = await refreshTokenResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    refreshTokenResponseBody
+      .Should()
+      .NotBeNull();
+
+    refreshTokenResponseBody?.Title
+      .Should()
+      .Be("Unauthorized");
+  }
+
+  [Fact]
+  public async Task RefreshToken_WhenCalledWithExpiredAccessToken_ItShouldNotReturn401StatusCodeWithProblemDetails()
+  {
+    var (_, existingUser) = FakeDataFactory.TestUser.Generate();
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, existingUser.Id))
+      .WithIssuedAt(DateTime.UtcNow.AddMinutes(-(TestJwtTokenBuilder.TestJwtExpiryInMinutes + 1)))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    var refreshTokenResponse = await _client.PostAsync("/auth/refresh-token", null);
+
+    refreshTokenResponse.StatusCode
+      .Should()
+      .NotBe(HttpStatusCode.Unauthorized);
   }
 }

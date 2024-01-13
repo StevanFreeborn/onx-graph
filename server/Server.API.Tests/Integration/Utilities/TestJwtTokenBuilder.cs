@@ -37,6 +37,7 @@ public class TestJwtTokenBuilder
       Subject = new ClaimsIdentity(_claims),
       Expires = expires,
       IssuedAt = issuedAt,
+      NotBefore = issuedAt,
       Issuer = TestJwtIssuer,
       Audience = TestJwtAudience,
       SigningCredentials = new SigningCredentials(

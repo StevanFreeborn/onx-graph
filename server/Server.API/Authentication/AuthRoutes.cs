@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+
 namespace Server.API.Authentication;
 
 /// <summary>
@@ -40,6 +42,7 @@ static class AuthRoutes
 
     group
       .MapPost("refresh-token", AuthController.RefreshToken)
+      .RequireAuthorization("AllowExpiredToken")
       .WithName("RefreshToken")
       .WithDescription("Refresh a user's token");
   }
