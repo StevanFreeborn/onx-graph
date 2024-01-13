@@ -31,8 +31,10 @@ class MongoTokenRepository(
     var filter = Builders<BaseToken>.Filter.And(
       Builders<BaseToken>.Filter.Eq(x => x.UserId, userId),
       Builders<BaseToken>.Filter.Eq(x => x.TokenType, TokenType.Refresh),
-      Builders<BaseToken>.Filter.Eq(x => x.Revoked, true),
-      Builders<BaseToken>.Filter.Lt(x => x.ExpiresAt, _timeProvider.GetUtcNow())
+      Builders<BaseToken>.Filter.Or(
+        Builders<BaseToken>.Filter.Eq(x => x.Revoked, true),
+        Builders<BaseToken>.Filter.Lt(x => x.ExpiresAt, _timeProvider.GetUtcNow().DateTime)
+      )
     );
 
     await _context.Tokens.DeleteManyAsync(filter);

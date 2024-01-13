@@ -1,7 +1,6 @@
 namespace Server.API.Tests.Integration;
 
-public class MongoUserRepositoryTests(TestDb testDb)
-    : IClassFixture<TestDb>, IDisposable
+public class MongoUserRepositoryTests(TestDb testDb) : IClassFixture<TestDb>, IDisposable
 {
   private readonly MongoDbContext _context = testDb.Context;
   private readonly MongoUserRepository _sut = new(testDb.Context);

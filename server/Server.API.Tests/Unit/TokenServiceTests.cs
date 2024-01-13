@@ -27,7 +27,7 @@ public class TokenServiceTests
   {
     _timeProviderMock
       .Setup(t => t.GetUtcNow())
-      .Returns(DateTime.UtcNow);
+      .Returns(DateTimeOffset.UtcNow);
 
     var (_, user) = FakeDataFactory.TestUser.Generate();
 
@@ -96,7 +96,7 @@ public class TokenServiceTests
 
     _timeProviderMock
       .Setup(t => t.GetUtcNow())
-      .Returns(DateTime.UtcNow);
+      .Returns(DateTimeOffset.UtcNow);
 
     var result = await _sut.GenerateRefreshToken(user.Id);
 
@@ -117,7 +117,7 @@ public class TokenServiceTests
 
     _timeProviderMock
       .Setup(t => t.GetUtcNow())
-      .Returns(DateTime.UtcNow);
+      .Returns(DateTimeOffset.UtcNow);
 
     _tokenRepositoryMock
       .Setup(t => t.CreateTokenAsync(It.IsAny<RefreshToken>()))
@@ -154,7 +154,7 @@ public class TokenServiceTests
 
     _timeProviderMock
       .Setup(t => t.GetUtcNow())
-      .Returns(DateTime.UtcNow);
+      .Returns(DateTimeOffset.UtcNow);
 
     await _sut.RevokeRefreshTokenAsync(refreshToken.UserId, refreshToken.Token);
 
@@ -179,7 +179,7 @@ public class TokenServiceTests
 
     _timeProviderMock
       .Setup(t => t.GetUtcNow())
-      .Returns(DateTime.UtcNow);
+      .Returns(DateTimeOffset.UtcNow);
 
     await _sut.RevokeRefreshTokenAsync(refreshToken.UserId, refreshToken.Token);
 
@@ -202,7 +202,7 @@ public class TokenServiceTests
 
     _timeProviderMock
       .Setup(t => t.GetUtcNow())
-      .Returns(DateTime.UtcNow);
+      .Returns(DateTimeOffset.UtcNow);
 
     await _sut.RevokeRefreshTokenAsync("some-other-user-id", refreshToken.Token);
 

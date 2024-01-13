@@ -37,8 +37,6 @@ static class FakeDataFactory
     .RuleFor(t => t.UserId, f => ObjectId.GenerateNewId().ToString())
     .RuleFor(t => t.Token, f => f.Random.AlphaNumeric(32))
     .RuleFor(t => t.ExpiresAt, f => DateTime.UtcNow.AddHours(12))
-    .RuleFor(t => t.CreatedAt, f => f.Date.Past())
-    .RuleFor(t => t.UpdatedAt, f => f.Date.Past())
     .RuleFor(t => t.Revoked, false)
     .RuleFor(t => t.TokenType, TokenType.Refresh);
 }
