@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,9 +28,9 @@ public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
       services.Configure<JwtOptions>(options =>
       {
         options.Secret = TestJwtTokenBuilder.TestJwtSecret;
-        options.Audience = "TestAudience";
-        options.Issuer = "TestIssuer";
-        options.ExpiryInMinutes = 5;
+        options.Audience = TestJwtTokenBuilder.TestJwtAudience;
+        options.Issuer = TestJwtTokenBuilder.TestJwtIssuer;
+        options.ExpiryInMinutes = TestJwtTokenBuilder.TestJwtExpiryInMinutes;
       });
       services.Configure<MongoDbOptions>(options =>
       {
@@ -37,6 +38,22 @@ public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
         options.DatabaseName = "tests";
       });
     });
+
+    builder.ConfigureServices(
+      services =>
+        services.PostConfigure<JwtBearerOptions>(
+          JwtBearerDefaults.AuthenticationScheme,
+          options =>
+            options.TokenValidationParameters = new()
+            {
+              ValidIssuer = TestJwtTokenBuilder.TestJwtIssuer,
+              ValidAudience = TestJwtTokenBuilder.TestJwtAudience,
+              IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(TestJwtTokenBuilder.TestJwtSecret)
+              ),
+            }
+        )
+    );
   }
 
   new public async Task DisposeAsync()

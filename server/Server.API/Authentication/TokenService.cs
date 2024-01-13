@@ -7,12 +7,14 @@ namespace Server.API.Authentication;
 class TokenService(
   ITokenRepository tokenRepository,
   IOptions<JwtOptions> jwtOptions,
-  TimeProvider timeProvider
+  TimeProvider timeProvider,
+  ILogger<TokenService> logger
 ) : ITokenService
 {
   private readonly ITokenRepository _tokenRepository = tokenRepository;
   private readonly JwtOptions _jwtOptions = jwtOptions.Value;
   private readonly TimeProvider _timeProvider = timeProvider;
+  private readonly ILogger<TokenService> _logger = logger;
 
   public string GenerateAccessToken(User user)
   {
@@ -80,8 +82,22 @@ class TokenService(
   {
     var token = await _tokenRepository.GetTokenAsync(refreshToken);
 
-    if (token is null || token.UserId != userId)
+    if (token is null)
     {
+      _logger.LogWarning(
+        "Refresh token {RefreshToken} does not exist",
+        refreshToken
+      );
+      return;
+    }
+
+    if (token.UserId != userId)
+    {
+      _logger.LogWarning(
+        "Refresh token {RefreshToken} does not belong to user {UserId}",
+        refreshToken,
+        userId
+      );
       return;
     }
 

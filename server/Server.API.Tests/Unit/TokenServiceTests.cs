@@ -5,6 +5,7 @@ public class TokenServiceTests
   private readonly Mock<ITokenRepository> _tokenRepositoryMock = new();
   private readonly Mock<IOptions<JwtOptions>> _jwtOptionsMock = new();
   private readonly Mock<TimeProvider> _timeProviderMock = new();
+  private readonly Mock<ILogger<TokenService>> _loggerMock = new();
   private readonly TokenService _sut;
 
   public TokenServiceTests()
@@ -18,7 +19,8 @@ public class TokenServiceTests
     _sut = new TokenService(
       _tokenRepositoryMock.Object,
       _jwtOptionsMock.Object,
-      _timeProviderMock.Object
+      _timeProviderMock.Object,
+      _loggerMock.Object
     );
   }
 
