@@ -270,4 +270,24 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .Should()
       .ContainKey("Errors");
   }
+
+  [Fact]
+  public async Task Logout_WhenCalledByUnauthorizedUser_ItShouldReturn401StatusCodeWithProblemDetails()
+  {
+    var logoutResponse = await _client.PostAsync("/auth/logout", null);
+
+    logoutResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.Unauthorized);
+
+    var logoutResponseBody = await logoutResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    logoutResponseBody
+      .Should()
+      .NotBeNull();
+
+    logoutResponseBody?.Title
+      .Should()
+      .Be("Unauthorized");
+  }
 }

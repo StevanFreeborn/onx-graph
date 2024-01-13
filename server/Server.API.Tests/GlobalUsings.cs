@@ -29,9 +29,13 @@ global using Server.API.Identity;
 global using Server.API.Persistence.Mongo;
 global using Server.API.Tests.Data;
 global using Server.API.Tests.Integration.Fixtures;
+global using Server.API.Tests.Integration.Utilities;
 
 global using Testcontainers.MongoDb;
 
 global using Xunit;
 global using System.Net.Http.Json;
 global using System.Security.Claims;
+global using System.Text;
+
+global using Microsoft.IdentityModel.Tokens;

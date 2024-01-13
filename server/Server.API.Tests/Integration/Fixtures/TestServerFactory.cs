@@ -4,8 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Server.API.Tests.Integration.Fixtures;
 
-public class TestServerFactory
-: WebApplicationFactory<Program>, IAsyncLifetime
+public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
   private readonly MongoDbContainer _container = new MongoDbBuilder().Build();
 
@@ -27,7 +26,7 @@ public class TestServerFactory
     {
       services.Configure<JwtOptions>(options =>
       {
-        options.Secret = "qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q=";
+        options.Secret = TestJwtTokenBuilder.TestJwtSecret;
         options.Audience = "TestAudience";
         options.Issuer = "TestIssuer";
         options.ExpiryInMinutes = 5;
