@@ -1,5 +1,5 @@
-using ValidationResult = FluentValidation.Results.ValidationResult;
 using ValidationFailure = FluentValidation.Results.ValidationFailure;
+using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace Server.API.Tests.Unit;
 

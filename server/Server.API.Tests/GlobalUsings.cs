@@ -1,6 +1,9 @@
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Net;
+global using System.Net.Http.Json;
+global using System.Security.Claims;
 global using System.Security.Cryptography;
+global using System.Text;
 
 global using Bogus;
 
@@ -18,6 +21,7 @@ global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.Testing;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
+global using Microsoft.IdentityModel.Tokens;
 
 global using MongoDB.Bson;
 global using MongoDB.Driver;
@@ -34,8 +38,3 @@ global using Server.API.Tests.Integration.Utilities;
 global using Testcontainers.MongoDb;
 
 global using Xunit;
-global using System.Net.Http.Json;
-global using System.Security.Claims;
-global using System.Text;
-
-global using Microsoft.IdentityModel.Tokens;
