@@ -33,8 +33,8 @@ static class AuthRoutes
     group
       .MapPost("logout", AuthController.Logout)
       .RequireAuthorization()
-      .Produces<ProblemDetails>((int)HttpStatusCode.Unauthorized)
       .Produces((int)HttpStatusCode.OK)
+      .Produces<ProblemDetails>((int)HttpStatusCode.Unauthorized)
       .WithName("LogoutUser")
       .WithDescription("Logout a user");
 
