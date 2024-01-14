@@ -566,4 +566,138 @@ public class AuthControllerTests
         Times.Once
       );
   }
+
+  [Fact]
+  public async Task RefreshToken_WhenUserIsNotAuthenticated_ItShouldReturnAUnauthorizedResults()
+  {
+    _httpContextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal());
+
+    _httpContextMock
+      .Setup(c => c.Request.Cookies)
+      .Returns(new Mock<IRequestCookieCollection>().Object);
+
+    var req = new RefreshTokenRequest(
+      _httpContextMock.Object,
+      _tokenServiceMock.Object
+    );
+
+    var result = await AuthController.RefreshToken(req);
+
+    result.Should()
+      .BeOfType<UnauthorizedHttpResult>();
+
+    result.As<UnauthorizedHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.Unauthorized);
+  }
+
+  [Fact]
+  public async Task RefreshToken_WhenUserIsAuthenticatedAndNoRefreshTokenIsProvided_ItShouldReturnUnauthorizedResult()
+  {
+    var claims = new[]
+    {
+      new Claim(ClaimTypes.NameIdentifier, "test"),
+    };
+
+    _httpContextMock
+      .Setup(c => c.User)
+      .Returns(
+        new ClaimsPrincipal(
+          new ClaimsIdentity(claims)
+        )
+      );
+
+    _httpContextMock
+      .Setup(c => c.Request.Cookies)
+      .Returns(new Mock<IRequestCookieCollection>().Object);
+
+    var req = new RefreshTokenRequest(
+      _httpContextMock.Object,
+      _tokenServiceMock.Object
+    );
+
+    var result = await AuthController.RefreshToken(req);
+
+    result.Should()
+      .BeOfType<UnauthorizedHttpResult>();
+
+    result.As<UnauthorizedHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.Unauthorized);
+  }
+
+  [Fact]
+  public async Task RefreshToken_WhenUserIsAuthenticatedAndRefreshTokenIsProvided_ItShouldReturnALoginUserResponseWith200StatusCode()
+  {
+    var claims = new[]
+    {
+      new Claim(ClaimTypes.NameIdentifier, "test"),
+    };
+
+    _httpContextMock
+      .Setup(c => c.User)
+      .Returns(
+        new ClaimsPrincipal(
+          new ClaimsIdentity(claims)
+        )
+      );
+
+    var refreshToken = Guid.NewGuid().ToString();
+
+    var requestCookieCollectionMock = new Mock<IRequestCookieCollection>();
+
+    requestCookieCollectionMock
+      .Setup(c => c[It.IsAny<string>()])
+      .Returns(refreshToken);
+
+    _httpContextMock
+      .Setup(c => c.Request.Cookies)
+      .Returns(
+        requestCookieCollectionMock.Object
+      );
+
+    var loginResult = Result.Ok((AccessToken: "accessToken", RefreshToken: new RefreshToken()));
+
+    _tokenServiceMock
+      .Setup(t => t.RefreshAccessTokenAsync(It.IsAny<string>(), It.IsAny<string>()))
+      .ReturnsAsync(loginResult);
+
+    var responseMock = new Mock<HttpResponse>();
+
+    responseMock
+      .Setup(r => r.Cookies)
+      .Returns(new Mock<IResponseCookies>().Object);
+
+    _httpContextMock
+      .Setup(c => c.Response)
+      .Returns(responseMock.Object);
+
+    var req = new RefreshTokenRequest(
+      _httpContextMock.Object,
+      _tokenServiceMock.Object
+    );
+
+    var result = await AuthController.RefreshToken(req);
+
+    result.Should()
+      .BeOfType<Ok<LoginUserResponse>>();
+
+    var okResult = result.As<Ok<LoginUserResponse>>();
+
+    okResult.StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.OK);
+
+    okResult.Value
+      .Should()
+      .BeOfType<LoginUserResponse>();
+
+    var response = okResult.Value?.AccessToken
+      .Should()
+      .Be(loginResult.Value.AccessToken);
+  }
 }
