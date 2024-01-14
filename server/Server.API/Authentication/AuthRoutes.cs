@@ -42,7 +42,11 @@ static class AuthRoutes
 
     group
       .MapPost("refresh-token", AuthController.RefreshToken)
-      .RequireAuthorization("AllowExpiredToken")
+      .RequireAuthorization(opts =>
+      {
+        opts.AuthenticationSchemes = ["AllowExpiredToken"];
+        opts.RequireAuthenticatedUser();
+      })
       .WithName("RefreshToken")
       .WithDescription("Refresh a user's token");
   }

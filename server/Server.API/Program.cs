@@ -72,20 +72,7 @@ builder.Services
     }
   );
 
-builder.Services.AddAuthorizationBuilder()
-  .SetDefaultPolicy(
-    new AuthorizationPolicyBuilder()
-      .RequireAuthenticatedUser()
-      .Build()
-  )
-  .AddPolicy(
-    "AllowExpiredToken",
-    policy =>
-    {
-      policy.AuthenticationSchemes = ["AllowExpiredToken"];
-      policy.RequireAuthenticatedUser();
-    }
-  );
+builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<ITokenRepository, MongoTokenRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();

@@ -361,6 +361,29 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .WithClaim(new(JwtRegisteredClaimNames.Sub, existingUser.Id))
       .WithIssuedAt(DateTime.UtcNow.AddMinutes(-(TestJwtTokenBuilder.TestJwtExpiryInMinutes + 1)))
       .Build();
+    var refreshToken = FakeDataFactory.RefreshToken.Generate() with { UserId = existingUser.Id };
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    _client
+      .DefaultRequestHeaders
+      .Add("Cookie", $"onxRefreshToken={refreshToken.Token}");
+
+    var refreshTokenResponse = await _client.PostAsync("/auth/refresh-token", null);
+
+    refreshTokenResponse.StatusCode
+      .Should()
+      .NotBe(HttpStatusCode.Unauthorized);
+  }
+
+  [Fact]
+  public async Task RefreshToken_WhenCalledAndNoRefreshTokenIsPresent_ItShouldReturn401StatusCodeWithProblemDetails()
+  {
+    var (_, existingUser) = FakeDataFactory.TestUser.Generate();
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, existingUser.Id))
+      .Build();
 
     _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
 
@@ -368,6 +391,48 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
 
     refreshTokenResponse.StatusCode
       .Should()
-      .NotBe(HttpStatusCode.Unauthorized);
+      .Be(HttpStatusCode.Unauthorized);
+
+    var refreshTokenResponseBody = await refreshTokenResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    refreshTokenResponseBody
+      .Should()
+      .NotBeNull();
+
+    refreshTokenResponseBody?.Title
+      .Should()
+      .Be("Unauthorized");
+  }
+
+  [Fact]
+  public async Task RefreshToken_WhenCalledAndRefreshTokenDoesNotExist_ItdShouldReturn401StatusCodeWithProblemDetails()
+  {
+    var (_, existingUser) = FakeDataFactory.TestUser.Generate();
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, existingUser.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    _client
+      .DefaultRequestHeaders
+      .Add("Cookie", $"onxRefreshToken=non_existing_token");
+
+    var refreshTokenResponse = await _client.PostAsync("/auth/refresh-token", null);
+
+    refreshTokenResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.Unauthorized);
+
+    var refreshTokenResponseBody = await refreshTokenResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    refreshTokenResponseBody
+      .Should()
+      .NotBeNull();
+
+    refreshTokenResponseBody?.Title
+      .Should()
+      .Be("Unauthorized");
   }
 }

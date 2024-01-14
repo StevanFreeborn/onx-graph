@@ -96,8 +96,16 @@ static class AuthController
     return Results.Ok();
   }
 
-  internal static Task<IResult> RefreshToken([AsParameters] RefreshTokenRequest req)
+  internal static async Task<IResult> RefreshToken([AsParameters] RefreshTokenRequest req)
   {
+    var userId = req.Context.GetUserId();
+    var refreshToken = req.Context.Request.GetRefreshTokenCookie();
+
+    if (userId is null || string.IsNullOrWhiteSpace(refreshToken))
+    {
+      return Results.Unauthorized();
+    }
+
     throw new NotImplementedException();
   }
 }
