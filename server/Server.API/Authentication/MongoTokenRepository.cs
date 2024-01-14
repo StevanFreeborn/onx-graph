@@ -40,6 +40,18 @@ class MongoTokenRepository(
     await _context.Tokens.DeleteManyAsync(filter);
   }
 
+  public Task RevokeAllRefreshTokensForUserAsync(string userId)
+  {
+    var filter = Builders<BaseToken>.Filter.And(
+      Builders<BaseToken>.Filter.Eq(x => x.UserId, userId),
+      Builders<BaseToken>.Filter.Eq(x => x.TokenType, TokenType.Refresh)
+    );
+
+    var update = Builders<BaseToken>.Update.Set(x => x.Revoked, true);
+
+    return _context.Tokens.UpdateManyAsync(filter, update);
+  }
+
   public async Task UpdateTokenAsync(BaseToken updatedToken)
   {
     var filter = Builders<BaseToken>.Filter.Eq(x => x.Id, updatedToken.Id);

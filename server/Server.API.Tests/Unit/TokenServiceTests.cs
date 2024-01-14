@@ -3,6 +3,7 @@ namespace Server.API.Tests.Unit;
 public class TokenServiceTests
 {
   private readonly Mock<ITokenRepository> _tokenRepositoryMock = new();
+  private readonly Mock<IUserRepository> _userRepositoryMock = new();
   private readonly Mock<IOptions<JwtOptions>> _jwtOptionsMock = new();
   private readonly Mock<TimeProvider> _timeProviderMock = new();
   private readonly Mock<ILogger<TokenService>> _loggerMock = new();
@@ -18,6 +19,7 @@ public class TokenServiceTests
 
     _sut = new TokenService(
       _tokenRepositoryMock.Object,
+      _userRepositoryMock.Object,
       _jwtOptionsMock.Object,
       _timeProviderMock.Object,
       _loggerMock.Object
@@ -213,6 +215,201 @@ public class TokenServiceTests
         It.IsAny<BaseToken>()
       ),
       Times.Never
+    );
+  }
+
+  [Fact]
+  public async Task RefreshAccessTokenAsync_WhenCalledAndRefreshTokenDoesNotExist_ItShouldReturnError()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .ReturnsAsync(user);
+
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(null as RefreshToken);
+
+    var result = await _sut.RefreshAccessTokenAsync(user.Id, "non-existent-token");
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<TokenDoesNotExist>();
+  }
+
+  [Fact]
+  public async Task RefreshAccessTokenAsync_WhenCalledAndUserDoesNotExist_ItShouldReturnError()
+  {
+    var refreshToken = FakeDataFactory.RefreshToken.Generate();
+
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(refreshToken);
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .ReturnsAsync(null as User);
+
+    var result = await _sut.RefreshAccessTokenAsync("non-existent-user-id", refreshToken.Token);
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<UserDoesNotExistError>();
+  }
+
+  [Fact]
+  public async Task RefreshAccessTokenAsync_WhenCalledAndGeneratingNewRefreshTokenFails_ItShouldReturnError()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var refreshToken = FakeDataFactory.RefreshToken.Generate() with { UserId = user.Id };
+
+    _timeProviderMock
+      .Setup(t => t.GetUtcNow())
+      .Returns(DateTimeOffset.UtcNow);
+
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(refreshToken);
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .ReturnsAsync(user);
+
+    _tokenRepositoryMock
+      .Setup(t => t.CreateTokenAsync(It.IsAny<RefreshToken>()))
+      .ThrowsAsync(new Exception());
+
+    var result = await _sut.RefreshAccessTokenAsync(user.Id, refreshToken.Token);
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<GenerateRefreshTokenError>();
+  }
+
+  [Fact]
+  public async Task RefreshAccessTokenAsync_WhenCalledWithExpiredRefreshToken_ItShouldReturnError()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var refreshToken = FakeDataFactory.RefreshToken.Generate() with
+    {
+      UserId = user.Id,
+      ExpiresAt = DateTime.UtcNow.AddDays(-1)
+    };
+
+    _timeProviderMock
+      .Setup(t => t.GetUtcNow())
+      .Returns(DateTimeOffset.UtcNow);
+
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(refreshToken);
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .ReturnsAsync(user);
+
+    var result = await _sut.RefreshAccessTokenAsync(user.Id, refreshToken.Token);
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<ExpiredTokenError>();
+  }
+
+  [Fact]
+  public async Task RefreshAccessTokenAsync_WhenCalledWithRefreshTokenThatDoesNotBelongToUser_ItShouldReturnErrorAndRevokeUsersRefreshTokens()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var refreshToken = FakeDataFactory.RefreshToken.Generate() with { UserId = user.Id };
+
+    _timeProviderMock
+      .Setup(t => t.GetUtcNow())
+      .Returns(DateTimeOffset.UtcNow);
+
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(refreshToken);
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .ReturnsAsync(user);
+
+    var result = await _sut.RefreshAccessTokenAsync("some-other-user-id", refreshToken.Token);
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<InvalidTokenError>();
+
+    _tokenRepositoryMock.Verify(
+      t => t.RevokeAllRefreshTokensForUserAsync(refreshToken.UserId),
+      Times.Once
+    );
+  }
+
+  [Fact]
+  public async Task RefreshAccessTokenAsync_WhenCalledWithRevokedRefreshToken_ItShouldReturnErrorAndRevokeUsersRefreshTokens()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var refreshToken = FakeDataFactory.RefreshToken.Generate() with
+    {
+      UserId = user.Id,
+      Revoked = true
+    };
+
+    _timeProviderMock
+      .Setup(t => t.GetUtcNow())
+      .Returns(DateTimeOffset.UtcNow);
+
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(refreshToken);
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .ReturnsAsync(user);
+
+    var result = await _sut.RefreshAccessTokenAsync(user.Id, refreshToken.Token);
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<InvalidTokenError>();
+
+    _tokenRepositoryMock.Verify(
+      t => t.RevokeAllRefreshTokensForUserAsync(user.Id),
+      Times.Once
+    );
+  }
+
+  [Fact]
+  public async Task RefreshAccessTokenAsync_WhenCalledWithValidUserAndRefreshTokenAndGeneratingNewRefreshTokenSucceeds_ItShouldReturnNewAccessTokenAndRefreshToken()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var refreshToken = FakeDataFactory.RefreshToken.Generate() with { UserId = user.Id };
+
+    _timeProviderMock
+      .Setup(t => t.GetUtcNow())
+      .Returns(DateTimeOffset.UtcNow);
+
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(refreshToken);
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .ReturnsAsync(user);
+
+    var result = await _sut.RefreshAccessTokenAsync(user.Id, refreshToken.Token);
+
+    result.IsSuccess.Should().BeTrue();
+    result.Value.Should().NotBeNull();
+    result.Value.AccessToken.Should().NotBeNullOrEmpty();
+    result.Value.RefreshToken.Should().NotBeNull();
+    result.Value.RefreshToken.Should().BeOfType<RefreshToken>();
+    result.Value.RefreshToken.UserId.Should().Be(user.Id);
+    result.Value.RefreshToken.Token.Should().NotBeNullOrEmpty();
+    result.Value.RefreshToken.ExpiresAt.Should().BeCloseTo(
+      DateTime.UtcNow.AddHours(12),
+      TimeSpan.FromSeconds(5)
     );
   }
 }

@@ -6,12 +6,14 @@ namespace Server.API.Authentication;
 /// <inheritdoc cref="ITokenService"/>
 class TokenService(
   ITokenRepository tokenRepository,
+  IUserRepository userRepository,
   IOptions<JwtOptions> jwtOptions,
   TimeProvider timeProvider,
   ILogger<TokenService> logger
 ) : ITokenService
 {
   private readonly ITokenRepository _tokenRepository = tokenRepository;
+  private readonly IUserRepository _userRepository = userRepository;
   private readonly JwtOptions _jwtOptions = jwtOptions.Value;
   private readonly TimeProvider _timeProvider = timeProvider;
   private readonly ILogger<TokenService> _logger = logger;
@@ -74,6 +76,64 @@ class TokenService(
         new GenerateRefreshTokenError().CausedBy(ex)
       );
     }
+  }
+
+  public async Task<Result<(string AccessToken, RefreshToken RefreshToken)>> RefreshAccessTokenAsync(string userId, string refreshToken)
+  {
+    var token = await _tokenRepository.GetTokenAsync(refreshToken);
+    var user = await _userRepository.GetUserById(userId);
+
+    if (token is null)
+    {
+      return Result.Fail(
+        new TokenDoesNotExist(refreshToken)
+      );
+    }
+
+    if (user is null)
+    {
+      return Result.Fail(
+        new UserDoesNotExistError(userId)
+      );
+    }
+
+    if (token.UserId != userId || token.Revoked)
+    {
+      // this is a malicious attempt to get a new access token
+      // we should revoke the refresh token and all other refresh tokens for the tokens user
+      _logger.LogWarning(
+        "Refresh token {RefreshToken} belongs to user {TokenUser} and has been revoked or does not belong to calling user: {UserId}",
+        refreshToken,
+        token.UserId,
+        userId
+      );
+      await _tokenRepository.RevokeAllRefreshTokensForUserAsync(token.UserId);
+      return Result.Fail(
+        new InvalidTokenError(refreshToken)
+      );
+    }
+
+    if (token.ExpiresAt < _timeProvider.GetUtcNow().UtcDateTime)
+    {
+      await RevokeRefreshTokenAsync(userId, refreshToken);
+      return Result.Fail(
+        new ExpiredTokenError(refreshToken)
+      );
+    }
+
+    var accessToken = GenerateAccessToken(user);
+    var newRefreshTokenResult = await GenerateRefreshToken(userId);
+
+    if (newRefreshTokenResult.IsFailed)
+    {
+      return Result.Fail(
+        newRefreshTokenResult.Errors
+      );
+    }
+
+    await RevokeRefreshTokenAsync(userId, refreshToken);
+
+    return Result.Ok((accessToken, newRefreshTokenResult.Value));
   }
 
   public async Task RemoveAllInvalidRefreshTokensAsync(string userId) => await _tokenRepository.RemoveAllInvalidRefreshTokensAsync(userId);

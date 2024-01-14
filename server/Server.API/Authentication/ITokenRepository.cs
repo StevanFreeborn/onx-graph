@@ -14,5 +14,6 @@ interface ITokenRepository
   Task<RefreshToken> CreateTokenAsync(RefreshToken token);
   Task<BaseToken?> GetTokenAsync(string refreshToken);
   Task RemoveAllInvalidRefreshTokensAsync(string userId);
+  Task RevokeAllRefreshTokensForUserAsync(string userId);
   Task UpdateTokenAsync(BaseToken updatedToken);
 }

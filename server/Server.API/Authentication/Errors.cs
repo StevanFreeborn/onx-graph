@@ -29,3 +29,24 @@ class GenerateRefreshTokenError : Error
   {
   }
 }
+
+class TokenDoesNotExist : Error
+{
+  internal TokenDoesNotExist(string identifier) : base($"Token does not exist with identifier: {identifier}")
+  {
+  }
+}
+
+class ExpiredTokenError : Error
+{
+  internal ExpiredTokenError(string token) : base($"Token has expired with: {token}")
+  {
+  }
+}
+
+class InvalidTokenError : Error
+{
+  internal InvalidTokenError(string token) : base($"Token is invalid with: {token}")
+  {
+  }
+}

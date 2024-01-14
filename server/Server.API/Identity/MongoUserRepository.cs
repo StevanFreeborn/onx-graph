@@ -22,6 +22,13 @@ class MongoUserRepository(MongoDbContext context) : IUserRepository
       .SingleOrDefaultAsync();
   }
 
+  public async Task<User?> GetUserById(string userId)
+  {
+    return await _context.Users
+      .Find(u => u.Id == userId)
+      .SingleOrDefaultAsync();
+  }
+
   public async Task<User?> GetUserByUsernameAsync(string username)
   {
     return await _context.Users

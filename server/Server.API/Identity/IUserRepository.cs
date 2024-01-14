@@ -19,6 +19,7 @@ interface IUserRepository
   /// <param name="email">The email address of the user to get.</param>
   /// <returns>The user as an <see cref="User"/> instance.</returns>
   Task<User?> GetUserByEmailAsync(string email);
+  Task<User?> GetUserById(string userId);
 
   /// <summary>
   /// Gets a user by their username.

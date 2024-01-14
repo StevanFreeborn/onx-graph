@@ -106,6 +106,18 @@ static class AuthController
       return Results.Unauthorized();
     }
 
-    throw new NotImplementedException();
+    var refreshTokenResult = await req.TokenService.RefreshAccessTokenAsync(userId, refreshToken);
+
+    if (refreshTokenResult.IsFailed)
+    {
+      return Results.Unauthorized();
+    }
+
+    req.Context.Response.SetRefreshTokenCookie(
+      refreshTokenResult.Value.RefreshToken.Token,
+      refreshTokenResult.Value.RefreshToken.ExpiresAt
+    );
+
+    return Results.Ok(new LoginUserResponse(refreshTokenResult.Value.AccessToken));
   }
 }
