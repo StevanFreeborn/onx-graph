@@ -1,6 +1,7 @@
 name: Pull Request - Server Changes
-env:
-  WORKING_DIRECTORY: ./server
+defaults:
+  run:
+    working-directory: ./server
 on:
   workflow_dispatch:
   push:
