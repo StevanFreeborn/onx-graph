@@ -548,4 +548,52 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .Should()
       .Be("Unauthorized");
   }
+
+  [Fact]
+  public async Task RefreshToken_WhenCalledAndGivenValidRefreshToken_ItShouldReturn200StatusCodeWithNewAccessTokenAndRefreshToken()
+  {
+    var (_, existingUser) = FakeDataFactory.TestUser.Generate();
+    var refreshToken = FakeDataFactory.RefreshToken.Generate() with { UserId = existingUser.Id };
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, existingUser.Id))
+      .Build();
+
+    await context.Tokens.InsertOneAsync(refreshToken);
+    await context.Users.InsertOneAsync(existingUser);
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    _client
+      .DefaultRequestHeaders
+      .Add("Cookie", $"onxRefreshToken={refreshToken.Token}");
+
+    var refreshTokenResponse = await _client.PostAsync("/auth/refresh-token", null);
+
+    refreshTokenResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.OK);
+
+    refreshTokenResponse.Headers
+      .Should()
+      .Contain(h => h.Key == "Set-Cookie" && h.Value.Any(v => v.Contains("onxRefreshToken")));
+
+    var refreshTokenResponseBody = await refreshTokenResponse.Content.ReadFromJsonAsync<LoginUserResponse>();
+
+    refreshTokenResponseBody
+      .Should()
+      .NotBeNull();
+
+    refreshTokenResponseBody?.AccessToken
+      .Should()
+      .NotBeNullOrEmpty();
+
+    var existingRefreshToken = await context.Tokens
+      .Find(t => t.Id == refreshToken.Id)
+      .FirstOrDefaultAsync();
+
+    existingRefreshToken
+      .Should()
+      .BeNull();
+  }
 }

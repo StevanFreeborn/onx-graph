@@ -110,6 +110,7 @@ static class AuthController
 
     if (refreshTokenResult.IsFailed)
     {
+      req.Context.Response.SetRefreshTokenCookie(string.Empty, DateTime.UtcNow.AddDays(-1));
       return Results.Unauthorized();
     }
 

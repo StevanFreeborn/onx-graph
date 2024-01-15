@@ -132,6 +132,7 @@ class TokenService(
     }
 
     await RevokeRefreshTokenAsync(userId, refreshToken);
+    await RemoveAllInvalidRefreshTokensAsync(userId);
 
     return Result.Ok((accessToken, newRefreshTokenResult.Value));
   }
