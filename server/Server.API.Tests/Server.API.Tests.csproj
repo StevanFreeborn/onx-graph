@@ -37,7 +37,8 @@
     <CoverletOutput>./TestResults/coverage/</CoverletOutput>
     <CoverletOutputFormat>cobertura</CoverletOutputFormat>
     <Include>[Server.API]*</Include>
-    <ExcludeByFile>**/program.cs</ExcludeByFile>
+    <ExcludeByFile>**/Server.API/Program.cs</ExcludeByFile>
+    <ExcludeByFile>**/Server.API/Swagger/**</ExcludeByFile>
   </PropertyGroup>
 
   <Target Name="GenerateHtmlCoverageReport" AfterTargets="GenerateCoverageResultAfterTest">
