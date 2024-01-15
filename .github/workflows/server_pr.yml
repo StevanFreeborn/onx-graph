@@ -9,7 +9,7 @@ defaults:
     working-directory: ./server
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     paths:
       - server/Server.API/**
       - server/Server.API.Tests/**
