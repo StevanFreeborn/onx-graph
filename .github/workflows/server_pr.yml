@@ -1,6 +1,6 @@
 name: Pull Request - Server Changes
 env:
-  working_directory: ./server
+  WORKING_DIRECTORY: ./server
 on:
   workflow_dispatch:
   push:
