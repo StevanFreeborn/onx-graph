@@ -1,0 +1,32 @@
+name: Open Pull Request - Server Changes
+env:
+  working_directory: ./server
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - server/Server.API/**
+      - server/Server.API.Tests/**
+    branches:
+      - main
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: latest
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build project
+        run: dotnet build --no-restore
+      - name: Test project
+        run: dotnet test --no-build --verbosity normal
+      - name: Upload test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: ./Server.API.Tests/TestResults
