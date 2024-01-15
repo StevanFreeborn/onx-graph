@@ -1,4 +1,9 @@
 name: Pull Request - Server Changes
+env:
+  JwtOptions__Secret: qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q=
+  JwtOptions__Issuer: TesetIssuer
+  JwtOptions__Audience: TestAudience
+  JwtOptions__ExpiryInMinutes: 5
 defaults:
   run:
     working-directory: ./server
@@ -25,7 +30,7 @@ jobs:
       - name: Build project
         run: dotnet build --no-restore
       - name: Test project
-        run: dotnet test -e DOTNET_ENVIRONMENT="CI" --no-build --verbosity normal
+        run: dotnet test --no-build --verbosity normal
       - name: Upload test results
         uses: actions/upload-artifact@v2
         with:

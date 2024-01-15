@@ -1,5 +1,6 @@
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
+config.AddEnvironmentVariables();
 
 // TODO: Clean up with extension methods
 
