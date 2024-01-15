@@ -7,6 +7,7 @@
 .env
 logs/
 appsettings*.json
+!appsettings.CI.json
 
 # User-specific files
 *.rsuser

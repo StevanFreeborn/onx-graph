@@ -1,9 +1,15 @@
-name: Open Pull Request - Server Changes
+name: Pull Request - Server Changes
 env:
-  working_directory: ./server
+  JwtOptions__Secret: qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q=
+  JwtOptions__Issuer: TesetIssuer
+  JwtOptions__Audience: TestAudience
+  JwtOptions__ExpiryInMinutes: 5
+defaults:
+  run:
+    working-directory: ./server
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     paths:
       - server/Server.API/**
       - server/Server.API.Tests/**
@@ -16,17 +22,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: latest
+          dotnet-version: 8.x.x
+      - name: Install report generator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.2.0
       - name: Restore dependencies
         run: dotnet restore
       - name: Build project
         run: dotnet build --no-restore
       - name: Test project
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test -e DOTNET_ENVIRONMENT=CI --no-build --verbosity normal
+      - name: Print current directory
+        run: pwd
       - name: Upload test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: ./Server.API.Tests/TestResults
+          path: ./server/Server.API.Tests/TestResults

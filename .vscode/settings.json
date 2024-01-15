@@ -1,4 +1,11 @@
 {
   "dotnet.defaultSolution": "server/Server.sln",
-  "cSpell.words": ["Pinia"]
+  "cSpell.words": [
+    "Bson",
+    "Hmac",
+    "Instantiator",
+    "Pinia",
+    "Swashbuckle",
+    "Testcontainers"
+  ]
 }
