@@ -5,6 +5,7 @@ namespace Server.API.Authentication;
 /// </summary>
 static class AuthController
 {
+  // TODO: Need to implement email verification
   /// <summary>
   /// Registers a new user.
   /// </summary>
