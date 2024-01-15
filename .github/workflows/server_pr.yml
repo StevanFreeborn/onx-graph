@@ -25,6 +25,8 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.x.x
+      - name: Install report generator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.2.0
       - name: Restore dependencies
         run: dotnet restore
       - name: Build project
