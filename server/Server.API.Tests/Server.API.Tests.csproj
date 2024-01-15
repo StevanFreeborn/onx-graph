@@ -45,7 +45,7 @@
     <Exec Command="reportgenerator -reports:./TestResults/coverage/*.xml -targetdir:./TestResults/coverage/report/ -reporttypes:Html_Dark" />
   </Target>
 
-  <Target Name="OpenTestReport" AfterTargets="GenerateHtmlCoverageReport">
+  <Target Name="OpenTestReport" AfterTargets="GenerateHtmlCoverageReport" Condition="'$(DOTNET_ENVIRONMENT)' != 'CI'">
     <Exec Command="start ./TestResults/coverage/report/index.html" />
   </Target>
 
