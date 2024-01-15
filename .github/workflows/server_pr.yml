@@ -1,4 +1,6 @@
 name: Pull Request - Server Changes
+env:
+  DOTNET_ENVIRONMENT: CI
 defaults:
   run:
     working-directory: ./server
