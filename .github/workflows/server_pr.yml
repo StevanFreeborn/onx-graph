@@ -1,4 +1,4 @@
-name: Open Pull Request - Server Changes
+name: Pull Request - Server Changes
 env:
   working_directory: ./server
 on:
