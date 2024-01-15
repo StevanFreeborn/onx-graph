@@ -1,6 +1,7 @@
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
+// TODO: Clean up with extension methods
 
 // add logging
 builder.Host.UseSerilog(
