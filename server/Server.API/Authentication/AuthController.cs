@@ -71,6 +71,11 @@ static class AuthController
     return Results.Ok(new LoginUserResponse(loginResult.Value.AccessToken));
   }
 
+  /// <summary>
+  /// Logs out a user.
+  /// </summary>
+  /// <param name="req">The request as a <see cref="LogoutRequest"/> instance.</param>
+  /// <returns>A <see cref="Task"/> of <see cref="IResult"/>.</returns>
   internal static async Task<IResult> Logout([AsParameters] LogoutRequest req)
   {
     var userId = req.Context.GetUserId();
@@ -96,6 +101,11 @@ static class AuthController
     return Results.Ok();
   }
 
+  /// <summary>
+  /// Refreshes a user's access token.
+  /// </summary>
+  /// <param name="req">The request as a <see cref="RefreshTokenRequest"/> instance.</param>
+  /// <returns>A <see cref="Task"/> of <see cref="IResult"/>.</returns>
   internal static async Task<IResult> RefreshToken([AsParameters] RefreshTokenRequest req)
   {
     var userId = req.Context.GetUserId();

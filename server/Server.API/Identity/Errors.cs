@@ -13,7 +13,6 @@ class UserAlreadyExistError : Error
 /// <summary>
 /// An error indicating that a user does not exist.
 /// </summary>
-
 class UserDoesNotExistError : Error
 {
   internal UserDoesNotExistError(string identifier) : base($"User does not exist with identifier: {identifier}")

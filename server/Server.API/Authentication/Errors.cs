@@ -30,6 +30,9 @@ class GenerateRefreshTokenError : Error
   }
 }
 
+/// <summary>
+/// An error indicating that a token was not found.
+/// </summary>
 class TokenDoesNotExist : Error
 {
   internal TokenDoesNotExist(string identifier) : base($"Token does not exist with identifier: {identifier}")
@@ -37,6 +40,9 @@ class TokenDoesNotExist : Error
   }
 }
 
+/// <summary>
+/// An error indicating a token has expired.
+/// </summary>
 class ExpiredTokenError : Error
 {
   internal ExpiredTokenError(string token) : base($"Token has expired with: {token}")
@@ -44,6 +50,9 @@ class ExpiredTokenError : Error
   }
 }
 
+/// <summary>
+/// An error indicating a token is invalid.
+/// </summary>
 class InvalidTokenError : Error
 {
   internal InvalidTokenError(string token) : base($"Token is invalid with: {token}")

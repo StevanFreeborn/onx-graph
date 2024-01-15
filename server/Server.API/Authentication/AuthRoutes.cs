@@ -45,6 +45,9 @@ static class AuthRoutes
         opts.AuthenticationSchemes = ["AllowExpiredToken"];
         opts.RequireAuthenticatedUser();
       })
+      .Produces<LoginUserResponse>((int)HttpStatusCode.OK)
+      .Produces<ProblemDetails>((int)HttpStatusCode.Unauthorized)
+      .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("RefreshToken")
       .WithDescription("Refresh a user's token");
   }

@@ -99,7 +99,7 @@ class TokenService(
 
     if (token.UserId != userId || token.Revoked)
     {
-      // this is a malicious attempt to get a new access token
+      // this is could be a malicious attempt to get a new access token
       // we should revoke the refresh token and all other refresh tokens for the tokens user
       _logger.LogWarning(
         "Refresh token {RefreshToken} belongs to user {TokenUser} and has been revoked or does not belong to calling user: {UserId}",
