@@ -1,8 +1,3 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
 namespace Server.API.Tests.Integration.Fixtures;
 
 public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime

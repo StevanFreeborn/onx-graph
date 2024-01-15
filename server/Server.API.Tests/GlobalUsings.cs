@@ -38,3 +38,7 @@ global using Server.API.Tests.Integration.Utilities;
 global using Testcontainers.MongoDb;
 
 global using Xunit;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.AspNetCore.TestHost;
+global using Microsoft.Extensions.Configuration;

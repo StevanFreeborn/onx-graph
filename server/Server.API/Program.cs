@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
-
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
@@ -11,7 +9,10 @@ builder.Host.UseSerilog(
     .Enrich.FromLogContext()
 );
 
+
+// add problem details service
 builder.Services.AddProblemDetails();
+
 
 // add versioning
 var versionOne = new ApiVersion(1, 0);
@@ -132,6 +133,7 @@ var versionSet = app.NewApiVersionSet()
 
 // map endpoints
 app.MapAuthEndpoints();
+
 
 // wire up authentication and authorization
 app.UseAuthentication();

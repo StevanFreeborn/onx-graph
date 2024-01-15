@@ -1,7 +1,3 @@
-using Server.API.Tests.Data;
-
-using Xunit.Abstractions;
-
 namespace Server.API.Tests.Unit;
 
 public class UserServiceTests

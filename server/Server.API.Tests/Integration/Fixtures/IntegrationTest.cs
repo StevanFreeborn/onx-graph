@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace Server.API.Tests.Integration.Fixtures;
 
 public class IntegrationTest : IClassFixture<TestServerFactory>

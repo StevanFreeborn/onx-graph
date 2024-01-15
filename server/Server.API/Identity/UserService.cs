@@ -1,4 +1,3 @@
-
 namespace Server.API.Identity;
 
 /// <summary>

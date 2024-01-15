@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
-
 namespace Server.API.Authentication;
 
 /// <summary>
