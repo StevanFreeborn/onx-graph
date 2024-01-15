@@ -1,6 +1,4 @@
 name: Pull Request - Server Changes
-env:
-  DOTNET_ENVIRONMENT: CI
 defaults:
   run:
     working-directory: ./server
@@ -27,7 +25,7 @@ jobs:
       - name: Build project
         run: dotnet build --no-restore
       - name: Test project
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test -e DOTNET_ENVIRONMENT="CI" --no-build --verbosity normal
       - name: Upload test results
         uses: actions/upload-artifact@v2
         with:
