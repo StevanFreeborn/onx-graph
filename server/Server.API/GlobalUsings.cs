@@ -28,3 +28,9 @@ global using Server.API.Authentication;
 global using Server.API.Identity;
 global using Server.API.Middleware;
 global using Server.API.Persistence.Mongo;
+
+global using Swashbuckle.AspNetCore.SwaggerGen;
+global using Microsoft.OpenApi.Any;
+global using Microsoft.OpenApi.Models;
+global using Server.API.Swagger;
+global using Microsoft.AspNetCore.Authorization;

@@ -30,6 +30,20 @@ builder.Services.AddSwaggerGen(opts =>
 {
   var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
   opts.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+
+  opts.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+  {
+    In = ParameterLocation.Header,
+    Description = "Enter 'Bearer' [space] and then your token in the text input below.",
+    Name = "Authorization",
+    Type = SecuritySchemeType.Http,
+    BearerFormat = "JWT",
+    Scheme = "Bearer"
+  });
+
+  opts.OperationFilter<AuthorizeOperationFilter>();
+
+  opts.OperationFilter<ApiVersionOperationFilter>();
 });
 
 

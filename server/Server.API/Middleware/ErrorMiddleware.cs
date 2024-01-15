@@ -32,8 +32,8 @@ class ErrorMiddleware(RequestDelegate next, ILogger<ErrorMiddleware> logger)
       var problem = new ProblemDetails
       {
         Status = (int)HttpStatusCode.InternalServerError,
-        Title = "An problem occurred while processing the request",
-        Detail = ex.Message,
+        Title = "Server error",
+        Detail = "An problem occurred while processing the request",
       };
 
       context.Response.StatusCode = problem.Status.Value;
