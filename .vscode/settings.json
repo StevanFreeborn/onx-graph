@@ -2,6 +2,7 @@
   "dotnet.defaultSolution": "server/Server.sln",
   "cSpell.words": [
     "Bson",
+    "composables",
     "Hmac",
     "Instantiator",
     "Pinia",
