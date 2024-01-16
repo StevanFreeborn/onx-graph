@@ -14,6 +14,7 @@ export function useTheme() {
   onMounted(() => {
     const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     updateTheme(isDark ? 'dark' : 'light');
+
     window
       .matchMedia('(prefers-color-scheme: dark)')
       .addEventListener('change', handleMediaChange);
