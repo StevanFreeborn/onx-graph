@@ -5,7 +5,9 @@
     <h1 class="orange">OnxGraph</h1>
     <h3>
       Create visualizations of your
-      <a href="https://vitejs.dev/" target="_blank" rel="noopener">Onspring</a>
+      <a href="https://onspring.com/" target="_blank" rel="noopener"
+        >Onspring</a
+      >
       relationships
     </h3>
   </div>
