@@ -9,7 +9,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? [['blob'], ['github']] : [['html'], ['list']],
+  reporter: process.env.CI
+    ? [['blob'], ['github'], ['list']]
+    : [['html'], ['list']],
   use: {
     actionTimeout: 0,
     baseURL: 'https://localhost:5173',
@@ -41,6 +43,10 @@ export default defineConfig({
     {
       command: process.env.CI ? 'vite preview --port 5173' : 'vite dev',
       port: 5173,
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      command: 'dotnet run --project ../server/Server.API/Server.API.csproj',
       reuseExistingServer: !process.env.CI,
     },
   ],
