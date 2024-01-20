@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { useTheme } from '@/composables/useTheme';
-  import { computed } from 'vue';
+import { computed } from 'vue';
 
   const theme = useTheme();
 
@@ -80,6 +80,7 @@
       :nodes="nodes"
       :edges="edges"
       :configs="configs"
+      data-testid="demo-graph"
     />
   </main>
 </template>
