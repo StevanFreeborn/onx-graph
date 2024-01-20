@@ -65,4 +65,19 @@ test.describe('HomeView', () => {
     const graph = page.getByTestId('demo-graph');
     await expect(graph).toBeVisible();
   });
+
+  test('when user visits / on a mobile device they should see the heading above the demo graph', async ({
+    page,
+  }) => {
+    const heading = page.getByText('OnxGraph');
+    const graph = page.getByTestId('demo-graph');
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/');
+
+    const headingBox = await heading.boundingBox();
+    const graphBox = await graph.boundingBox();
+
+    expect(headingBox?.y ?? 0).toBeLessThan(graphBox?.y ?? -1);
+  });
 });
