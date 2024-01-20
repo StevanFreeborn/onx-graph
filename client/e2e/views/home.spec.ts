@@ -35,12 +35,30 @@ test.describe('HomeView', () => {
     await expect(link).toHaveAttribute('href', '/login');
   });
 
+  test('when user clicks on the login link they should be taken to the login page', async ({
+    page,
+  }) => {
+    const link = page.getByText('Login');
+    await link.click();
+    await page.waitForURL(/login/);
+    expect(page.url()).toMatch(/login/);
+  });
+
   test('when user visits / they should see a link to the register page', async ({
     page,
   }) => {
     const link = page.getByText('Register');
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute('href', '/register');
+  });
+
+  test('when user clicks on the register link they should be taken to the register page', async ({
+    page,
+  }) => {
+    const link = page.getByText('Register');
+    await link.click();
+    await page.waitForURL(/register/);
+    expect(page.url()).toMatch(/register/);
   });
 
   test('when user visits / they should see demo graph', async ({ page }) => {
