@@ -3,8 +3,7 @@ import { type IClient } from './client';
 
 type AuthServiceFactoryKeyType = InjectionKey<IAuthServiceFactory>;
 
-export const AuthServiceFactoryKey: AuthServiceFactoryKeyType =
-  Symbol('AuthServiceFactory');
+export const AuthServiceFactoryKey: AuthServiceFactoryKeyType = Symbol('AuthServiceFactory');
 
 export interface IAuthServiceFactory {
   create: (client: IClient) => IAuthService;
