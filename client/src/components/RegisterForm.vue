@@ -53,6 +53,7 @@
   .form-group input {
     padding: 0.5rem;
     border-radius: 0.5rem;
+    border: none;
   }
 
   .register-button {
