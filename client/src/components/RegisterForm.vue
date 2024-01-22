@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { toTitleCase } from '@/utils';
+  import isEmail from 'validator/es/lib/isEmail';
   import { reactive } from 'vue';
   import { type FormFieldState } from './types';
 
@@ -28,6 +29,16 @@
 
       if (!field.value) {
         field.errorMessage = `${toTitleCase(key)} is required.`;
+        continue;
+      }
+
+      if (key === 'email' && !isEmail(field.value) === false) {
+        field.errorMessage = 'Enter a valid email address.';
+        continue;
+      }
+
+      if (key === 'confirmPassword' && field.value !== formState.password.value) {
+        field.errorMessage = 'Passwords do not match.';
         continue;
       }
 

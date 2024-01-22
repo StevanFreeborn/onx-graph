@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import { useAuthService } from '@/composables/useAuthService';
   import { toTitleCase } from '@/utils';
   import { reactive } from 'vue';
   import type { FormFieldState } from './types';
@@ -16,7 +17,9 @@
     },
   });
 
-  function handleLoginFormSubmit() {
+  const authService = useAuthService();
+
+  async function handleLoginFormSubmit() {
     const keys = Object.keys(formState) as (keyof LoginFormState)[];
 
     for (const key of keys) {
@@ -30,11 +33,19 @@
       field.errorMessage = '';
     }
 
-    if (Object.values(formState).some(field => !field.errorMessage)) {
+    var formStateHasError = Object.values(formState).some(field => !field.errorMessage);
+
+    if (formStateHasError) {
       return;
     }
 
-    // TODO: actually log in
+    var loginResult = await authService.login(formState.email.value, formState.password.value);
+
+    if (loginResult.err) {
+      return;
+    }
+
+    // login user via global user store
   }
 
   function handleInputChange(e: Event) {
