@@ -32,7 +32,7 @@
         continue;
       }
 
-      if (key === 'email' && !isEmail(field.value) === false) {
+      if (key === 'email' && isEmail(field.value) === false) {
         field.errorMessage = 'Enter a valid email address.';
         continue;
       }
