@@ -1,60 +1,81 @@
 <script setup lang="ts">
   import { useAuthService } from '@/composables/useAuthService';
+  import { useUserStore } from '@/stores/userStore';
   import { toTitleCase } from '@/utils';
+  import isEmail from 'validator/es/lib/isEmail';
   import { reactive } from 'vue';
   import type { FormFieldState } from './types';
 
-  type LoginFormState = Record<'email' | 'password', FormFieldState>;
+  type LoginFormState = {
+    fields: Record<'email' | 'password', FormFieldState>;
+    errors: string[];
+  };
 
   const formState = reactive<LoginFormState>({
-    email: {
-      value: '',
-      errorMessage: '',
+    fields: {
+      email: {
+        value: '',
+        errorMessage: '',
+      },
+      password: {
+        value: '',
+        errorMessage: '',
+      },
     },
-    password: {
-      value: '',
-      errorMessage: '',
-    },
+    errors: [],
   });
 
   const authService = useAuthService();
+  const userStore = useUserStore();
 
   async function handleLoginFormSubmit() {
-    const keys = Object.keys(formState) as (keyof LoginFormState)[];
+    formState.errors = [];
+
+    const keys = Object.keys(formState.fields) as (keyof LoginFormState['fields'])[];
 
     for (const key of keys) {
-      const field = formState[key];
+      const field = formState.fields[key];
 
       if (!field.value) {
         field.errorMessage = `${toTitleCase(key)} is required.`;
         continue;
       }
 
+      if (key === 'email' && isEmail(field.value) === false) {
+        field.errorMessage = 'Enter a valid email address.';
+        continue;
+      }
+
       field.errorMessage = '';
     }
 
-    var formStateHasError = Object.values(formState).some(field => !field.errorMessage);
+    var formStateHasError = Object.values(formState.fields).some(field => field.errorMessage);
 
     if (formStateHasError) {
       return;
     }
 
-    var loginResult = await authService.login(formState.email.value, formState.password.value);
+    var loginResult = await authService.login(
+      formState.fields.email.value,
+      formState.fields.password.value
+    );
 
     if (loginResult.err) {
+      formState.errors.push(...loginResult.val.map(err => err.message));
       return;
     }
 
-    // login user via global user store
+    userStore.logUserIn(loginResult.val.accessToken);
   }
 
   function handleInputChange(e: Event) {
     const target = e.target as HTMLInputElement;
     const { id } = target;
-    const error = formState[id as keyof LoginFormState].errorMessage;
+    const fieldKey = id as keyof LoginFormState['fields'];
+    const error = formState.fields[fieldKey].errorMessage;
 
     if (error) {
-      formState[id as keyof LoginFormState].errorMessage = '';
+      formState.fields[fieldKey].errorMessage = '';
     }
   }
 </script>
@@ -70,12 +91,12 @@
           id="email"
           name="email"
           required
-          v-model="formState.email.value"
+          v-model="formState.fields.email.value"
           @input="handleInputChange"
-          :class="{ invalid: formState.email.errorMessage }"
+          :class="{ invalid: formState.fields.email.errorMessage }"
         />
-        <span class="error-message" v-if="formState.email.errorMessage">
-          {{ formState.email.errorMessage }}
+        <span class="error-message" v-if="formState.fields.email.errorMessage">
+          {{ formState.fields.email.errorMessage }}
         </span>
       </div>
       <div class="form-group">
@@ -85,15 +106,18 @@
           id="password"
           name="password"
           required
-          v-model="formState.password.value"
+          v-model="formState.fields.password.value"
           @input="handleInputChange"
-          :class="{ invalid: formState.email.errorMessage }"
+          :class="{ invalid: formState.fields.password.errorMessage }"
         />
-        <span class="error-message" v-if="formState.password.errorMessage">
-          {{ formState.password.errorMessage }}
+        <span class="error-message" v-if="formState.fields.password.errorMessage">
+          {{ formState.fields.password.errorMessage }}
         </span>
       </div>
       <button class="login-button" type="submit">Login</button>
+      <ul class="form-errors">
+        <li class="error-message" v-for="error in formState.errors" :key="error">{{ error }}</li>
+      </ul>
     </form>
   </div>
 </template>
@@ -139,7 +163,7 @@
 
   .error-message {
     color: #bb0000;
-    font-size: 0.75rem;
+    font-size: 1rem;
     font-weight: bold;
   }
 
@@ -149,5 +173,13 @@
     background-color: var(--orange);
     cursor: pointer;
     border: none;
+  }
+
+  .form-errors {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
   }
 </style>
