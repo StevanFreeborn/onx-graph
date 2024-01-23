@@ -25,6 +25,7 @@ global using MongoDB.Driver;
 global using Serilog;
 
 global using Server.API.Authentication;
+global using Server.API.Configuration;
 global using Server.API.Identity;
 global using Server.API.Middleware;
 global using Server.API.Persistence.Mongo;
