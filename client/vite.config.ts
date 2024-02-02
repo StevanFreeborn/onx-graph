@@ -2,14 +2,22 @@ import { fileURLToPath, URL } from 'node:url';
 
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
+import fs from 'fs';
 import { defineConfig } from 'vite';
-import mkcert from 'vite-plugin-mkcert';
 
 export default defineConfig({
   server: {
     port: 5173,
+    watch: {
+      usePolling: true,
+      interval: 1000,
+    },
+    https: {
+      cert: fs.readFileSync('./.certs/cert.pem'),
+      key: fs.readFileSync('./.certs/key.pem'),
+    },
   },
-  plugins: [vue(), vueJsx(), mkcert()],
+  plugins: [vue(), vueJsx()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

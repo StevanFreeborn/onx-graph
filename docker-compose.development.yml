@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  client:
+    container_name: vue-client-development
+    build:
+      target: development-stage
+      context: ./client
+      dockerfile: Dockerfile
+    volumes:
+      - './client:/app'
+      - '/app/node_modules'
+    ports:
+      - '3001:5173'
+    restart: unless-stopped
