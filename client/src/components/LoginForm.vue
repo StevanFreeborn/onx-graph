@@ -4,6 +4,7 @@
   import { toTitleCase } from '@/utils';
   import isEmail from 'validator/es/lib/isEmail';
   import { reactive } from 'vue';
+  import { useRouter } from 'vue-router';
   import type { FormFieldState } from './types';
 
   type LoginFormState = {
@@ -27,6 +28,7 @@
 
   const authService = useAuthService();
   const userStore = useUserStore();
+  const router = useRouter();
 
   async function handleLoginFormSubmit() {
     formState.errors = [];
@@ -49,13 +51,13 @@
       field.errorMessage = '';
     }
 
-    var formStateHasError = Object.values(formState.fields).some(field => field.errorMessage);
+    const formStateHasError = Object.values(formState.fields).some(field => field.errorMessage);
 
     if (formStateHasError) {
       return;
     }
 
-    var loginResult = await authService.login(
+    const loginResult = await authService.login(
       formState.fields.email.value,
       formState.fields.password.value
     );
@@ -66,6 +68,7 @@
     }
 
     userStore.logUserIn(loginResult.val.accessToken);
+    router.push('/graphs');
   }
 
   function handleInputChange(e: Event) {
