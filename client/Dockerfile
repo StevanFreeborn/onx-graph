@@ -8,6 +8,7 @@ COPY . .
 # development stage
 FROM setup-stage as development-stage
 EXPOSE 5173
+EXPOSE 9229
 CMD ["npm", "run", "dev:host"]
 
 # build stage
