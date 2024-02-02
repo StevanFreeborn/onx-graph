@@ -18,6 +18,7 @@ export class AuthServiceFactory implements IAuthServiceFactory {
 
 export interface IAuthService {
   login: (email: string, password: string) => Promise<Result<LoginResponse, Error[]>>;
+  register: (email: string, password: string) => Promise<Result<RegisterResponse, Error[]>>;
 }
 
 export class AuthService implements IAuthService {
@@ -67,9 +68,41 @@ export class AuthService implements IAuthService {
       return Err([new Error('Login failed. Please try again.')]);
     }
   }
+
+  async register(email: string, password: string) {
+    const request = new ClientRequestWithBody(
+      this.endpoints.register,
+      undefined,
+      new RegisterRequest(email, password)
+    );
+
+    try {
+      const res = await this.client.post(request);
+
+      if (res.status === 400) {
+        const body = await res.json();
+        const validationErrors = body.errors as Record<string, string[]>;
+        const errors = Object.values(validationErrors)
+          .flat()
+          .map(e => new Error(e));
+
+        return Err(errors);
+      }
+
+      if (res.ok === false) {
+        return Err([new Error('Registration failed. Please try again.')]);
+      }
+
+      const body = await res.json();
+      return Ok(body as RegisterResponse);
+    } catch (e) {
+      console.error(e);
+      return Err([new Error('Registration failed. Please try again.')]);
+    }
+  }
 }
 
-class LoginRequest {
+class BaseAuthRequest {
   readonly email: string;
   readonly password: string;
 
@@ -79,6 +112,22 @@ class LoginRequest {
   }
 }
 
+class LoginRequest extends BaseAuthRequest {
+  constructor(email: string, password: string) {
+    super(email, password);
+  }
+}
+
+class RegisterRequest extends BaseAuthRequest {
+  constructor(email: string, password: string) {
+    super(email, password);
+  }
+}
+
 type LoginResponse = {
   accessToken: string;
+};
+
+type RegisterResponse = {
+  id: string;
 };
