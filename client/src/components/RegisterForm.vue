@@ -1,31 +1,44 @@
 <script setup lang="ts">
+  import { useAuthService } from '@/composables/useAuthService';
   import { toTitleCase } from '@/utils';
   import isEmail from 'validator/es/lib/isEmail';
   import { reactive } from 'vue';
+  import { useRouter } from 'vue-router';
   import { type FormFieldState } from './types';
 
-  type RegisterFormState = Record<'email' | 'password' | 'confirmPassword', FormFieldState>;
+  type RegisterFormState = {
+    fields: Record<'email' | 'password' | 'confirmPassword', FormFieldState>;
+    errors: string[];
+  };
 
   const formState = reactive<RegisterFormState>({
-    email: {
-      value: '',
-      errorMessage: '',
+    fields: {
+      email: {
+        value: '',
+        errorMessage: '',
+      },
+      password: {
+        value: '',
+        errorMessage: '',
+      },
+      confirmPassword: {
+        value: '',
+        errorMessage: '',
+      },
     },
-    password: {
-      value: '',
-      errorMessage: '',
-    },
-    confirmPassword: {
-      value: '',
-      errorMessage: '',
-    },
+    errors: [],
   });
 
-  function handleRegisterFormSubmit() {
-    const keys = Object.keys(formState) as (keyof RegisterFormState)[];
+  const authService = useAuthService();
+  const router = useRouter();
+
+  async function handleRegisterFormSubmit() {
+    formState.errors = [];
+
+    const keys = Object.keys(formState.fields) as (keyof RegisterFormState['fields'])[];
 
     for (const key of keys) {
-      const field = formState[key];
+      const field = formState.fields[key];
 
       if (!field.value) {
         field.errorMessage = `${toTitleCase(key)} is required.`;
@@ -37,7 +50,7 @@
         continue;
       }
 
-      if (key === 'confirmPassword' && field.value !== formState.password.value) {
+      if (key === 'confirmPassword' && field.value !== formState.fields.password.value) {
         field.errorMessage = 'Passwords do not match.';
         continue;
       }
@@ -45,20 +58,33 @@
       field.errorMessage = '';
     }
 
-    if (Object.values(formState).some(field => !field.errorMessage)) {
+    const formStateHasError = Object.values(formState.fields).some(field => field.errorMessage);
+
+    if (formStateHasError) {
       return;
     }
 
-    // TODO: actually register
+    const registerResult = await authService.register(
+      formState.fields.email.value,
+      formState.fields.password.value
+    );
+
+    if (registerResult.err) {
+      formState.errors.push(...registerResult.val.map(err => err.message));
+      return;
+    }
+
+    router.push('/login');
   }
 
   function handleInputChange(e: Event) {
     const target = e.target as HTMLInputElement;
     const { id } = target;
-    const error = formState[id as keyof RegisterFormState].errorMessage;
+    const fieldKey = id as keyof RegisterFormState['fields'];
+    const error = formState.fields[fieldKey].errorMessage;
 
     if (error) {
-      formState[id as keyof RegisterFormState].errorMessage = '';
+      formState.fields[fieldKey].errorMessage = '';
     }
   }
 </script>
@@ -74,9 +100,9 @@
           id="email"
           name="email"
           required
-          v-model="formState.email.value"
+          v-model="formState.fields.email.value"
           @input="handleInputChange"
-          :class="{ invalid: formState.email.errorMessage }"
+          :class="{ invalid: formState.fields.email.errorMessage }"
         />
       </div>
       <div class="form-group">
@@ -86,9 +112,9 @@
           id="password"
           name="password"
           required
-          v-model="formState.password.value"
+          v-model="formState.fields.password.value"
           @input="handleInputChange"
-          :class="{ invalid: formState.password.errorMessage }"
+          :class="{ invalid: formState.fields.password.errorMessage }"
         />
       </div>
       <div class="form-group">
@@ -98,12 +124,15 @@
           id="confirmPassword"
           name="confirmPassword"
           required
-          v-model="formState.confirmPassword.value"
+          v-model="formState.fields.confirmPassword.value"
           @input="handleInputChange"
-          :class="{ invalid: formState.confirmPassword.errorMessage }"
+          :class="{ invalid: formState.fields.confirmPassword.errorMessage }"
         />
       </div>
       <button class="register-button" type="submit">Register</button>
+      <ul class="form-errors">
+        <li class="error-message" v-for="error in formState.errors" :key="error">{{ error }}</li>
+      </ul>
     </form>
   </div>
 </template>
