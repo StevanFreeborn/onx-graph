@@ -7,6 +7,7 @@ const router = createRouter({
     {
       path: '/public',
       name: 'public',
+      redirect: { name: 'home' },
       component: () => import('../components/PublicLayout.vue'),
       beforeEnter: () => {
         const { user } = useUserStore();
@@ -34,6 +35,11 @@ const router = createRouter({
           name: 'about',
           component: () => import('../views/AboutView.vue'),
         },
+        {
+          path: '/:pathMatch(.*)*',
+          name: 'not-found',
+          component: () => import('../views/NotFoundView.vue'),
+        },
       ],
     },
     {
@@ -44,7 +50,7 @@ const router = createRouter({
         const { user } = useUserStore();
 
         if (user === null) {
-          return { name: 'login' };
+          return { name: 'home' };
         }
 
         const isExpired = user.expiresAtInSeconds < Date.now() / 1000;
@@ -63,6 +69,11 @@ const router = createRouter({
           path: 'graphs',
           name: 'graphs',
           component: () => import('../views/GraphsView.vue'),
+        },
+        {
+          path: '/:pathMatch(.*)*',
+          name: 'not-found',
+          component: () => import('../views/NotFoundView.vue'),
         },
       ],
     },
