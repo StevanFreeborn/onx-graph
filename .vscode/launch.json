@@ -2,6 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Vue Client - Docker",
+      "request": "launch",
+      "type": "msedge",
+      "webRoot": "${workspaceFolder}/client",
+      "url": "http://localhost:3001"
+    },
+    {
       "name": "Vue Client",
       "request": "launch",
       "type": "msedge",
