@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Client, ClientConfig, ClientRequestWithBody } from './../src/services/client';
 
 describe('Client', () => {
-  let client = new Client();
+  let client: Client;
   let clientConfig: ClientConfig;
   const fetchMock = vi.fn();
 

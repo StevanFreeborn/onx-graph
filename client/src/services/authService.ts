@@ -20,7 +20,7 @@ export interface IAuthService {
   login: (email: string, password: string) => Promise<Result<LoginResponse, Error[]>>;
   register: (email: string, password: string) => Promise<Result<RegisterResponse, Error[]>>;
   refreshToken: () => Promise<Result<LoginResponse, Error[]>>;
-  logout: () => Promise<Result<void, Error[]>>;
+  logout: () => Promise<Result<boolean, Error[]>>;
 }
 
 export class AuthService implements IAuthService {
@@ -47,7 +47,7 @@ export class AuthService implements IAuthService {
         return Err([new Error('Logout failed')]);
       }
 
-      return Ok(undefined);
+      return Ok(true);
     } catch (e) {
       console.error(e);
       return Err([new Error('Logout failed')]);
@@ -61,7 +61,7 @@ export class AuthService implements IAuthService {
       const res = await this.client.post(request);
 
       if (res.status === 401) {
-        return Err([new Error('Refresh token is not valid')]);
+        return Err([new Error('Refresh and/or access token is not valid')]);
       }
 
       if (res.ok === false) {
