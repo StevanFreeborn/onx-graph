@@ -21,7 +21,14 @@ app.provide(ClientFactoryKey, new ClientFactory());
 app.provide(AuthServiceFactoryKey, new AuthServiceFactory());
 
 app.use(createPinia());
+
 app.use(router);
+
 app.use(VNetworkGraph);
+
+// TODO: Add actual global error handling for the app
+app.config.errorHandler = (err, vm, info) => {
+  console.error(err, vm, info);
+};
 
 app.mount('#app');
