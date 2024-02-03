@@ -1,8 +1,9 @@
-import { ClientFactoryKey } from '@/services/client';
+import { ClientConfig, ClientFactoryKey } from '@/services/client';
+import type { UserStore } from '@/stores/userStore';
 import { inject } from 'vue';
 import { AuthServiceFactoryKey } from './../services/authService';
 
-export function useAuthService() {
+export function useAuthService(store?: UserStore) {
   const clientFactory = inject(ClientFactoryKey);
   const authServiceFactory = inject(AuthServiceFactoryKey);
 
@@ -10,7 +11,16 @@ export function useAuthService() {
     throw new Error('Failed to inject dependencies');
   }
 
-  const client = clientFactory.create();
+  const client = store
+    ? clientFactory.create(
+        new ClientConfig(
+          { Authorization: `Bearer ${store.user?.token}` },
+          true,
+          store.refreshAccessToken
+        )
+      )
+    : clientFactory.create();
+
   const authService = authServiceFactory.create(client);
 
   return authService;
