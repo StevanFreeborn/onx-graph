@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
+  reportSlowTests: null,
   testDir: './e2e',
   timeout: 30 * 1000,
   expect: {
@@ -9,19 +10,17 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI
-    ? [['blob'], ['github'], ['list']]
-    : [['html'], ['list']],
+  reporter: process.env.CI ? [['blob'], ['github'], ['list']] : [['html'], ['list']],
   use: {
     actionTimeout: 0,
     baseURL: 'https://localhost:5173',
     trace: 'retain-on-failure',
-    headless: !!process.env.CI,
+    headless: true,
     viewport: { width: 1920, height: 1080 },
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'chrome',
       use: {
         ...devices['Desktop Chrome'],
       },
@@ -33,9 +32,9 @@ export default defineConfig({
       },
     },
     {
-      name: 'webkit',
+      name: 'edge',
       use: {
-        ...devices['Desktop Safari'],
+        ...devices['Desktop Edge'],
       },
     },
   ],

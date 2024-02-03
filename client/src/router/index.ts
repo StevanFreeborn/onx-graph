@@ -5,8 +5,8 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/public',
-      name: 'public',
+      path: '/masses',
+      name: 'masses',
       redirect: { name: 'home' },
       component: () => import('../components/PublicLayout.vue'),
       beforeEnter: () => {

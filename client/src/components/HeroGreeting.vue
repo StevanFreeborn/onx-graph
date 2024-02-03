@@ -3,11 +3,11 @@
 <template>
   <div class="greetings">
     <h1 class="orange">OnxGraph</h1>
-    <h3>
+    <h2>
       Create visualizations of your
       <a href="https://onspring.com/" target="_blank" rel="noopener">Onspring</a>
       relationships
-    </h3>
+    </h2>
   </div>
 </template>
 
@@ -19,18 +19,18 @@
     top: -10px;
   }
 
-  h3 {
+  h2 {
     font-size: 1.2rem;
   }
 
   .greetings h1,
-  .greetings h3 {
+  .greetings h2 {
     text-align: center;
   }
 
   @media (min-width: 1024px) {
     .greetings h1,
-    .greetings h3 {
+    .greetings h2 {
       text-align: left;
     }
   }

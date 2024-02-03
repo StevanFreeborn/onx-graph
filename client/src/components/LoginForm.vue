@@ -86,7 +86,12 @@
 <template>
   <div class="container">
     <h2>Login</h2>
-    <form class="login-form" novalidate @submit.prevent="handleLoginFormSubmit">
+    <form
+      aria-label="login form"
+      class="login-form"
+      novalidate
+      @submit.prevent="handleLoginFormSubmit"
+    >
       <div class="form-group">
         <label for="email">Email</label>
         <input

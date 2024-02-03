@@ -11,8 +11,8 @@
       <HeroGreeting />
 
       <nav>
-        <RouterLink to="/public/login">Login</RouterLink>
-        <RouterLink to="/public/register">Register</RouterLink>
+        <RouterLink to="/masses/login">Login</RouterLink>
+        <RouterLink to="/masses/register">Register</RouterLink>
       </nav>
     </div>
   </header>

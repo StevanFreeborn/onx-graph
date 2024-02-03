@@ -92,7 +92,12 @@
 <template>
   <div class="container">
     <h2>Register</h2>
-    <form class="register-form" novalidate @submit.prevent="handleRegisterFormSubmit">
+    <form
+      aria-label="register form"
+      class="register-form"
+      novalidate
+      @submit.prevent="handleRegisterFormSubmit"
+    >
       <div class="form-group">
         <label for="email">Email</label>
         <input
@@ -104,6 +109,9 @@
           @input="handleInputChange"
           :class="{ invalid: formState.fields.email.errorMessage }"
         />
+        <span class="error-message" v-if="formState.fields.email.errorMessage">
+          {{ formState.fields.email.errorMessage }}
+        </span>
       </div>
       <div class="form-group">
         <label for="password">Password</label>
@@ -116,9 +124,12 @@
           @input="handleInputChange"
           :class="{ invalid: formState.fields.password.errorMessage }"
         />
+        <span class="error-message" v-if="formState.fields.password.errorMessage">
+          {{ formState.fields.password.errorMessage }}
+        </span>
       </div>
       <div class="form-group">
-        <label for="password">Confirm Password</label>
+        <label for="confirmPassword">Confirm Password</label>
         <input
           type="password"
           id="confirmPassword"
@@ -128,6 +139,9 @@
           @input="handleInputChange"
           :class="{ invalid: formState.fields.confirmPassword.errorMessage }"
         />
+        <span class="error-message" v-if="formState.fields.confirmPassword.errorMessage">
+          {{ formState.fields.confirmPassword.errorMessage }}
+        </span>
       </div>
       <button class="register-button" type="submit">Register</button>
       <ul class="form-errors">
