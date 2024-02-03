@@ -1,6 +1,8 @@
+import { AuthServiceFactoryKey } from '@/services/authService';
+import { ClientConfig, ClientFactoryKey } from '@/services/client';
 import { jwtDecode } from 'jwt-decode';
 import { defineStore } from 'pinia';
-import { readonly, ref } from 'vue';
+import { inject, readonly, ref } from 'vue';
 
 const USER_KEY = 'onxGraphAuth';
 
@@ -20,8 +22,12 @@ function getUserFromLocalStorage(): User | null {
   return user === null ? null : JSON.parse(user);
 }
 
+export type UserStore = ReturnType<typeof useUserStore>;
+
 export const useUserStore = defineStore('userStore', () => {
   const user = ref<User | null>(getUserFromLocalStorage());
+  const clientFactory = inject(ClientFactoryKey);
+  const authServiceFactory = inject(AuthServiceFactoryKey);
 
   function logUserIn(jwtToken: string) {
     const { sub, exp } = jwtDecode<JwtTokenPayload>(jwtToken);
@@ -39,9 +45,38 @@ export const useUserStore = defineStore('userStore', () => {
     user.value = null;
   }
 
+  async function refreshAccessToken(originalRequest: Request) {
+    const unauthorizedResponse = new Response(null, { status: 401 });
+
+    if (user.value === null || !clientFactory || !authServiceFactory) {
+      logUserOut();
+      return unauthorizedResponse;
+    }
+
+    const client = clientFactory.create(
+      new ClientConfig({ Authorization: `Bearer ${user.value.token}` }, true)
+    );
+
+    const authService = authServiceFactory.create(client);
+
+    const refreshResult = await authService.refreshToken();
+
+    if (refreshResult.err) {
+      logUserOut();
+      return unauthorizedResponse;
+    }
+
+    logUserIn(refreshResult.val.accessToken);
+
+    originalRequest.headers.set('Authorization', `Bearer ${refreshResult.val.accessToken}`);
+
+    return await fetch(originalRequest);
+  }
+
   return {
     user: readonly(user),
     logUserIn,
     logUserOut,
+    refreshAccessToken,
   };
 });

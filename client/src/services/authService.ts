@@ -19,18 +19,61 @@ export class AuthServiceFactory implements IAuthServiceFactory {
 export interface IAuthService {
   login: (email: string, password: string) => Promise<Result<LoginResponse, Error[]>>;
   register: (email: string, password: string) => Promise<Result<RegisterResponse, Error[]>>;
+  refreshToken: () => Promise<Result<LoginResponse, Error[]>>;
+  logout: () => Promise<Result<void, Error[]>>;
 }
 
 export class AuthService implements IAuthService {
   private readonly baseURL = import.meta.env.VITE_API_BASE_URL;
+  private readonly client: IClient;
   private readonly endpoints = {
     register: `${this.baseURL}/auth/register`,
     login: `${this.baseURL}/auth/login`,
+    refreshToken: `${this.baseURL}/auth/refresh-token`,
+    logout: `${this.baseURL}/auth/logout`,
   };
-  private readonly client: IClient;
 
   constructor(client: IClient) {
     this.client = client;
+  }
+
+  async logout() {
+    const request = new ClientRequestWithBody(this.endpoints.logout, undefined, undefined);
+
+    try {
+      const res = await this.client.post(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Logout failed')]);
+      }
+
+      return Ok(undefined);
+    } catch (e) {
+      console.error(e);
+      return Err([new Error('Logout failed')]);
+    }
+  }
+
+  async refreshToken() {
+    const request = new ClientRequestWithBody(this.endpoints.refreshToken, undefined, undefined);
+
+    try {
+      const res = await this.client.post(request);
+
+      if (res.status === 401) {
+        return Err([new Error('Refresh token is not valid')]);
+      }
+
+      if (res.ok === false) {
+        return Err([new Error('Refreshing token failed')]);
+      }
+
+      const body = await res.json();
+      return Ok(body as LoginResponse);
+    } catch (e) {
+      console.error(e);
+      return Err([new Error('Refreshing token failed.')]);
+    }
   }
 
   async login(email: string, password: string) {
