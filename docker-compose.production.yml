@@ -6,9 +6,6 @@ services:
       target: production-stage
       context: ./client
       dockerfile: Dockerfile
-    volumes:
-      - './client:/app'
-      - '/app/node_modules'
     ports:
       - '3001:80'
     restart: unless-stopped
