@@ -1,3 +1,5 @@
+import { AuthService } from '@/services/authService';
+import { Client, ClientConfig } from '@/services/client';
 import { useUserStore } from '@/stores/userStore';
 import { createRouter, createWebHistory } from 'vue-router';
 
@@ -46,20 +48,38 @@ const router = createRouter({
       path: '/',
       name: 'root',
       redirect: { name: 'graphs' },
-      beforeEnter: () => {
-        const { user } = useUserStore();
+      beforeEnter: async () => {
+        const userStore = useUserStore();
 
-        if (user === null) {
+        if (userStore.user === null) {
           return { name: 'home' };
         }
 
-        const isExpired = user.expiresAtInSeconds < Date.now() / 1000;
+        const isExpired = userStore.user.expiresAtInSeconds < Date.now() / 1000;
 
         if (isExpired) {
-          // TODO: Make request to server to attempt to refresh token
-          // If successful, update user store and continue
-          // if not, post to server to log user out and then
-          // log user out in the client and redirect to login
+          // can't use useAuthService here because
+          // it uses inject and inject can only be
+          // used in the setup function of a component
+          const clientConfig = new ClientConfig(
+            { Authorization: `Bearer ${userStore.user.token}` },
+            true
+          );
+          const client = new Client(clientConfig);
+          const authService = new AuthService(client);
+          const refreshResult = await authService.refreshToken();
+
+          if (refreshResult.err) {
+            // not posting to server to log out
+            // because at this point both the
+            // refresh token and the access token
+            // are not valid
+            console.error(refreshResult.err);
+            userStore.logUserOut();
+            return { name: 'login' };
+          }
+
+          userStore.logUserIn(refreshResult.val.accessToken);
         }
 
         return true;
@@ -78,6 +98,11 @@ const router = createRouter({
       ],
     },
   ],
+});
+
+// TODO: Add actual error handling for router
+router.onError(error => {
+  console.error(error);
 });
 
 export default router;
