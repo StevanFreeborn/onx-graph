@@ -2,9 +2,9 @@ import { AuthServiceFactoryKey } from '@/services/authService';
 import { ClientConfig, ClientFactoryKey } from '@/services/client';
 import { jwtDecode } from 'jwt-decode';
 import { defineStore } from 'pinia';
-import { inject, readonly, ref } from 'vue';
+import { inject, ref } from 'vue';
 
-const USER_KEY = 'onxGraphAuth';
+export const USER_KEY = 'onxGraphAuth';
 
 export type User = {
   id: string;
@@ -43,6 +43,7 @@ export const useUserStore = defineStore('userStore', () => {
   function logUserOut() {
     localStorage.removeItem(USER_KEY);
     user.value = null;
+    console.log(user.value);
   }
 
   async function refreshAccessToken(originalRequest: Request) {
@@ -74,7 +75,7 @@ export const useUserStore = defineStore('userStore', () => {
   }
 
   return {
-    user: readonly(user),
+    user: user,
     logUserIn,
     logUserOut,
     refreshAccessToken,
