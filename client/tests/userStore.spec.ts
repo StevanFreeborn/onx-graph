@@ -1,6 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
-import { createPinia, setActivePinia } from 'pinia';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createPinia } from 'pinia';
+import { Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from 'vue';
 import { useUserStore } from '../src/stores/userStore';
 import { AuthServiceFactoryKey, IAuthService } from './../src/services/authService';
@@ -58,13 +58,12 @@ describe('userStore', () => {
     app.provide(ClientFactoryKey, {
       create: vi.fn(() => clientMock),
     });
+
     app.provide(AuthServiceFactoryKey, {
       create: vi.fn(() => authServiceMock),
     });
-    app.provide;
-    app.use(pinia);
 
-    setActivePinia(pinia);
+    app.use(pinia);
 
     global.localStorage = localStorageMock;
   });
@@ -119,7 +118,7 @@ describe('userStore', () => {
   describe('logUserIn', () => {
     it('should store user in local storage and set user', () => {
       localStorageMock.getItem.mockReturnValueOnce(null);
-      const { logUserIn, user } = useUserStore();
+      const store = useUserStore();
       const payload = { sub: 'test', exp: 123, token: 'token' };
       vi.mocked(jwtDecode).mockReturnValue(payload);
 
@@ -129,29 +128,94 @@ describe('userStore', () => {
         token: payload.token,
       };
 
-      logUserIn(payload.token);
+      store.logUserIn(payload.token);
 
       expect(localStorageMock.setItem).toHaveBeenCalledWith(USER_KEY, JSON.stringify(fakeUser));
-      expect(user).toEqual(fakeUser);
+      expect(store.user).toEqual(fakeUser);
     });
   });
 
-  // describe('logUserOut', () => {
-  //   it('should remove user from local storage and set user to null', () => {
-  //     localStorageMock.getItem.mockReturnValue(
-  //       JSON.stringify({
-  //         id: 'test',
-  //         expiresAtInSeconds: 123,
-  //         token: 'token',
-  //       })
-  //     );
+  describe('logUserOut', () => {
+    it('should remove user from local storage and set user to null', () => {
+      localStorageMock.getItem.mockReturnValue(
+        JSON.stringify({
+          id: 'test',
+          expiresAtInSeconds: 123,
+          token: 'token',
+        })
+      );
 
-  //     const { logUserOut, user } = useUserStore();
+      const store = useUserStore();
 
-  //     logUserOut();
+      store.logUserOut();
 
-  //     expect(localStorageMock.removeItem).toHaveBeenCalledWith(USER_KEY);
-  //     expect(user).toBe(null);
-  //   });
-  // });
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith(USER_KEY);
+      expect(store.user).toBe(null);
+    });
+  });
+
+  describe('refreshAccessToken', () => {
+    it('should log user out if user is not logged in and return 401 response', async () => {
+      localStorageMock.getItem.mockReturnValue(null);
+
+      const store = useUserStore();
+
+      const response = await store.refreshAccessToken(new Request('https://test.com'));
+
+      expect(store.user).toBe(null);
+      expect(response.status).toBe(401);
+    });
+
+    it('should log user out if refreshing token fails and return 401 response', async () => {
+      localStorageMock.getItem.mockReturnValue(
+        JSON.stringify({
+          id: 'test',
+          expiresAtInSeconds: 123,
+          token: 'token',
+        })
+      );
+
+      (authServiceMock.refreshToken as Mock).mockResolvedValue({ err: true });
+
+      const store = useUserStore();
+
+      const response = await store.refreshAccessToken(new Request('https://test.com'));
+
+      expect(store.user).toBe(null);
+      expect(response.status).toBe(401);
+    });
+
+    it('should log user in with new token and return 200 response', async () => {
+      localStorageMock.getItem.mockReturnValue(
+        JSON.stringify({
+          id: 'test',
+          expiresAtInSeconds: 123,
+          token: 'token',
+        })
+      );
+
+      (authServiceMock.refreshToken as Mock).mockResolvedValue({
+        err: false,
+        val: { accessToken: 'token' },
+      });
+
+      const payload = { sub: 'test', exp: 123, token: 'token' };
+      vi.mocked(jwtDecode).mockReturnValue(payload);
+
+      const user = {
+        id: payload.sub,
+        expiresAtInSeconds: payload.exp,
+        token: payload.token,
+      };
+
+      global.fetch = vi.fn().mockResolvedValue(new Response());
+
+      const store = useUserStore();
+
+      const response = await store.refreshAccessToken(new Request('https://test.com'));
+
+      expect(store.user).toEqual(user);
+      expect(response.status).toBe(200);
+    });
+  });
 });
