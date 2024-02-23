@@ -2,10 +2,9 @@ import { jwtDecode } from 'jwt-decode';
 import { createPinia } from 'pinia';
 import { Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from 'vue';
-import { useUserStore } from '../src/stores/userStore';
-import { AuthServiceFactoryKey, IAuthService } from './../src/services/authService';
-import { ClientFactoryKey, IClient } from './../src/services/client';
-import { USER_KEY } from './../src/stores/userStore';
+import { AuthServiceFactoryKey, IAuthService } from '../../src/services/authService';
+import { ClientFactoryKey, IClient } from '../../src/services/client';
+import { USER_KEY, useUserStore } from '../../src/stores/userStore';
 
 vi.mock('jwt-decode', async importOriginal => {
   const actual = await importOriginal<object>();

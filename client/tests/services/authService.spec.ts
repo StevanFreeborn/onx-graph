@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthService } from '../src/services/authService';
+import { AuthService } from '../../src/services/authService';
 
 describe('AuthService', () => {
   let authService: AuthService;

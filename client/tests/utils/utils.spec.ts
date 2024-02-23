@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { toTitleCase } from '../src/utils';
+import { toTitleCase } from '../../src/utils';
 
 describe('utils', () => {
   describe('toTitleCase', () => {

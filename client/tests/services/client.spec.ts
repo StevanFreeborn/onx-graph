@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Client, ClientConfig, ClientRequestWithBody } from './../src/services/client';
+import { Client, ClientConfig, ClientRequestWithBody } from '../../src/services/client';
 
 describe('Client', () => {
   let client: Client;

@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup, render } from '@testing-library/vue';
 import { afterEach, describe, expect, it } from 'vitest';
-import HeroGreeting from '../src/components/HeroGreeting.vue';
+import HeroGreeting from '../../src/components/HeroGreeting.vue';
 
 describe('HeroGreeting', () => {
   afterEach(cleanup);
