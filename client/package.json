@@ -17,11 +17,12 @@
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "cleanup": "rimraf ./test-results/ ./coverage/ ./dist/ ./tests/coverage/"
+    "cleanup": "rimraf ./test-results/ ./coverage/ ./dist/ ./tests/coverage/ ./playwright-report/"
   },
   "dependencies": {
     "jwt-decode": "^4.0.0",
     "pinia": "^2.1.7",
+    "rimraf": "^5.0.5",
     "ts-results": "^3.3.0",
     "v-network-graph": "^0.9.14",
     "validator": "^13.11.0",
