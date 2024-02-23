@@ -6,6 +6,7 @@
     "Hmac",
     "Instantiator",
     "Pinia",
+    "rushstack",
     "Swashbuckle",
     "Testcontainers"
   ]
