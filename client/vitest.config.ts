@@ -16,6 +16,7 @@ export default mergeConfig(
         exclude: ['**/views/**', ''],
         reporter: ['text', 'html'],
       },
+      setupFiles: ['./tests/vitest-setup.ts'],
     },
   })
 );

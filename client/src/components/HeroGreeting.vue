@@ -5,7 +5,7 @@
     <h1 class="orange">OnxGraph</h1>
     <h2>
       Create visualizations of your
-      <a href="https://onspring.com/" target="_blank" rel="noopener">Onspring</a>
+      <a href="https://onspring.com" target="_blank" rel="noopener">Onspring</a>
       relationships
     </h2>
   </div>

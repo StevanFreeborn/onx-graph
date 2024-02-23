@@ -13,4 +13,12 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
   },
+  overrides: [
+    {
+      files: ['tests/**/*.ts'],
+      rules: {
+        'playwright/missing-playwright-await': 'off',
+      },
+    },
+  ],
 };
