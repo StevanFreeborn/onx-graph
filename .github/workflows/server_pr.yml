@@ -1,7 +1,7 @@
 name: Pull Request - Server Changes
 env:
-  JwtOptions__Secret: qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q=
-  JwtOptions__Issuer: TesetIssuer
+  JwtOptions__Secret: qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q= # This is not a real secret.
+  JwtOptions__Issuer: TestIssuer
   JwtOptions__Audience: TestAudience
   JwtOptions__ExpiryInMinutes: 5
 defaults:
