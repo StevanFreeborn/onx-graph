@@ -18,6 +18,7 @@ module.exports = {
       files: ['tests/**/*.ts'],
       rules: {
         'playwright/missing-playwright-await': 'off',
+        'playwright/no-standalone-expect': 'off',
       },
     },
   ],
