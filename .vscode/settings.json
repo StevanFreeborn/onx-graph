@@ -1,4 +1,7 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
   "dotnet.defaultSolution": "server/Server.sln",
   "cSpell.words": [
     "Bson",
