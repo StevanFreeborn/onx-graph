@@ -1,5 +1,7 @@
 <script setup lang="ts">
   import { useAuthService } from '@/composables/useAuthService';
+  import { useMounted } from '@/composables/useMounted';
+  import { useSubmitting } from '@/composables/useSubmitting';
   import { useUserStore } from '@/stores/userStore';
   import { toTitleCase } from '@/utils';
   import isEmail from 'validator/es/lib/isEmail';
@@ -26,12 +28,15 @@
     errors: [],
   });
 
+  const { isSubmitting, setIsSubmitting } = useSubmitting();
+  const isMounted = useMounted();
   const authService = useAuthService();
   const userStore = useUserStore();
   const router = useRouter();
 
   async function handleLoginFormSubmit() {
     formState.errors = [];
+    setIsSubmitting(true);
 
     const keys = Object.keys(formState.fields) as (keyof LoginFormState['fields'])[];
 
@@ -54,6 +59,7 @@
     const formStateHasError = Object.values(formState.fields).some(field => field.errorMessage);
 
     if (formStateHasError) {
+      setIsSubmitting(false);
       return;
     }
 
@@ -64,10 +70,12 @@
 
     if (loginResult.err) {
       formState.errors.push(...loginResult.val.map(err => err.message));
+      setIsSubmitting(false);
       return;
     }
 
     userStore.logUserIn(loginResult.val.accessToken);
+    setIsSubmitting(false);
     router.push('/graphs');
   }
 
@@ -95,6 +103,7 @@
       <div class="form-group">
         <label for="email">Email</label>
         <input
+          :disabled="isMounted === false"
           type="email"
           id="email"
           name="email"
@@ -110,6 +119,7 @@
       <div class="form-group">
         <label for="password">Password</label>
         <input
+          :disabled="isMounted === false"
           type="password"
           id="password"
           name="password"
@@ -122,7 +132,13 @@
           {{ formState.fields.password.errorMessage }}
         </span>
       </div>
-      <button class="login-button" type="submit">Login</button>
+      <button
+        :disabled="isMounted === false || isSubmitting === true"
+        class="login-button"
+        type="submit"
+      >
+        Login
+      </button>
       <ul class="form-errors">
         <li class="error-message" v-for="error in formState.errors" :key="error">{{ error }}</li>
       </ul>
