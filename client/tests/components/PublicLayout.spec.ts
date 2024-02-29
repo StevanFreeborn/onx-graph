@@ -27,4 +27,20 @@ describe('PublicLayout', () => {
 
     expect(registerLink).toBeInTheDocument();
   });
+
+  it('should render hero greeting component', async () => {
+    const { getByText } = await customRender(PublicLayout, {
+      global: {
+        stubs: {
+          HeroGreeting: {
+            template: '<div>hero greeting</div>',
+          },
+        },
+      },
+    });
+
+    const greeting = getByText(/hero greeting/);
+
+    expect(greeting).toBeInTheDocument();
+  });
 });
