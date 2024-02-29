@@ -42,15 +42,15 @@ export async function customRender(component: Component, options: RenderOptions 
   ];
 
   const { global, ...rest } = options;
-  const { plugins, provide, ...restGlobal } = global;
+  const { plugins, provide, ...restGlobal } = global ?? {};
 
   const renderResult = render(component, {
     global: {
       provide: {
         ...defaultProvides,
-        ...provide,
+        ...(provide ?? {}),
       },
-      plugins: [...defaultPlugins, ...plugins],
+      plugins: [...defaultPlugins, ...(plugins ?? [])],
       ...restGlobal,
     },
     ...rest,
