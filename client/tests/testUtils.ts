@@ -16,7 +16,7 @@ import { ClientFactoryKey } from './../src/services/client';
  * @param options - The render options to add or overwrite the default options
  * @returns The render result
  */
-export async function renderApp(component: Component, options: RenderOptions = {}) {
+export async function customRender(component: Component, options: RenderOptions = {}) {
   const router = createRouter({
     history: createWebHistory(),
     routes: routes,
@@ -41,12 +41,19 @@ export async function renderApp(component: Component, options: RenderOptions = {
     VNetworkGraph,
   ];
 
+  const { global, ...rest } = options;
+  const { plugins, provide, ...restGlobal } = global;
+
   const renderResult = render(component, {
     global: {
-      provide: defaultProvides,
-      plugins: defaultPlugins,
+      provide: {
+        ...defaultProvides,
+        ...provide,
+      },
+      plugins: [...defaultPlugins, ...plugins],
+      ...restGlobal,
     },
-    ...options,
+    ...rest,
   });
 
   return renderResult;
