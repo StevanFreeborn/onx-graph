@@ -11,6 +11,7 @@
     "Pinia",
     "rushstack",
     "Swashbuckle",
-    "Testcontainers"
+    "Testcontainers",
+    "textbox"
   ]
 }
