@@ -1,15 +1,16 @@
 import { mount } from '@vue/test-utils';
 import { Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { defineComponent } from 'vue';
 import { useTheme } from '../../src/composables/useTheme';
 
 describe('useTheme', () => {
-  const TestComponent = {
+  const TestComponent = defineComponent({
     template: '<div></div>',
     setup() {
       const theme = useTheme();
       return { theme };
     },
-  };
+  });
 
   let matchMediaMock: Mock;
   let mediaQueryListMock: {
@@ -34,7 +35,6 @@ describe('useTheme', () => {
 
   it('should initialize with light theme', () => {
     const wrapper = mount(TestComponent);
-
     expect(wrapper.vm.theme).toBe('light');
   });
 
