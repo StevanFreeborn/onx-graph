@@ -132,11 +132,7 @@
           {{ formState.fields.password.errorMessage }}
         </span>
       </div>
-      <button
-        :disabled="isMounted === false || isSubmitting === true"
-        class="login-button"
-        type="submit"
-      >
+      <button :disabled="isMounted === false || isSubmitting" class="login-button" type="submit">
         Login
       </button>
       <ul class="form-errors">
