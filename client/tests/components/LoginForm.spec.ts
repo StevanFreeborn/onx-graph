@@ -266,10 +266,9 @@ describe('LoginForm', () => {
     expect(userStore.logUserIn).toHaveBeenCalledTimes(1);
     expect(userStore.logUserIn).toHaveBeenCalledWith(successResponse.val.accessToken);
 
-    const router = useRouter();
-    console.log(router.push);
+    const { push: pushMock } = useRouter();
 
-    expect(router.push).toHaveBeenCalledTimes(1);
-    expect(router.push).toHaveBeenCalledWith('/graphs');
+    expect(pushMock).toHaveBeenCalledTimes(1);
+    expect(pushMock).toHaveBeenCalledWith('/graphs');
   });
 });
