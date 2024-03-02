@@ -4,7 +4,11 @@
 ## Get latest from `dotnet new gitignore`
 
 # dotenv files
-.env
+
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
 logs/
 appsettings*.json
 !appsettings.CI.json
