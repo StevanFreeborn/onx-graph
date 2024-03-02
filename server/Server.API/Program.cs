@@ -7,8 +7,17 @@ config.AddEnvironmentVariables();
 // add logging
 builder.Host.UseSerilog(
   (context, loggerConfiguration) => loggerConfiguration
-    .ReadFrom.Configuration(config)
+    .MinimumLevel.Debug()
     .Enrich.FromLogContext()
+    .Enrich.WithMachineName()
+    .Enrich.WithThreadId()
+    .Enrich.WithProperty("Application", "Server.API")
+    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+    .WriteTo.File(
+      new CompactJsonFormatter(),
+      "logs/logs.json",
+      rollingInterval: RollingInterval.Day
+    )
 );
 
 
