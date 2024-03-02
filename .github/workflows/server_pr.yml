@@ -33,8 +33,6 @@ jobs:
         run: dotnet build --no-restore
       - name: Test project
         run: dotnet test -e DOTNET_ENVIRONMENT=CI --no-build --verbosity normal
-      - name: Print current directory
-        run: pwd
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
