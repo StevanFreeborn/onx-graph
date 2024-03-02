@@ -1,5 +1,29 @@
 version: '3.8'
+name: onxgraph-production
 services:
+  mongodb:
+    container_name: mongo-production
+    image: mongo:latest
+    ports:
+      - '2998:27017'
+    volumes:
+      - 'onxgraph_mongodb_production_data:/data/db'
+    restart: unless-stopped
+    env_file:
+      - server/server.API/.env
+  server:
+    depends_on:
+      - mongodb
+    container_name: server-api-production
+    build:
+      target: production-stage
+      context: ./server/Server.API
+      dockerfile: Dockerfile
+    ports:
+      - '3000:8080'
+    restart: unless-stopped
+    env_file:
+      - server/server.API/.env
   client:
     container_name: vue-client-production
     build:
@@ -9,3 +33,7 @@ services:
     ports:
       - '3001:80'
     restart: unless-stopped
+    env_file:
+      - client/.env
+volumes:
+  onxgraph_mongodb_production_data:
