@@ -10,7 +10,7 @@ tests/
 playwright.config.ts
 README.md
 vitest.config.ts
-.env*
-.flaskenv*
 !.env.project
 !.env.vault
+.env*
+.flaskenv*
