@@ -1,6 +1,22 @@
 version: '3.8'
 services:
+  server:
+    container_name: server-api-development
+    build:
+      target: development-stage
+      context: ./server/Server.API
+      dockerfile: Dockerfile
+    volumes:
+      - './server/Server.API:/app'
+      - '~/.aspnet/https:/https/'
+    ports:
+      - '3000:3000'
+    restart: unless-stopped
+    env_file:
+      - server/server.API/.env
   client:
+    depends_on:
+      - server
     container_name: vue-client-development
     build:
       target: development-stage
@@ -10,5 +26,7 @@ services:
       - './client:/app'
       - '/app/node_modules'
     ports:
-      - '3001:5173'
+      - '3001:3001'
     restart: unless-stopped
+    env_file:
+      - client/.env
