@@ -1,6 +1,29 @@
 version: '3.8'
+name: onxgraph-development
 services:
+  mongodb:
+    container_name: mongo-development
+    image: mongo:latest
+    ports:
+      - '2998:27017'
+    volumes:
+      - 'onxgraph_mongodb_development_data:/data/db'
+    restart: unless-stopped
+    env_file:
+      - server/server.API/.env
+  mongo-express:
+    depends_on:
+      - mongodb
+    container_name: mongo-express
+    image: mongo-express:latest
+    restart: unless-stopped
+    ports:
+      - 2999:8081
+    env_file:
+      - server/server.API/.env
   server:
+    depends_on:
+      - mongodb
     container_name: server-api-development
     build:
       target: development-stage
@@ -30,3 +53,5 @@ services:
     restart: unless-stopped
     env_file:
       - client/.env
+volumes:
+  onxgraph_mongodb_development_data:
