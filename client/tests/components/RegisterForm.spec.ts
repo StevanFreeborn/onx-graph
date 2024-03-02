@@ -1,8 +1,19 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup, fireEvent } from '@testing-library/vue';
+import { cleanup, fireEvent, waitFor } from '@testing-library/vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { useRouter } from 'vue-router';
 import RegisterForm from '../../src/components/RegisterForm.vue';
+import { AuthServiceFactoryKey } from '../../src/services/authService';
 import { customRender } from '../testUtils';
+
+vi.mock('vue-router', async importOriginal => {
+  const actual = await importOriginal<typeof import('vue-router')>();
+  const mock = vi.fn();
+  return {
+    ...actual,
+    useRouter: () => ({ push: mock }),
+  };
+});
 
 describe('RegisterForm', () => {
   afterEach(() => {
@@ -185,11 +196,135 @@ describe('RegisterForm', () => {
     expect(passwordConfirmationError).toBeInTheDocument();
   });
 
-  it('should display error message if form is submitted with invalid credentials', async () => {
-    expect(false).toBe(true);
+  it('should display error message if form is submitted with invalid information', async () => {
+    const mockAuthService = {
+      register: vi.fn(),
+    };
+
+    mockAuthService.register.mockReturnValueOnce({
+      err: true,
+      val: [new Error('Email already exists')],
+    });
+
+    const { getByRole, getByLabelText, getByText } = await customRender(RegisterForm, {
+      global: {
+        provide: {
+          [AuthServiceFactoryKey as symbol]: {
+            create: () => mockAuthService,
+          },
+        },
+      },
+    });
+
+    const newUserInfo = {
+      email: 'test@test.com',
+      password: 'password',
+    };
+
+    const emailInput = getByRole('textbox', { name: /email/i });
+    const passwordInput = getByLabelText('Password', { exact: true });
+    const confirmInput = getByLabelText(/confirm password/i);
+    const registerButton = getByRole('button', { name: /register/i });
+
+    await fireEvent.update(emailInput, newUserInfo.email);
+    await fireEvent.update(passwordInput, newUserInfo.password);
+    await fireEvent.update(confirmInput, newUserInfo.password);
+    await fireEvent.click(registerButton);
+
+    const errorMessage = getByText(/email already exists/i);
+    expect(errorMessage).toBeInTheDocument();
+
+    expect(mockAuthService.register).toHaveBeenCalledTimes(1);
+    expect(mockAuthService.register).toHaveBeenCalledWith(newUserInfo.email, newUserInfo.password);
+  });
+
+  it('should disable the register button when the form is submitting', async () => {
+    const mockAuthService = {
+      register: vi.fn(),
+    };
+
+    const fakeRequest = new Promise(resolve =>
+      setTimeout(() => {
+        resolve({ err: false, val: ['User already exists'] });
+      }, 100)
+    );
+
+    mockAuthService.register.mockResolvedValueOnce(fakeRequest);
+
+    const { getByRole, getByLabelText } = await customRender(RegisterForm, {
+      global: {
+        provide: {
+          [AuthServiceFactoryKey as symbol]: {
+            create: () => mockAuthService,
+          },
+        },
+      },
+    });
+
+    const emailInput = getByRole('textbox', { name: /email/i });
+    const passwordInput = getByLabelText('Password', { exact: true });
+    const confirmInput = getByLabelText(/confirm password/i);
+    const registerButton = getByRole('button', { name: /register/i });
+
+    expect(registerButton).toBeEnabled();
+
+    await fireEvent.update(emailInput, 'test@test.com');
+    await fireEvent.update(passwordInput, 'password');
+    await fireEvent.update(confirmInput, 'password');
+    await fireEvent.click(registerButton);
+
+    expect(registerButton).toBeDisabled();
+
+    await waitFor(() => {
+      expect(registerButton).toBeEnabled();
+    });
   });
 
   it('should redirect to /login if form is submitted with valid credentials', async () => {
-    expect(false).toBe(true);
+    const mockAuthService = {
+      register: vi.fn(),
+    };
+
+    const successResponse = {
+      err: false,
+      val: {
+        id: 'new-user-id',
+      },
+    };
+
+    mockAuthService.register.mockReturnValueOnce(successResponse);
+
+    const { getByRole, getByLabelText } = await customRender(RegisterForm, {
+      global: {
+        provide: {
+          [AuthServiceFactoryKey as symbol]: {
+            create: () => mockAuthService,
+          },
+        },
+      },
+    });
+
+    const newUserInfo = {
+      email: 'test@test.com',
+      password: 'password',
+    };
+
+    const emailInput = getByRole('textbox', { name: /email/i });
+    const passwordInput = getByLabelText('Password', { exact: true });
+    const confirmPasswordInput = getByLabelText(/confirm password/i);
+    const registerButton = getByRole('button', { name: /register/i });
+
+    await fireEvent.update(emailInput, newUserInfo.email);
+    await fireEvent.update(passwordInput, newUserInfo.password);
+    await fireEvent.update(confirmPasswordInput, newUserInfo.password);
+    await fireEvent.click(registerButton);
+
+    expect(mockAuthService.register).toHaveBeenCalledTimes(1);
+    expect(mockAuthService.register).toHaveBeenCalledWith(newUserInfo.email, newUserInfo.password);
+
+    const { push: pushMock } = useRouter();
+
+    expect(pushMock).toHaveBeenCalledTimes(1);
+    expect(pushMock).toHaveBeenCalledWith('/login');
   });
 });
