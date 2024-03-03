@@ -13,8 +13,10 @@ CMD ["npm", "run", "dev:host"]
 
 # build stage
 FROM setup-stage as build-stage
+ARG CI
 ARG VITE_API_BASE_URL
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV CI=$CI
 RUN npm run build
 
 # production stage

@@ -94,3 +94,8 @@ jobs:
           SERVER_VERSION: ${{ needs.build_and_publish_image.outputs.server_version }}
           CLIENT_VERSION: ${{ needs.build_and_publish_image.outputs.client_version }}
         run: npm test:e2e
+      - name: Upload e2e test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: ./client/playwright-results
