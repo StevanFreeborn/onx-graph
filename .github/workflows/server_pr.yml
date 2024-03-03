@@ -19,6 +19,8 @@ jobs:
   format:
     name: Run dotnet format
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,6 +43,7 @@ jobs:
           fi
   build_and_test:
     name: Runt tests
+    needs: format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
