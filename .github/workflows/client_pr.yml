@@ -60,8 +60,6 @@ jobs:
         uses: kzrnm/get-net-sdk-project-versions-action@v2
         with:
           proj-path: ./server/Server.API/Server.API.csproj
-      - name: 'DEBUG: Working directory'
-        run: 'pwd'
       - name: Get current package version
         id: client_version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
@@ -97,7 +95,7 @@ jobs:
         env:
           SERVER_VERSION: ${{ needs.build_and_publish_image.outputs.server_version }}
           CLIENT_VERSION: ${{ needs.build_and_publish_image.outputs.client_version }}
-        run: npm test:e2e
+        run: npm run test:e2e
       - name: Upload e2e test results
         uses: actions/upload-artifact@v4
         with:
