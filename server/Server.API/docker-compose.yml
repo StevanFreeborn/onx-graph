@@ -1,0 +1,9 @@
+version: "3.8"
+name: onx-graph-server
+services:
+  client:
+    image: stevanfreeborn/onx-graph-server:${VERSION}
+    build:
+      target: production-stage
+      context: .
+      dockerfile: Dockerfile
