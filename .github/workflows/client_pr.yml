@@ -55,6 +55,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: DEBUG - Echo the working directory
+        run: echo "Working directory is $(pwd)"
       - name: Get current server version
         id: server_version
         uses: kzrnm/get-net-sdk-project-versions-action@v2
