@@ -22,6 +22,11 @@ export default defineConfig({
   },
   projects: [
     {
+      name: 'docker-down',
+      testMatch: '**/cleanup/docker-down.ts',
+      dependencies: ['chrome', 'firefox', 'edge'],
+    },
+    {
       name: 'chrome',
       use: {
         ...devices['Desktop Chrome'],
@@ -40,24 +45,11 @@ export default defineConfig({
       },
     },
   ],
-  webServer: process.env.CI
-    ? [
-        {
-          command: 'npm run test:e2e:stack',
-          url: 'http://localhost:3001',
-          reuseExistingServer: !process.env.CI,
-        },
-      ]
-    : [
-        {
-          command: 'vite dev',
-          port: 3001,
-          reuseExistingServer: !process.env.CI,
-        },
-        {
-          command: 'dotnet run --project ../server/Server.API/Server.API.csproj',
-          port: 3000,
-          reuseExistingServer: !process.env.CI,
-        },
-      ],
+  webServer: [
+    {
+      command: 'npm run test:e2e:stack',
+      url: 'http://localhost:3001',
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });
