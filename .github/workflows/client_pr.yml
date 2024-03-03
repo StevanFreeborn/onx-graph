@@ -43,8 +43,8 @@ jobs:
             git add .
             git commit -m "chore: lint and format check fixes [skip ci]"
             git fetch origin
-            git pull --rebase origin ${{ github.head_ref }}
-            git push origin HEAD:${{ github.head_ref }}
+            git pull --rebase origin ${{ github.sha }}
+            git push origin HEAD:${{ github.sha }}
           fi
   vitest_tests:
     name: Run vitest tests
