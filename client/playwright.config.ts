@@ -43,7 +43,7 @@ export default defineConfig({
   webServer: process.env.CI
     ? [
         {
-          command: 'npm run test-stack',
+          command: 'npm run test:e2e:stack',
           url: 'http://localhost:3001',
           reuseExistingServer: !process.env.CI,
         },
