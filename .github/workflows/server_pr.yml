@@ -38,8 +38,8 @@ jobs:
             git add .
             git commit -m "chore: format fixes [skip ci]"
             git fetch origin
-            git pull --rebase origin ${{ github.head_ref }}
-            git push origin HEAD:${{ github.head_ref }}
+            git pull --rebase origin ${{ github.sha }}
+            git push origin HEAD:${{ github.sha }}
           fi
   build_and_test:
     name: Runt tests
