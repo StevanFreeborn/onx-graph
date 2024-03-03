@@ -31,13 +31,11 @@ jobs:
         run: npm install
       - name: Run tests
         run: npm run test:unit:coverage
-      - name: 'DEBUG: List files in directory'
-        run: 'ls tests/coverage -l'
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:
           name: coverage
-          path: ./tests/coverage/
+          path: ./client/tests/coverage
   build_and_publish_image:
     name: Build and publish Docker image
     runs-on: ubuntu-latest
@@ -64,8 +62,8 @@ jobs:
         uses: kzrnm/get-net-sdk-project-versions-action@v2
         with:
           proj-path: ./server/Server.API/Server.API.csproj
-      - name: 'Cange to client directory'
-        run: 'cd client'
+      - name: 'DEBUG: Working directory'
+        run: 'pwd'
       - name: Get current package version
         id: client_version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
