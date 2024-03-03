@@ -34,7 +34,7 @@ jobs:
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: vitest-coverage
           path: ./client/tests/coverage
   build_and_publish_image:
     name: Build and publish Docker image
@@ -91,6 +91,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Install dependencies
+        run: npm install
+      - name: Install playwright dependencies
+        run: npx playwright install
       - name: Run tests
         env:
           SERVER_VERSION: ${{ needs.build_and_publish_image.outputs.server_version }}
@@ -99,5 +103,5 @@ jobs:
       - name: Upload e2e test results
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-test-results
-          path: ./client/playwright-results
+          name: playwright-report
+          path: ./client/playwright-report
