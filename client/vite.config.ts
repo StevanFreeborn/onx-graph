@@ -4,6 +4,13 @@ import fs from 'fs';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 
+const https = process.env.CI
+  ? undefined
+  : {
+      cert: fs.readFileSync('./.certs/cert.pem'),
+      key: fs.readFileSync('./.certs/key.pem'),
+    };
+
 export default defineConfig({
   server: {
     port: 3001,
@@ -11,10 +18,7 @@ export default defineConfig({
       usePolling: true,
       interval: 1000,
     },
-    https: {
-      cert: fs.readFileSync('./.certs/cert.pem'),
-      key: fs.readFileSync('./.certs/key.pem'),
-    },
+    https: https,
   },
   plugins: [vue(), vueJsx()],
   resolve: {
