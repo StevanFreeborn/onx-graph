@@ -51,5 +51,7 @@ services:
     ports:
       - '3001:3001'
     restart: unless-stopped
+    env_file:
+      - client/.env
 volumes:
   onxgraph_mongodb_development_data:
