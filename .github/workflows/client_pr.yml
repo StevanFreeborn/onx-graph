@@ -55,8 +55,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # - name: 'Change to root directory'
-      #   run: 'cd ..'
       - name: Get current server version
         id: server_version
         uses: kzrnm/get-net-sdk-project-versions-action@v2
@@ -71,6 +69,7 @@ jobs:
         env:
           VERSION: ${{ steps.client_version.outputs.version }}.pr.${{ github.event.number }}.attempt.${{ github.run_number }}
           VITE_API_BASE_URL: http://localhost:3000
+          CI: true
         run: docker compose -f docker-compose.yml build
       - name: Push client image
         run : docker compose -f docker-compose.yml push
