@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import 'dotenv/config';
 
 export default defineConfig({
   reportSlowTests: null,
@@ -13,10 +14,11 @@ export default defineConfig({
   reporter: process.env.CI ? [['blob'], ['github'], ['list']] : [['html'], ['list']],
   use: {
     actionTimeout: 0,
-    baseURL: 'https://localhost:5173',
+    baseURL: 'http://localhost:3001',
     trace: 'retain-on-failure',
     headless: true,
     viewport: { width: 1920, height: 1080 },
+    navigationTimeout: 0,
   },
   projects: [
     {
@@ -38,15 +40,24 @@ export default defineConfig({
       },
     },
   ],
-  webServer: [
-    {
-      command: process.env.CI ? 'vite preview --port 5173' : 'vite dev',
-      port: 5173,
-      reuseExistingServer: !process.env.CI,
-    },
-    {
-      command: 'dotnet run --project ../server/Server.API/Server.API.csproj',
-      reuseExistingServer: !process.env.CI,
-    },
-  ],
+  webServer: process.env.CI
+    ? [
+        {
+          command: 'npm run test-stack',
+          url: 'http://localhost:3001',
+          reuseExistingServer: !process.env.CI,
+        },
+      ]
+    : [
+        {
+          command: 'vite dev',
+          port: 3001,
+          reuseExistingServer: !process.env.CI,
+        },
+        {
+          command: 'dotnet run --project ../server/Server.API/Server.API.csproj',
+          port: 3000,
+          reuseExistingServer: !process.env.CI,
+        },
+      ],
 });
