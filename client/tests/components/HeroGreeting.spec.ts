@@ -15,6 +15,6 @@ describe('HeroGreeting', () => {
   it('should display link to Onspring website', async () => {
     const { getByRole } = render(HeroGreeting);
     const link = getByRole('link', { name: 'Onspring' });
-    expect(link).toHaveAttribute('href', 'https://onspring.com');
+    expect(link).toHaveAttribute('href', 'https://onspring.com/');
   });
 });
