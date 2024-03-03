@@ -17,6 +17,7 @@ CMD ["dotnet", "watch"]
 # build stage
 FROM setup-stage as build-stage
 RUN dotnet publish -c Release -o dist
+
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS production-stage
 WORKDIR /app
 COPY --from=build-stage /app/dist ./
