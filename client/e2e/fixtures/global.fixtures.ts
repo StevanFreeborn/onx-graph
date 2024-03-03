@@ -2,8 +2,15 @@ import AxeBuilder from '@axe-core/playwright';
 import { test as base } from '@playwright/test';
 import { AxeResults } from 'axe-core';
 
+type TestUser = {
+  email: string;
+  password: string;
+  username: string;
+};
+
 type GlobalFixtures = {
   accessibilityResults: AxeResults;
+  user: TestUser;
 };
 
 export const test = base.extend<GlobalFixtures>({
@@ -17,6 +24,12 @@ export const test = base.extend<GlobalFixtures>({
       contentType: 'application/json',
     });
   },
+  user: async ({}, use) =>
+    await use({
+      email: 'test@test.com',
+      password: '@Password1',
+      username: 'test',
+    }),
 });
 
 export * from '@playwright/test';

@@ -11,6 +11,8 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=testAdmin
       - MONGO_INITDB_ROOT_PASSWORD=password
       - MONGO_INITDB_DATABASE=onxGraphTest
+    volumes:
+      - ./e2e/dbscripts:/docker-entrypoint-initdb.d
   server:
     depends_on:
       - mongodb
