@@ -16,7 +16,31 @@ on:
     branches:
       - main
 jobs:
+  format:
+    name: Run dotnet format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x.x
+      - name: Format project
+        run: dotnet format --verbosity normal
+      - name: Commit Changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "<>"
+          if [[ $(git status --porcelain) ]]; then
+            git add .
+            git commit -m "chore: format fixes [skip ci]"
+            git fetch origin
+            git pull --rebase origin ${{ github.head_ref }}
+            git push origin HEAD:${{ github.head_ref }}
+          fi
   build_and_test:
+    name: Runt tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
