@@ -156,7 +156,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          allenvs: true
+          envs: SERVER_VERSION, CLIENT_VERSION, MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD, MONGO_INITDB_DATABASE, Logging__LogLevel__Default, AllowedHosts, JwtOptions__Secret, JwtOptions__Issuer, JwtOptions__Audience, JwtOptions__ExpiryInMinutes, MongoDbOptions__ConnectionString, MongoDbOptions__DatabaseName, CorsOptions__AllowedOrigins__0
           script: |
             export SERVER_VERSION=$SERVER_VERSION
             export CLIENT_VERSION=$CLIENT_VERSION
