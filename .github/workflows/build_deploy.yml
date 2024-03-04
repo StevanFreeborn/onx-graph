@@ -1,10 +1,26 @@
 name: Build and Deploy
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*/README.md'
+      - '**/*/LICENSE.md'
+      - '**/*/docker-compose*.yml'
+      - '**/*/.gitingore'
+      - '**/*/.dockerignore'
+      - '**/*/.editorconfig'
+      - '**/*/Dockerfile'
+      - '.vscode/**'
+      - '.github/**'
 jobs:
   version_client:
     name: Version client
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-current-version.outputs.version }}
+      commit: ${{ steps.get-latest-commit.outputs.commit }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,20 +34,131 @@ jobs:
         run: echo "version=$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT
       - name: Print current version
         run: echo "${{ steps.get-current-version.outputs.version }}"
+      - name: Run semantic release to update version
+        working-directory: client
+        run: npx semantic-release
+        continue-on-error: true
+      - name: Commit version changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "<>"
+          git add .
+          git commit -m "chore: update client version"
+          git push
+        continue-on-error: true
+      - name: Get latest commit
+        id: get-latest-commit
+        run: echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   version_server:
     name: Version server
+    needs: version_client
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      commit: ${{ steps.get-latest-commit.outputs.commit }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version_client.outputs.commit }}
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.x.x
+      - name: Install versionize
+        run: dotnet tool install --global Versionize
       - name: Get current version
+        working-directory: server/Server.API
         id: get-version
-        uses: kzrnm/get-net-sdk-project-versions-action@v2
-        with:
-          proj-path: server/Server.API/Server.API.csproj
+        run: echo "version=$(versionize inspect)" >> $GITHUB_OUTPUT
       - name: Print current version
         run: echo "${{ steps.get-version.outputs.version }}"
+      - name: Run versionize to update version
+        working-directory: server/Server.API
+        run: versionize -i --exit-insignificant-commits
+        continue-on-error: true
+      - name: Commit version changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "<>"
+          git add .
+          git commit -m "chore: update server version"
+          git push
+        continue-on-error: true
+      - name: Get latest commit
+        id: get-latest-commit
+        run: echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+  build_images:
+    name: Build images
+    needs: [version_client, version_server]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version_server.outputs.commit }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push server image
+        working-directory: server/Server.API
+        env:
+          VERSION: ${{ needs.version_server.outputs.version }}
+        run: |
+          docker compose build
+          docker compose push
+      - name: Build and push client image
+        working-directory: client
+        env:
+          VERSION: ${{ needs.version_client.outputs.version }}
+          VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          CI: true
+        run: |
+          docker compose build
+          docker compose push
+  deploy:
+    name: Deploy
+    needs: [version_client, version_server, build_images]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version_server.outputs.commit }}
+      - name: Generate .env file
+        run: |
+          echo "SERVER_VERSION=${{ needs.version_server.outputs.version }}" >> .env
+          echo "CLIENT_VERSION=${{ needs.version_client.outputs.version }}" >> .env
+          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
+          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
+          echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
+          echo "Logging__LogLevel__Default=${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}" >> .env
+          echo "AllowedHosts=${{ secrets.ALLOWEDHOSTS }}" >> .env
+          echo "JwtOptions__Secret=${{ secrets.JWTOPTIONS__SECRET }}" >> .env
+          echo "JwtOptions__Issuer=${{ secrets.JWTOPTIONS__ISSUER }}" >> .env
+          echo "JwtOptions__Audience=${{ secrets.JWTOPTIONS__AUDIENCE }}" >> .env
+          echo "JwtOptions__ExpiryInMinutes=${{ secrets.JWTOPTIONS__EXPIRYINMINUTES }}" >> .env
+          echo "MongoDbOptions__ConnectionString=${{ secrets.MONGODBOPTIONS__CONNECTIONSTRING }}" >> .env
+          echo "MongoDbOptions__DatabaseName=${{ secrets.MONGODBOPTIONS__DATABASENAME }}" >> .env
+          echo "CorsOptions__AllowedOrigins__0=${{ secrets.CORSOPTIONS__ALLOWEDORIGINS__0 }}" >> .env
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "docker-compose.production.yml,.env"
+          target: onx-graph
+      - name: SSH into server and start containers
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker compose -f onx-graph/docker-compose.production.yml down
+            docker-compose -f onx-graph/docker-compose.production.yml up -d --wait
+            rm onx-graph/docker-compose.production.yml
+            rm onx-graph/.env

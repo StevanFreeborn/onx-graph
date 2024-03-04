@@ -3,6 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "release": {
+    "repositoryUrl": "https://github.com/StevanFreeborn/onx-graph.git",
+    "branches": [
+      "main",
+      "stevanfreeborn/chore/tesr-deploy-workflow"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer"
+    ]
+  },
   "scripts": {
     "dev": "vite",
     "dev:host": "vite --host 0.0.0.0",

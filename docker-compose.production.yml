@@ -23,7 +23,6 @@ services:
     restart: always
     environment:
       - Logging__LogLevel__Default=${Logging__LogLevel__Default}
-      - Logging__LogLevel__Microsoft.AspNetCore=${Logging__LogLevel__Microsoft.AspNetCore}
       - AllowedHosts=${AllowedHosts}
       - JwtOptions__Secret=${JwtOptions__Secret}
       - JwtOptions__Issuer=${JwtOptions__Issuer}
