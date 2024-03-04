@@ -24,6 +24,7 @@ jobs:
       - name: Run semantic release to update version
         working-directory: client
         run: npx semantic-release
+        continue-on-error: true
       - name: Commit version changes
         run: |
           git config --global user.name "GitHub Actions"
@@ -31,6 +32,7 @@ jobs:
           git add .
           git commit -m "chore: update client version"
           git push
+        continue-on-error: true
       - name: Get latest commit
         id: get-latest-commit
         run: echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
@@ -69,6 +71,7 @@ jobs:
           git add .
           git commit -m "chore: update server version"
           git push
+        continue-on-error: true
       - name: Get latest commit
         id: get-latest-commit
         run: echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT

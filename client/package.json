@@ -7,7 +7,7 @@
     "repositoryUrl": "https://github.com/StevanFreeborn/onx-graph.git",
     "branches": [
       "main",
-      "stevanfreeborn/chore/test-deploy-workflow"
+      "stevanfreeborn/chore/tesr-deploy-workflow"
     ],
     "plugins": [
       "@semantic-release/commit-analyzer"
