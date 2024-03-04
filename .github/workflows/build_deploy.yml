@@ -62,7 +62,7 @@ jobs:
         run: echo "${{ steps.get-version.outputs.version }}"
       - name: Run versionize to update version
         working-directory: server/Server.API
-        run: versionize -i --exit-insignificant-commits --changelog-all --workingDir ./server/Server.API
+        run: versionize -i --exit-insignificant-commits
         continue-on-error: true
       - name: Commit version changes
         run: |
@@ -100,8 +100,25 @@ jobs:
         working-directory: client
         env:
           VERSION: ${{ needs.version_client.outputs.version }}
+          VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          CI: true
         run: |
           docker compose build
           docker compose push
-      
-      
+  deploy:
+    name: Deploy
+    needs: build_images
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into server
+        uses: appleboy/ssh-action@master
+        env:
+          TEST: 'Passed from GitHub Actions'
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: TEST
+          script: |
+            export TEST=$TEST
+            echo $TEST
