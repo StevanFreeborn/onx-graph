@@ -127,51 +127,36 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ needs.version_server.outputs.commit }}
-      - name: Copy docker-compose file to server
+      - name: Generate .env file
+        run: |
+          echo "SERVER_VERSION=${{ needs.version_server.outputs.version }}" >> .env
+          echo "CLIENT_VERSION=${{ needs.version_client.outputs.version }}" >> .env
+          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
+          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
+          echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
+          echo "Logging__LogLevel__Default=${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}" >> .env
+          echo "AllowedHosts=${{ secrets.ALLOWEDHOSTS }}" >> .env
+          echo "JwtOptions__Secret=${{ secrets.JWTOPTIONS__SECRET }}" >> .env
+          echo "JwtOptions__Issuer=${{ secrets.JWTOPTIONS__ISSUER }}" >> .env
+          echo "JwtOptions__Audience=${{ secrets.JWTOPTIONS__AUDIENCE }}" >> .env
+          echo "JwtOptions__ExpiryInMinutes=${{ secrets.JWTOPTIONS__EXPIRYINMINUTES }}" >> .env
+          echo "MongoDbOptions__ConnectionString=${{ secrets.MONGODBOPTIONS__CONNECTIONSTRING }}" >> .env
+          echo "MongoDbOptions__DatabaseName=${{ secrets.MONGODBOPTIONS__DATABASENAME }}" >> .env
+          echo "CorsOptions__AllowedOrigins__0=${{ secrets.CORSOPTIONS__ALLOWEDORIGINS__0 }}" >> .env
+      - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: docker-compose.production.yml
+          source: "docker-compose.production.yml,.env"
           target: onx-graph
       - name: SSH into server and start containers
         uses: appleboy/ssh-action@master
-        env:
-          SERVER_VERSION: ${{ needs.version_server.outputs.version }}
-          CLIENT_VERSION: ${{ needs.version_client.outputs.version }}
-          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
-          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
-          MONGO_INITDB_DATABASE: ${{ secrets.MONGO_INITDB_DATABASE }}
-          Logging__LogLevel__Default: ${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}
-          AllowedHosts: ${{ secrets.ALLOWEDHOSTS }}
-          JwtOptions__Secret: ${{ secrets.JWTOPTIONS__SECRET }}
-          JwtOptions__Issuer: ${{ secrets.JWTOPTIONS__ISSUER }}
-          JwtOptions__Audience: ${{ secrets.JWTOPTIONS__AUDIENCE }}
-          JwtOptions__ExpiryInMinutes: 5
-          MongoDbOptions__ConnectionString: ${{ secrets.MONGODBOPTIONS__CONNECTIONSTRING }}
-          MongoDbOptions__DatabaseName: ${{ secrets.MONGODBOPTIONS__DATABASENAME}}
-          CorsOptions__AllowedOrigins__0: ${{ secrets.CORSOPTIONS__ALLOWEDORIGINS__0 }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          envs: SERVER_VERSION, CLIENT_VERSION, MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD, MONGO_INITDB_DATABASE, Logging__LogLevel__Default, AllowedHosts, JwtOptions__Secret, JwtOptions__Issuer, JwtOptions__Audience, JwtOptions__ExpiryInMinutes, MongoDbOptions__ConnectionString, MongoDbOptions__DatabaseName, CorsOptions__AllowedOrigins__0
           script: |
-            export SERVER_VERSION="$SERVER_VERSION"
-            export CLIENT_VERSION="$CLIENT_VERSION"
-            export MONGO_INITDB_ROOT_USERNAME="$MONGO_INITDB_ROOT_USERNAME"
-            export MONGO_INITDB_ROOT_PASSWORD="$MONGO_INITDB_ROOT_PASSWORD"
-            export MONGO_INITDB_DATABASE="$MONGO_INITDB_DATABASE"
-            export Logging__LogLevel__Default="$Logging__LogLevel__Default"
-            export AllowedHosts="$AllowedHosts"
-            export JwtOptions__Secret="$JwtOptions__Secret"
-            export JwtOptions__Issuer="$JwtOptions__Issuer"
-            export JwtOptions__Audience="$JwtOptions__Audience"
-            export JwtOptions__ExpiryInMinutes="5"
-            export MongoDbOptions__ConnectionString="$MongoDbOptions__ConnectionString"
-            export MongoDbOptions__DatabaseName="$MongoDbOptions__DatabaseName"
-            export CorsOptions__AllowedOrigins__0="$CorsOptions__AllowedOrigins__0"
-            echo "JwtOptions__ExpiryInMinutes=$JwtOptions__ExpiryInMinutes" >> .env
             docker compose -f onx-graph/docker-compose.production.yml down
             docker-compose -f onx-graph/docker-compose.production.yml up -d --wait
