@@ -160,3 +160,5 @@ jobs:
           script: |
             docker compose -f onx-graph/docker-compose.production.yml down
             docker-compose -f onx-graph/docker-compose.production.yml up -d --wait
+            rm onx-graph/docker-compose.production.yml
+            rm onx-graph/.env
