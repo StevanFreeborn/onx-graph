@@ -17,7 +17,7 @@ services:
     depends_on:
       - mongodb
     container_name: server-api-production
-    image: stevanfreeborn/onx-graph-server:${SERVER_VERSION}
+    image: stevanfreeborn/onx-graph-server:latest
     ports:
       - '3000:8080'
     restart: always
@@ -34,7 +34,7 @@ services:
       - CorsOptions__AllowedOrigins__0=${CorsOptions__AllowedOrigins__0}
   client:
     container_name: vue-client-production
-    image: stevanfreeborn/onx-graph-client:${CLIENT_VERSION}
+    image: stevanfreeborn/onx-graph-client:latest
     ports:
       - '3001:80'
     restart: always
