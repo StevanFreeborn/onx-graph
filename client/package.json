@@ -1,18 +1,8 @@
 {
   "name": "client",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
-  "release": {
-    "repositoryUrl": "https://github.com/StevanFreeborn/onx-graph.git",
-    "branches": [
-      "main",
-      "stevanfreeborn/chore/add-deploy-workflow"
-    ],
-    "plugins": [
-      "@semantic-release/commit-analyzer"
-    ]
-  },
   "scripts": {
     "dev": "vite",
     "dev:host": "vite --host 0.0.0.0",
