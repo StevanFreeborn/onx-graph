@@ -1,0 +1,42 @@
+version: '3.8'
+name: onxgraph-production
+services:
+  mongodb:
+    container_name: mongo-production
+    image: mongo:latest
+    ports:
+      - '2998:27017'
+    volumes:
+      - 'onxgraph_mongodb_production_data:/data/db'
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+  server:
+    depends_on:
+      - mongodb
+    container_name: server-api-production
+    image: stevanfreeborn/onx-graph-server:${SERVER_VERSION}
+    ports:
+      - '3000:8080'
+    restart: always
+    environment:
+      - Logging__LogLevel__Default=${Logging__LogLevel__Default}
+      - Logging__LogLevel__Microsoft.AspNetCore=${Logging__LogLevel__Microsoft.AspNetCore}
+      - AllowedHosts=${AllowedHosts}
+      - JwtOptions__Secret=${JwtOptions__Secret}
+      - JwtOptions__Issuer=${JwtOptions__Issuer}
+      - JwtOptions__Audience=${JwtOptions__Audience}
+      - JwtOptions__ExpiryInMinutes=${JwtOptions__ExpiryInMinutes}
+      - MongoDbOptions__ConnectionString=${MongoDbOptions__ConnectionString}
+      - MongoDbOptions__DatabaseName=${MongoDbOptions__DatabaseName}
+      - CorsOptions__AllowedOrigins__0=${CorsOptions__AllowedOrigins__0}
+  client:
+    container_name: vue-client-production
+    image: stevanfreeborn/onx-graph-client:${CLIENT_VERSION}
+    ports:
+      - '3001:80'
+    restart: always
+volumes:
+  onxgraph_mongodb_production_data:

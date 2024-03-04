@@ -33,7 +33,7 @@
   --color-heading: var(--vt-c-text-light-1);
   --color-text: var(--vt-c-text-light-1);
 
-  --section-gap: 160px;
+  --orange: hsla(33, 94%, 54%, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,7 +58,16 @@
   font-weight: normal;
 }
 
+ul,
+ul li {
+  margin: 0;
+  padding: 0;
+  text-indent: 0;
+  list-style-type: none;
+}
+
 body {
+  display: flex;
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);

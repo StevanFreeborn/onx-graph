@@ -1,0 +1,49 @@
+version: '3.8'
+name: onxgraph-test
+services:
+  mongodb:
+    container_name: mongo-test
+    image: mongo:latest
+    ports:
+      - '2998:27017'
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=testAdmin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=onxGraphTest
+    volumes:
+      - ./e2e/dbscripts:/docker-entrypoint-initdb.d
+  server:
+    depends_on:
+      - mongodb
+    container_name: server-test
+    build:
+      target: production-stage
+      context: ../server/Server.API/
+      dockerfile: Dockerfile
+    ports:
+      - '3000:8080'
+    restart: unless-stopped
+    environment:
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__Microsoft.AspNetCore=Warning
+      - AllowedHosts=*
+      - JwtOptions__Secret=qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q=
+      - JwtOptions__Issuer=TestIssuer
+      - JwtOptions__Audience=TestAudience
+      - JwtOptions__ExpiryInMinutes=5
+      - MongoDbOptions__ConnectionString=mongodb://testAdmin:password@mongodb:27017/onxGraphTest?authMechanism=SCRAM-SHA-256&authSource=admin&retryWrites=true&w=majority
+      - MongoDbOptions__DatabaseName=onxGraphTest
+      - CorsOptions__AllowedOrigins__0=http://localhost:3001
+  client:
+    container_name: client-test
+    build:
+      target: production-stage
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:3000
+        - CI=true
+    ports:
+      - '3001:80'
+    restart: unless-stopped

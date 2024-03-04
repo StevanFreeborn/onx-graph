@@ -1,7 +1,7 @@
 name: Pull Request - Server Changes
 env:
-  JwtOptions__Secret: qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q=
-  JwtOptions__Issuer: TesetIssuer
+  JwtOptions__Secret: qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q= # This is not a real secret.
+  JwtOptions__Issuer: TestIssuer
   JwtOptions__Audience: TestAudience
   JwtOptions__ExpiryInMinutes: 5
 defaults:
@@ -16,7 +16,34 @@ on:
     branches:
       - main
 jobs:
+  format:
+    name: Run dotnet format
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x.x
+      - name: Format project
+        run: dotnet format --verbosity normal
+      - name: Commit Changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "<>"
+          if [[ $(git status --porcelain) ]]; then
+            git add .
+            git commit -m "chore: format fixes [skip ci]"
+            git fetch origin
+            git pull --rebase origin ${{ github.head_ref }}
+            git push origin HEAD:${{ github.head_ref }}
+          fi
   build_and_test:
+    name: Runt tests
+    needs: format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -33,8 +60,6 @@ jobs:
         run: dotnet build --no-restore
       - name: Test project
         run: dotnet test -e DOTNET_ENVIRONMENT=CI --no-build --verbosity normal
-      - name: Print current directory
-        run: pwd
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:

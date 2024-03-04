@@ -13,6 +13,7 @@ dist
 dist-ssr
 coverage
 *.local
+.certs/
 
 /cypress/videos/
 /cypress/screenshots/
@@ -31,3 +32,8 @@ coverage
 
 test-results/
 playwright-report/
+
+.env*
+.flaskenv*
+!.env.project
+!.env.vault

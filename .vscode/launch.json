@@ -2,6 +2,29 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Vue Client - Docker",
+      "request": "launch",
+      "type": "msedge",
+      "webRoot": "${workspaceFolder}/client",
+      "url": "http://localhost:3001"
+    },
+    {
+      "name": "Server API - Docker",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:pickRemoteProcess}",
+      "pipeTransport": {
+          "pipeProgram": "docker",
+          "pipeArgs": [ "exec", "-i", "server-api-development" ],
+          "debuggerPath": "/root/vsdbg/vsdbg",
+          "pipeCwd": "${workspaceRoot}",
+          "quoteArgs": false
+      },
+      "sourceFileMap": {
+          "/app": "${workspaceRoot}/server/Server.API/"
+      }
+    },
+    {
       "name": "Vue Client",
       "request": "launch",
       "type": "msedge",
@@ -39,6 +62,10 @@
     {
       "name": "App",
       "configurations": ["Server API", "Vue Client"]
+    },
+    {
+      "name": "Dockerized App",
+      "configurations": ["Vue Client - Docker", "Server API - Docker"]
     }
   ]
 }

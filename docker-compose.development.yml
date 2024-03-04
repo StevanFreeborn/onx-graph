@@ -1,0 +1,57 @@
+version: '3.8'
+name: onxgraph-development
+services:
+  mongodb:
+    container_name: mongo-development
+    image: mongo:latest
+    ports:
+      - '2998:27017'
+    volumes:
+      - 'onxgraph_mongodb_development_data:/data/db'
+    restart: unless-stopped
+    env_file:
+      - server/server.API/.env
+  mongo-express:
+    depends_on:
+      - mongodb
+    container_name: mongo-express
+    image: mongo-express:latest
+    restart: unless-stopped
+    ports:
+      - 2999:8081
+    env_file:
+      - server/server.API/.env
+  server:
+    depends_on:
+      - mongodb
+    container_name: server-api-development
+    build:
+      target: development-stage
+      context: ./server/Server.API
+      dockerfile: Dockerfile
+    volumes:
+      - './server/Server.API:/app'
+      - '~/.aspnet/https:/https/'
+    ports:
+      - '3000:3000'
+    restart: unless-stopped
+    env_file:
+      - server/server.API/.env
+  client:
+    depends_on:
+      - server
+    container_name: vue-client-development
+    build:
+      target: development-stage
+      context: ./client
+      dockerfile: Dockerfile
+    volumes:
+      - './client:/app'
+      - '/app/node_modules'
+    ports:
+      - '3001:3001'
+    restart: unless-stopped
+    env_file:
+      - client/.env
+volumes:
+  onxgraph_mongodb_development_data:

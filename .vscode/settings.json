@@ -1,11 +1,17 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
   "dotnet.defaultSolution": "server/Server.sln",
   "cSpell.words": [
     "Bson",
+    "composables",
     "Hmac",
     "Instantiator",
     "Pinia",
+    "rushstack",
     "Swashbuckle",
-    "Testcontainers"
+    "Testcontainers",
+    "textbox"
   ]
 }

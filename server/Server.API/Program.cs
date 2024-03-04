@@ -7,8 +7,17 @@ config.AddEnvironmentVariables();
 // add logging
 builder.Host.UseSerilog(
   (context, loggerConfiguration) => loggerConfiguration
-    .ReadFrom.Configuration(config)
+    .MinimumLevel.Debug()
     .Enrich.FromLogContext()
+    .Enrich.WithMachineName()
+    .Enrich.WithThreadId()
+    .Enrich.WithProperty("Application", "Server.API")
+    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+    .WriteTo.File(
+      new CompactJsonFormatter(),
+      "logs/logs.json",
+      rollingInterval: RollingInterval.Day
+    )
 );
 
 
@@ -97,6 +106,21 @@ builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
 
 
+// add cors
+var corsOptions = new CorsOptions();
+config.GetSection(nameof(CorsOptions)).Bind(corsOptions);
+
+builder.Services.AddCors(
+  options => options.AddPolicy(
+    "CORSpolicy",
+    policy => policy
+      .AllowCredentials()
+      .AllowAnyHeader()
+      .AllowAnyMethod()
+      .WithOrigins(corsOptions.AllowedOrigins)
+  )
+);
+
 // add mongo db for persistence
 // add as singleton as client should be reused
 builder.Services.ConfigureOptions<MongoDbOptionsSetup>();
@@ -149,6 +173,10 @@ var versionSet = app.NewApiVersionSet()
 
 // map endpoints
 app.MapAuthEndpoints();
+
+
+// use cors
+app.UseCors("CORSpolicy");
 
 
 // wire up authentication and authorization

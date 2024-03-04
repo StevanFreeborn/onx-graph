@@ -21,8 +21,11 @@ class AuthorizeOperationFilter : IOperationFilter
           [
             new()
             {
-              Reference = new() {
-              Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+              Reference = new()
+              {
+                Type = ReferenceType.SecurityScheme,
+                Id = "Bearer"
+              }
             }
           ] = []
         }
