@@ -135,8 +135,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: docker-compose.production.yml
           target: onx-graph
-      - name: 'DEBUG: PRINT expiryInMinutes'
-        run: echo ${{ vars.JWTOPTIONS__EXPIRYINMINUTES }}
       - name: SSH into server and start containers
         uses: appleboy/ssh-action@master
         env:
@@ -150,7 +148,7 @@ jobs:
           JwtOptions__Secret: ${{ secrets.JWTOPTIONS__SECRET }}
           JwtOptions__Issuer: ${{ secrets.JWTOPTIONS__ISSUER }}
           JwtOptions__Audience: ${{ secrets.JWTOPTIONS__AUDIENCE }}
-          JwtOptions__ExpiryInMinutes: ${{ vars.JWTOPTIONS__EXPIRYINMINUTES }}
+          JwtOptions__ExpiryInMinutes: 5
           MongoDbOptions__ConnectionString: ${{ secrets.MONGODBOPTIONS__CONNECTIONSTRING }}
           MongoDbOptions__DatabaseName: ${{ secrets.MONGODBOPTIONS__DATABASENAME}}
           CorsOptions__AllowedOrigins__0: ${{ secrets.CORSOPTIONS__ALLOWEDORIGINS__0 }}
