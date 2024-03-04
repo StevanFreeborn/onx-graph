@@ -107,18 +107,58 @@ jobs:
           docker compose push
   deploy:
     name: Deploy
-    needs: build_images
+    needs: [version_client, version_server, build_images]
     runs-on: ubuntu-latest
     steps:
-      - name: SSH into server
-        uses: appleboy/ssh-action@master
-        env:
-          TEST: 'Passed from GitHub Actions'
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version_server.outputs.commit }}
+      - name: Copy docker-compose file to server
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          envs: TEST
+          source: docker-compose.production.yml
+          target: onx-graph
+      - name: SSH into server and start containers
+        uses: appleboy/ssh-action@master
+        env:
+          SERVER_VERSION: ${{ needs.version_server.outputs.version }}
+          CLIENT_VERSION: ${{ needs.version_client.outputs.version }}
+          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
+          MONGO_INITDB_DATABASE: ${{ secrets.MONGO_INITDB_DATABASE }}
+          Logging__LogLevel__Default: ${{ secrets.Logging__LogLevel__Default }}
+          Logging__LogLevel__Microsoft.AspNetCore: ${{ secrets.Logging__LogLevel__Microsoft_AspNetCore }}
+          AllowedHosts: ${{ secrets.AllowedHosts }}
+          JwtOptions__Secret: ${{ secrets.JwtOptions__Secret }}
+          JwtOptions__Issuer: ${{ secrets.JwtOptions__Issuer }}
+          JwtOptions__Audience: ${{ secrets.JwtOptions__Audience }}
+          JwtOptions__ExpiryInMinutes: ${{ secrets.JwtOptions__ExpiryInMinutes }}
+          MongoDbOptions__ConnectionString: ${{ secrets.MongoDbOptions__ConnectionString }}
+          MongoDbOptions__DatabaseName: ${{ secrets.MongoDbOptions__DatabaseName }}
+          CorsOptions__AllowedOrigins__0: ${{ secrets.CorsOptions__AllowedOrigins__0 }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: TEST, SERVER_VERSION, CLIENT_VERSION, MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD, MONGO_INITDB_DATABASE, Logging__LogLevel__Default, Logging__LogLevel__Microsoft.AspNetCore, AllowedHosts, JwtOptions__Secret, JwtOptions__Issuer, JwtOptions__Audience, JwtOptions__ExpiryInMinutes, MongoDbOptions__ConnectionString, MongoDbOptions__DatabaseName, CorsOptions__AllowedOrigins__0
           script: |
-            export TEST=$TEST
-            echo $TEST
+            export SERVER_VERSION=$SERVER_VERSION
+            export CLIENT_VERSION=$CLIENT_VERSION
+            export MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME
+            export MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
+            export MONGO_INITDB_DATABASE=$MONGO_INITDB_DATABASE
+            export Logging__LogLevel__Default=$Logging__LogLevel__Default
+            export Logging__LogLevel__Microsoft.AspNetCore=$Logging__LogLevel__Microsoft.AspNetCore
+            export AllowedHosts=$AllowedHosts
+            export JwtOptions__Secret=$JwtOptions__Secret
+            export JwtOptions__Issuer=$JwtOptions__Issuer
+            export JwtOptions__Audience=$JwtOptions__Audience
+            export JwtOptions__ExpiryInMinutes=$JwtOptions__ExpiryInMinutes
+            export MongoDbOptions__ConnectionString=$MongoDbOptions__ConnectionString
+            export MongoDbOptions__DatabaseName=$MongoDbOptions__DatabaseName
+            export CorsOptions__AllowedOrigins__0=$CorsOptions__AllowedOrigins__0
+            docker-compose -f onx-graph/docker-compose.production.yml up -d --wait
