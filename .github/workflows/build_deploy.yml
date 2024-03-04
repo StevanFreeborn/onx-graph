@@ -1,6 +1,19 @@
 name: Build and Deploy
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*/README.md'
+      - '**/*/LICENSE.md'
+      - '**/*/docker-compose*.yml'
+      - '**/*/.gitingore'
+      - '**/*/.dockerignore'
+      - '**/*/.editorconfig'
+      - '**/*/Dockerfile'
+      - '.vscode/**'
+      - '.github/**'
 jobs:
   version_client:
     name: Version client
