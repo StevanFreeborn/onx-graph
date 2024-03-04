@@ -135,6 +135,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: docker-compose.production.yml
           target: onx-graph
+      - name: 'DEBUG: PRINT expiryInMinutes'
+        run: echo ${{ secrets.JWTOPTIONS__EXPIRYINMINUTES }}
       - name: SSH into server and start containers
         uses: appleboy/ssh-action@master
         env:
@@ -143,15 +145,15 @@ jobs:
           MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
           MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
           MONGO_INITDB_DATABASE: ${{ secrets.MONGO_INITDB_DATABASE }}
-          Logging__LogLevel__Default: ${{ secrets.Logging__LogLevel__Default }}
-          AllowedHosts: ${{ secrets.AllowedHosts }}
-          JwtOptions__Secret: ${{ secrets.JwtOptions__Secret }}
-          JwtOptions__Issuer: ${{ secrets.JwtOptions__Issuer }}
-          JwtOptions__Audience: ${{ secrets.JwtOptions__Audience }}
-          JwtOptions__ExpiryInMinutes: ${{ secrets.JwtOptions__ExpiryInMinutes }}
-          MongoDbOptions__ConnectionString: ${{ secrets.MongoDbOptions__ConnectionString }}
-          MongoDbOptions__DatabaseName: ${{ secrets.MongoDbOptions__DatabaseName }}
-          CorsOptions__AllowedOrigins__0: ${{ secrets.CorsOptions__AllowedOrigins__0 }}
+          Logging__LogLevel__Default: ${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}
+          AllowedHosts: ${{ secrets.ALLOWEDHOSTS }}
+          JwtOptions__Secret: ${{ secrets.JWTOPTIONS__SECRET }}
+          JwtOptions__Issuer: ${{ secrets.JWTOPTIONS__ISSUER }}
+          JwtOptions__Audience: ${{ secrets.JWTOPTIONS__AUDIENCE }}
+          JwtOptions__ExpiryInMinutes: ${{ secrets.JWTOPTIONS__EXPIRYINMINUTES }}
+          MongoDbOptions__ConnectionString: ${{ secrets.MONGODBOPTIONS__CONNECTIONSTRING }}
+          MongoDbOptions__DatabaseName: ${{ secrets.MONGODBOPTIONS__DATABASENAME}}
+          CorsOptions__AllowedOrigins__0: ${{ secrets.CORSOPTIONS__ALLOWEDORIGINS__0 }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -172,6 +174,6 @@ jobs:
             export MongoDbOptions__ConnectionString=$MongoDbOptions__ConnectionString
             export MongoDbOptions__DatabaseName=$MongoDbOptions__DatabaseName
             export CorsOptions__AllowedOrigins__0=$CorsOptions__AllowedOrigins__0
-            echo "CLIENT_VERSION=$CLIENT_VERSION" > onx-graph/.env
+            echo "JwtOptions__ExpiryInMinutes=$JwtOptions__ExpiryInMinutes" >> .env
             docker compose -f onx-graph/docker-compose.production.yml down
             docker-compose -f onx-graph/docker-compose.production.yml up -d --wait
