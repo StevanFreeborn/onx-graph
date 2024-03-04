@@ -1,0 +1,37 @@
+name: Build and Deploy
+on:
+  workflow_dispatch:
+jobs:
+  version_client:
+    name: Version client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - name: Get current version
+        id: get-current-version
+        working-directory: client
+        run: echo "version=$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT
+      - name: Print current version
+        run: echo "${{ steps.get-current-version.outputs.version }}"
+  version_server:
+    name: Version server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x.x
+      - name: Get current version
+        id: get-version
+        uses: kzrnm/get-net-sdk-project-versions-action@v2
+        with:
+          proj-path: server/Server.API/Server.API.csproj
+      - name: Print current version
+        run: echo "${{ steps.get-version.outputs.version }}"
