@@ -168,7 +168,7 @@ jobs:
             export JwtOptions__Secret="$JwtOptions__Secret"
             export JwtOptions__Issuer="$JwtOptions__Issuer"
             export JwtOptions__Audience="$JwtOptions__Audience"
-            export JwtOptions__ExpiryInMinutes="$JwtOptions__ExpiryInMinutes"
+            export JwtOptions__ExpiryInMinutes="5"
             export MongoDbOptions__ConnectionString="$MongoDbOptions__ConnectionString"
             export MongoDbOptions__DatabaseName="$MongoDbOptions__DatabaseName"
             export CorsOptions__AllowedOrigins__0="$CorsOptions__AllowedOrigins__0"
