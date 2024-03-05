@@ -32,6 +32,19 @@ static class AuthController
       );
     }
 
+    var emailMessage = new EmailMessage
+    {
+      To = req.Dto.Email,
+      Subject = "Welcome to OnxGraph! Verify your account to get started.",
+      Content = """
+        <h1>Welcome to OnxGraph!</h1>
+        <p>Click the link below to verify your account and get started.</p>
+        <a href='https://onxgraph.com/verify-account'>Verify Account</a>
+      """
+    };
+
+    await req.EmailService.SendEmailAsync(emailMessage);
+
     return Results.Created(
       uri: $"/users/{registrationResult.Value}",
       value: new RegisterUserResponse(registrationResult.Value)
