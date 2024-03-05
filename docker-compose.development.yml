@@ -1,6 +1,16 @@
 version: '3.8'
 name: onxgraph-development
 services:
+  mailhog:
+    container_name: mailhog-development
+    image: mailhog/mailhog:latest
+    command: ["-storage=maildir", "-maildir-path=/maildir"]
+    volumes:
+      - "mailhog_development_data:/maildir"
+    ports:
+      - "2996:1025"
+      - "2997:8025"
+    restart: unless-stopped
   mongodb:
     container_name: mongo-development
     image: mongo:latest
@@ -55,3 +65,4 @@ services:
       - client/.env
 volumes:
   onxgraph_mongodb_development_data:
+  mailhog_development_data:
