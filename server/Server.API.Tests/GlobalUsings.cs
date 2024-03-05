@@ -37,6 +37,7 @@ global using Server.API.Persistence.Mongo;
 global using Server.API.Tests.Data;
 global using Server.API.Tests.Integration.Fixtures;
 global using Server.API.Tests.Integration.Utilities;
+global using Server.API.Email;
 
 global using Testcontainers.MongoDb;
 

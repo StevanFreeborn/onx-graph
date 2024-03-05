@@ -47,7 +47,8 @@ class RegisterDtoValidator : AbstractValidator<RegisterDto>
 record RegisterRequest(
   [FromBody] RegisterDto Dto,
   [FromServices] IValidator<RegisterDto> Validator,
-  [FromServices] IUserService UserService
+  [FromServices] IUserService UserService,
+  [FromServices] IEmailService EmailService
 );
 
 /// <summary>

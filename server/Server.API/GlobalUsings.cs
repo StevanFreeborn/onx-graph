@@ -35,5 +35,6 @@ global using Server.API.Identity;
 global using Server.API.Middleware;
 global using Server.API.Persistence.Mongo;
 global using Server.API.Swagger;
+global using Server.API.Email;
 
 global using Swashbuckle.AspNetCore.SwaggerGen;

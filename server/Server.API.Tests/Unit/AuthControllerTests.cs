@@ -8,8 +8,17 @@ public class AuthControllerTests
   private readonly Mock<HttpContext> _httpContextMock = new();
   private readonly Mock<IUserService> _userServiceMock = new();
   private readonly Mock<ITokenService> _tokenServiceMock = new();
+  private readonly Mock<IEmailService> _emailServiceMock = new();
   private readonly Mock<IValidator<RegisterDto>> _registerDtoValidatorMock = new();
   private readonly Mock<IValidator<LoginDto>> _loginDtoValidatorMock = new();
+
+  private RegisterRequest CreateRegisterRequest(RegisterDto dto) =>
+    new(
+      dto,
+      _registerDtoValidatorMock.Object,
+      _userServiceMock.Object,
+      _emailServiceMock.Object
+    );
 
   [Fact]
   public async Task Register_WhenRegistrationFails_ItShouldReturnProblemDetailWith409StatusCode()
@@ -27,11 +36,7 @@ public class AuthControllerTests
       .Setup(u => u.RegisterUserAsync(It.IsAny<User>()))
       .ReturnsAsync(registrationResult);
 
-    var req = new RegisterRequest(
-      dto,
-      _registerDtoValidatorMock.Object,
-      _userServiceMock.Object
-    );
+    var req = CreateRegisterRequest(dto);
 
     var result = await AuthController.Register(req);
 
@@ -80,11 +85,7 @@ public class AuthControllerTests
       .Setup(v => v.ValidateAsync(It.IsAny<RegisterDto>(), default))
       .ReturnsAsync(validationResult);
 
-    var req = new RegisterRequest(
-      dto,
-      _registerDtoValidatorMock.Object,
-      _userServiceMock.Object
-    );
+    var req = CreateRegisterRequest(dto);
 
     var result = await AuthController.Register(req);
 
@@ -126,11 +127,7 @@ public class AuthControllerTests
       .Setup(v => v.ValidateAsync(It.IsAny<RegisterDto>(), default))
       .ReturnsAsync(validationResult);
 
-    var req = new RegisterRequest(
-      dto,
-      _registerDtoValidatorMock.Object,
-      _userServiceMock.Object
-    );
+    var req = CreateRegisterRequest(dto);
 
     var result = await AuthController.Register(req);
 
@@ -170,11 +167,7 @@ public class AuthControllerTests
       .Setup(u => u.RegisterUserAsync(It.IsAny<User>()))
       .ReturnsAsync(registrationResult);
 
-    var req = new RegisterRequest(
-      dto,
-      _registerDtoValidatorMock.Object,
-      _userServiceMock.Object
-    );
+    var req = CreateRegisterRequest(dto);
 
     var result = await AuthController.Register(req);
 
@@ -197,6 +190,58 @@ public class AuthControllerTests
   }
 
   [Fact]
+  public async Task Register_WhenRegistrationSucceeds_ItShouldSendAVerificationEmail()
+  {
+    var dto = new RegisterDto("test@test.com", "@Password1234");
+    var validationResult = new ValidationResult();
+
+    _registerDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<RegisterDto>(), default))
+      .ReturnsAsync(validationResult);
+
+    var registrationResult = Result.Ok("test");
+
+    _userServiceMock
+      .Setup(u => u.RegisterUserAsync(It.IsAny<User>()))
+      .ReturnsAsync(registrationResult);
+
+    var req = CreateRegisterRequest(dto);
+
+    var result = await AuthController.Register(req);
+
+    result.Should()
+      .BeOfType<Created<RegisterUserResponse>>();
+
+    var createdResponse = result.As<Created<RegisterUserResponse>>();
+
+    createdResponse.StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.Created);
+
+    createdResponse.Value
+      .Should()
+      .BeOfType<RegisterUserResponse>();
+
+    createdResponse.Value?.Id
+      .Should()
+      .Be(registrationResult.Value);
+
+    _emailServiceMock
+      .Verify(
+        e => e.SendEmailAsync(It.IsAny<EmailMessage>()),
+        Times.Once
+      );
+  }
+
+  private LoginRequest CreateLoginRequest(LoginDto dto) =>
+    new(
+      _httpContextMock.Object,
+      dto,
+      _loginDtoValidatorMock.Object,
+      _userServiceMock.Object
+    );
+
+  [Fact]
   public async Task Login_WhenNoEmailIsProvided_ItShouldReturnAValidationProblemDetailWith400StatusCode()
   {
     var expectedEmailKey = "Email";
@@ -214,12 +259,7 @@ public class AuthControllerTests
       .Setup(v => v.ValidateAsync(It.IsAny<LoginDto>(), default))
       .ReturnsAsync(validationResult);
 
-    var req = new LoginRequest(
-      _httpContextMock.Object,
-      dto,
-      _loginDtoValidatorMock.Object,
-      _userServiceMock.Object
-    );
+    var req = CreateLoginRequest(dto);
 
     var result = await AuthController.Login(req);
 
@@ -261,12 +301,7 @@ public class AuthControllerTests
       .Setup(v => v.ValidateAsync(It.IsAny<LoginDto>(), default))
       .ReturnsAsync(validationResult);
 
-    var req = new LoginRequest(
-      _httpContextMock.Object,
-      dto,
-      _loginDtoValidatorMock.Object,
-      _userServiceMock.Object
-    );
+    var req = CreateLoginRequest(dto);
 
     var result = await AuthController.Login(req);
 
@@ -308,12 +343,7 @@ public class AuthControllerTests
       .Setup(v => v.ValidateAsync(It.IsAny<LoginDto>(), default))
       .ReturnsAsync(validationResult);
 
-    var req = new LoginRequest(
-      _httpContextMock.Object,
-      dto,
-      _loginDtoValidatorMock.Object,
-      _userServiceMock.Object
-    );
+    var req = CreateLoginRequest(dto);
 
     var result = await AuthController.Login(req);
 
@@ -353,12 +383,7 @@ public class AuthControllerTests
       .Setup(u => u.LoginUserAsync(It.IsAny<string>(), It.IsAny<string>()))
       .ReturnsAsync(loginResult);
 
-    var req = new LoginRequest(
-      _httpContextMock.Object,
-      dto,
-      _loginDtoValidatorMock.Object,
-      _userServiceMock.Object
-    );
+    var req = CreateLoginRequest(dto);
 
     var result = await AuthController.Login(req);
 
@@ -403,12 +428,7 @@ public class AuthControllerTests
       .Setup(c => c.Response)
       .Returns(responseMock.Object);
 
-    var req = new LoginRequest(
-      _httpContextMock.Object,
-      dto,
-      _loginDtoValidatorMock.Object,
-      _userServiceMock.Object
-    );
+    var req = CreateLoginRequest(dto);
 
     var result = await AuthController.Login(req);
 
@@ -430,6 +450,12 @@ public class AuthControllerTests
       .Be(loginResult.Value.AccessToken);
   }
 
+  private LogoutRequest CreateLogoutRequest() =>
+    new(
+      _httpContextMock.Object,
+      _tokenServiceMock.Object
+    );
+
   [Fact]
   public async Task Logout_WhenUserIsNotAuthenticated_ItShouldReturnAProblemDetailWith401StatusCode()
   {
@@ -437,10 +463,7 @@ public class AuthControllerTests
       .Setup(c => c.User)
       .Returns(new ClaimsPrincipal());
 
-    var req = new LogoutRequest(
-      _httpContextMock.Object,
-      _tokenServiceMock.Object
-    );
+    var req = CreateLogoutRequest();
 
     var result = await AuthController.Logout(req);
 
@@ -477,10 +500,7 @@ public class AuthControllerTests
       .Setup(c => c.Response.Cookies)
       .Returns(new Mock<IResponseCookies>().Object);
 
-    var req = new LogoutRequest(
-      _httpContextMock.Object,
-      _tokenServiceMock.Object
-    );
+    var req = CreateLogoutRequest();
 
     var result = await AuthController.Logout(req);
 
@@ -539,10 +559,7 @@ public class AuthControllerTests
       .Setup(c => c.Response.Cookies)
       .Returns(new Mock<IResponseCookies>().Object);
 
-    var req = new LogoutRequest(
-      _httpContextMock.Object,
-      _tokenServiceMock.Object
-    );
+    var req = CreateLogoutRequest();
 
     var result = await AuthController.Logout(req);
 
@@ -567,6 +584,12 @@ public class AuthControllerTests
       );
   }
 
+  private RefreshTokenRequest CreateRefreshTokenRequest() =>
+    new(
+      _httpContextMock.Object,
+      _tokenServiceMock.Object
+    );
+
   [Fact]
   public async Task RefreshToken_WhenUserIsNotAuthenticated_ItShouldReturnAUnauthorizedResults()
   {
@@ -578,10 +601,7 @@ public class AuthControllerTests
       .Setup(c => c.Request.Cookies)
       .Returns(new Mock<IRequestCookieCollection>().Object);
 
-    var req = new RefreshTokenRequest(
-      _httpContextMock.Object,
-      _tokenServiceMock.Object
-    );
+    var req = CreateRefreshTokenRequest();
 
     var result = await AuthController.RefreshToken(req);
 
@@ -614,10 +634,7 @@ public class AuthControllerTests
       .Setup(c => c.Request.Cookies)
       .Returns(new Mock<IRequestCookieCollection>().Object);
 
-    var req = new RefreshTokenRequest(
-      _httpContextMock.Object,
-      _tokenServiceMock.Object
-    );
+    var req = CreateRefreshTokenRequest();
 
     var result = await AuthController.RefreshToken(req);
 
@@ -676,10 +693,7 @@ public class AuthControllerTests
       .Setup(c => c.Response)
       .Returns(responseMock.Object);
 
-    var req = new RefreshTokenRequest(
-      _httpContextMock.Object,
-      _tokenServiceMock.Object
-    );
+    var req = CreateRefreshTokenRequest();
 
     var result = await AuthController.RefreshToken(req);
 
