@@ -4,8 +4,8 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
 {
   public void Dispose()
   {
-    context.Users.DeleteMany(_ => true);
-    context.Tokens.DeleteMany(_ => true);
+    Context.Users.DeleteMany(_ => true);
+    Context.Tokens.DeleteMany(_ => true);
     GC.SuppressFinalize(this);
   }
 
@@ -31,6 +31,36 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
     registerResponseBody?.Id
       .Should()
       .NotBeNullOrEmpty();
+  }
+
+  [Fact]
+  public async Task Register_WhenCalledAndGivenValidEmailAndPassword_ItShouldSendVerificationEmail()
+  {
+    var (password, _) = FakeDataFactory.TestUser.Generate();
+    var testEmail = $"test.user.{Guid.NewGuid()}@test.com";
+
+    var registerResponse = await _client.PostAsJsonAsync("/auth/register", new
+    {
+      email = testEmail,
+      password
+    });
+
+    registerResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+
+    var registerResponseBody = await registerResponse.Content.ReadFromJsonAsync<RegisterUserResponse>();
+
+    registerResponseBody
+      .Should()
+      .NotBeNull();
+
+    registerResponseBody?.Id
+      .Should()
+      .NotBeNullOrEmpty();
+
+    var emailSearchResult = await _mailHogService.SearchEmailAsync(new(MailHogSearchKind.To, testEmail));
+    emailSearchResult.Count.Should().Be(1);
+    emailSearchResult.Messages.Should().NotBeNullOrEmpty();
+    emailSearchResult.Messages.First().To.Should().ContainSingle(t => t.Mailbox == testEmail);
   }
 
   [Fact]
@@ -86,7 +116,7 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   {
     var (userPassword, alreadyExistingUser) = FakeDataFactory.TestUser.Generate();
 
-    await context.Users.InsertOneAsync(alreadyExistingUser);
+    await Context.Users.InsertOneAsync(alreadyExistingUser);
 
     var registerResponse = await _client.PostAsJsonAsync("/auth/register", new
     {
@@ -110,7 +140,7 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   {
     var (userPassword, existingUser) = FakeDataFactory.TestUser.Generate();
 
-    await context.Users.InsertOneAsync(existingUser);
+    await Context.Users.InsertOneAsync(existingUser);
 
     var loginResponse = await _client.PostAsJsonAsync("/auth/login", new
     {
@@ -142,7 +172,7 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   {
     var (userPassword, existingUser) = FakeDataFactory.TestUser.Generate();
 
-    await context.Users.InsertOneAsync(existingUser);
+    await Context.Users.InsertOneAsync(existingUser);
 
     var loginResponse = await _client.PostAsJsonAsync("/auth/login", new
     {
@@ -170,7 +200,7 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   {
     var (userPassword, existingUser) = FakeDataFactory.TestUser.Generate();
 
-    await context.Users.InsertOneAsync(existingUser);
+    await Context.Users.InsertOneAsync(existingUser);
 
     var loginResponse = await _client.PostAsJsonAsync("/auth/login", new
     {
@@ -206,7 +236,7 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   {
     var (_, existingUser) = FakeDataFactory.TestUser.Generate();
 
-    await context.Users.InsertOneAsync(existingUser);
+    await Context.Users.InsertOneAsync(existingUser);
 
     var loginResponse = await _client.PostAsJsonAsync("/auth/login", new
     {
@@ -302,8 +332,8 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .WithClaim(new(JwtRegisteredClaimNames.Sub, existingUser.Id))
       .Build();
 
-    await context.Users.InsertOneAsync(existingUser);
-    await context.Tokens.InsertOneAsync(userRefreshToken);
+    await Context.Users.InsertOneAsync(existingUser);
+    await Context.Tokens.InsertOneAsync(userRefreshToken);
 
     _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
 
@@ -321,7 +351,7 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .Should()
       .Contain(h => h.Key == "Set-Cookie" && h.Value.Any(v => v.Contains("onxRefreshToken")));
 
-    var revokedToken = await context.Tokens
+    var revokedToken = await Context.Tokens
       .Find(t => t.Id == userRefreshToken.Id)
       .FirstOrDefaultAsync();
 
@@ -361,8 +391,8 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .Build();
     var refreshToken = FakeDataFactory.RefreshToken.Generate() with { UserId = existingUser.Id };
 
-    await context.Tokens.InsertOneAsync(refreshToken);
-    await context.Users.InsertOneAsync(existingUser);
+    await Context.Tokens.InsertOneAsync(refreshToken);
+    await Context.Users.InsertOneAsync(existingUser);
 
     _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
 
@@ -447,7 +477,7 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .WithClaim(new(JwtRegisteredClaimNames.Sub, "non_existing_user_id"))
       .Build();
 
-    await context.Tokens.InsertOneAsync(refreshToken);
+    await Context.Tokens.InsertOneAsync(refreshToken);
 
     _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
 
@@ -487,8 +517,8 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .WithClaim(new(JwtRegisteredClaimNames.Sub, existingUser.Id))
       .Build();
 
-    await context.Tokens.InsertOneAsync(refreshToken);
-    await context.Users.InsertOneAsync(existingUser);
+    await Context.Tokens.InsertOneAsync(refreshToken);
+    await Context.Users.InsertOneAsync(existingUser);
 
     _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
 
@@ -523,8 +553,8 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .WithClaim(new(JwtRegisteredClaimNames.Sub, existingUser.Id))
       .Build();
 
-    await context.Tokens.InsertOneAsync(refreshToken);
-    await context.Users.InsertOneAsync(existingUser);
+    await Context.Tokens.InsertOneAsync(refreshToken);
+    await Context.Users.InsertOneAsync(existingUser);
 
     _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
 
@@ -559,8 +589,8 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .WithClaim(new(JwtRegisteredClaimNames.Sub, existingUser.Id))
       .Build();
 
-    await context.Tokens.InsertOneAsync(refreshToken);
-    await context.Users.InsertOneAsync(existingUser);
+    await Context.Tokens.InsertOneAsync(refreshToken);
+    await Context.Users.InsertOneAsync(existingUser);
 
     _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
 
@@ -588,7 +618,7 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .Should()
       .NotBeNullOrEmpty();
 
-    var existingRefreshToken = await context.Tokens
+    var existingRefreshToken = await Context.Tokens
       .Find(t => t.Id == refreshToken.Id)
       .FirstOrDefaultAsync();
 

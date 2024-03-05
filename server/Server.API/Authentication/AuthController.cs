@@ -32,14 +32,20 @@ static class AuthController
       );
     }
 
+    var baseURL = $"{req.Context.Request.Scheme}://{req.Context.Request.Host}";
+
     var emailMessage = new EmailMessage
     {
       To = req.Dto.Email,
       Subject = "Welcome to OnxGraph! Verify your account to get started.",
-      Content = """
+      Content = $"""
         <h1>Welcome to OnxGraph!</h1>
-        <p>Click the link below to verify your account and get started.</p>
-        <a href='https://onxgraph.com/verify-account'>Verify Account</a>
+        <p>We're excited to welcome you to OnxGraph! Before you begin we need to verify your account. Follow these steps to complete the verification process:</p>
+        <p>Click the link below to verify your account:</p>
+        <a href='{baseURL}/verify-account'>Verify Account</a>
+        <p>If the link isn't clickable, you can copy and paste this URL into your browser:</p>
+        <p>{baseURL}/verify-account</p>
+        <p>If you didn't create an account with OnxGraph, please ignore this email.</p>
       """
     };
 

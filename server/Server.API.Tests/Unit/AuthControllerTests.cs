@@ -15,6 +15,7 @@ public class AuthControllerTests
   private RegisterRequest CreateRegisterRequest(RegisterDto dto) =>
     new(
       dto,
+      _httpContextMock.Object,
       _registerDtoValidatorMock.Object,
       _userServiceMock.Object,
       _emailServiceMock.Object
