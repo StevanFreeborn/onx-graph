@@ -137,6 +137,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton(TimeProvider.System);
 
 
+// add email service
+builder.Services.AddScoped<IEmailService, DotNetEmailService>();
+
+
 // build the app
 var app = builder.Build();
 
