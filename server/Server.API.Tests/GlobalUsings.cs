@@ -42,3 +42,5 @@ global using Server.API.Email;
 global using Testcontainers.MongoDb;
 
 global using Xunit;
+global using DotNet.Testcontainers.Builders;
+global using DotNet.Testcontainers.Containers;

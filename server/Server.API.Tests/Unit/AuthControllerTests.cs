@@ -1,3 +1,5 @@
+using Server.API.Configuration;
+
 using ValidationFailure = FluentValidation.Results.ValidationFailure;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
@@ -6,19 +8,22 @@ namespace Server.API.Tests.Unit;
 public class AuthControllerTests
 {
   private readonly Mock<HttpContext> _httpContextMock = new();
+  private readonly Mock<IOptions<CorsOptions>> _corsOptions = new();
   private readonly Mock<IUserService> _userServiceMock = new();
   private readonly Mock<ITokenService> _tokenServiceMock = new();
   private readonly Mock<IEmailService> _emailServiceMock = new();
+  private readonly Mock<ILogger<RegisterRequest>> _loggerMock = new();
   private readonly Mock<IValidator<RegisterDto>> _registerDtoValidatorMock = new();
   private readonly Mock<IValidator<LoginDto>> _loginDtoValidatorMock = new();
 
   private RegisterRequest CreateRegisterRequest(RegisterDto dto) =>
     new(
       dto,
-      _httpContextMock.Object,
+      _corsOptions.Object,
       _registerDtoValidatorMock.Object,
       _userServiceMock.Object,
-      _emailServiceMock.Object
+      _emailServiceMock.Object,
+      _loggerMock.Object
     );
 
   [Fact]
@@ -158,9 +163,22 @@ public class AuthControllerTests
     var dto = new RegisterDto("test@test.com", "@Password1234");
     var validationResult = new ValidationResult();
 
+    _corsOptions
+      .Setup(c => c.Value)
+      .Returns(
+        new CorsOptions
+        {
+          AllowedOrigins = ["http://localhost:3000"]
+        }
+      );
+
     _registerDtoValidatorMock
       .Setup(v => v.ValidateAsync(It.IsAny<RegisterDto>(), default))
       .ReturnsAsync(validationResult);
+
+    _emailServiceMock
+      .Setup(e => e.SendEmailAsync(It.IsAny<EmailMessage>()))
+      .ReturnsAsync(Result.Ok());
 
     var registrationResult = Result.Ok("test");
 
@@ -195,6 +213,19 @@ public class AuthControllerTests
   {
     var dto = new RegisterDto("test@test.com", "@Password1234");
     var validationResult = new ValidationResult();
+
+    _corsOptions
+      .Setup(c => c.Value)
+      .Returns(
+        new CorsOptions
+        {
+          AllowedOrigins = ["http://localhost:3000"]
+        }
+      );
+
+    _emailServiceMock
+      .Setup(e => e.SendEmailAsync(It.IsAny<EmailMessage>()))
+      .ReturnsAsync(Result.Fail(new EmailFailedError()));
 
     _registerDtoValidatorMock
       .Setup(v => v.ValidateAsync(It.IsAny<RegisterDto>(), default))

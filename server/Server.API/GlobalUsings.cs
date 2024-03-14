@@ -38,3 +38,4 @@ global using Server.API.Swagger;
 global using Server.API.Email;
 
 global using Swashbuckle.AspNetCore.SwaggerGen;
+global using System.Net.Mail;

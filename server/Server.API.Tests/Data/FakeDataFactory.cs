@@ -35,6 +35,17 @@ static class FakeDataFactory
     .RuleFor(t => t.ExpiresAt, f => DateTime.UtcNow.AddHours(12))
     .RuleFor(t => t.Revoked, false)
     .RuleFor(t => t.TokenType, TokenType.Refresh);
+
+  internal static readonly Faker<SmtpOptions> SmtpOptions = new Faker<SmtpOptions>()
+    .RuleFor(t => t.SmtpAddress, f => f.Internet.Ip())
+    .RuleFor(t => t.SmtpPort, f => f.Random.Int(1, 65535))
+    .RuleFor(t => t.SenderEmail, f => f.Internet.Email())
+    .RuleFor(t => t.SenderPassword, f => string.Empty);
+
+  internal static readonly Faker<EmailMessage> EmailMessage = new Faker<EmailMessage>()
+    .RuleFor(t => t.Subject, f => f.Lorem.Sentence())
+    .RuleFor(t => t.HtmlContent, f => f.Lorem.Paragraphs(3))
+    .RuleFor(t => t.To, f => f.Person.Email);
 }
 
 /// <summary>

@@ -38,6 +38,9 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
   {
     var (password, _) = FakeDataFactory.TestUser.Generate();
     var testEmail = $"test.user.{Guid.NewGuid()}@test.com";
+    var emailParts = testEmail.Split('@');
+    var testMailbox = emailParts[0];
+    var testDomain = emailParts[1];
 
     var registerResponse = await _client.PostAsJsonAsync("/auth/register", new
     {
@@ -59,8 +62,12 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
 
     var emailSearchResult = await _mailHogService.SearchEmailAsync(new(MailHogSearchKind.To, testEmail));
     emailSearchResult.Count.Should().Be(1);
-    emailSearchResult.Messages.Should().NotBeNullOrEmpty();
-    emailSearchResult.Messages.First().To.Should().ContainSingle(t => t.Mailbox == testEmail);
+    emailSearchResult.Items.Should().NotBeNullOrEmpty();
+    emailSearchResult.Items.First().To
+      .Should()
+      .ContainSingle(t =>
+        t.Mailbox == testMailbox && t.Domain == testDomain
+      );
   }
 
   [Fact]

@@ -1,5 +1,4 @@
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
+using Server.API.Configuration;
 
 namespace Server.API.Tests.Integration.Fixtures;
 
@@ -41,6 +40,19 @@ public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
       {
         options.ConnectionString = _mongoDbContainer.GetConnectionString();
         options.DatabaseName = "tests";
+      });
+
+      services.Configure<SmtpOptions>(options =>
+      {
+        options.SmtpAddress = _mailHogContainer.Hostname;
+        options.SmtpPort = _mailHogContainer.GetMappedPublicPort(1025);
+        options.SenderEmail = "onxGraphTesting@test.com";
+        options.SenderPassword = string.Empty;
+      });
+
+      services.Configure<CorsOptions>(options =>
+      {
+        options.AllowedOrigins = ["https://localhost:3001"];
       });
 
       var mailHogBaseUrl = $"http://{_mailHogContainer.Hostname}:{_mailHogContainer.GetMappedPublicPort(8025)}";

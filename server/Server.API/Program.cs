@@ -138,6 +138,8 @@ builder.Services.AddSingleton(TimeProvider.System);
 
 
 // add email service
+builder.Services.ConfigureOptions<SmtpOptionsSetup>();
+builder.Services.AddTransient<IEmailClient, SmtpEmailClient>();
 builder.Services.AddScoped<IEmailService, DotNetEmailService>();
 
 

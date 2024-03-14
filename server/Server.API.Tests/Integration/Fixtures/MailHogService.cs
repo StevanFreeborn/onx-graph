@@ -22,7 +22,7 @@ public class MailHogService(HttpClient client)
 
 public class MailHogSearchResult
 {
-  public List<MailHogMessage> Messages { get; init; } = [];
+  public List<MailHogMessage> Items { get; init; } = [];
   public int Total { get; init; } = 0;
   public int Start { get; init; } = 0;
   public int Count { get; init; } = 0;
