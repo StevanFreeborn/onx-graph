@@ -140,6 +140,10 @@ jobs:
           echo "JwtOptions__Issuer=${{ secrets.JWTOPTIONS__ISSUER }}" >> .env
           echo "JwtOptions__Audience=${{ secrets.JWTOPTIONS__AUDIENCE }}" >> .env
           echo "JwtOptions__ExpiryInMinutes=${{ secrets.JWTOPTIONS__EXPIRYINMINUTES }}" >> .env
+          echo "SmtpOptions__SmtpAddress=${{ secrets.SMTPOPTIONS__SMTPADDRESS }}" >> .env
+          echo "SmtpOptions__SmtpPort=${{ secrets.SMTPOPTIONS__SMTPPORT }}" >> .env
+          echo "SmtpOptions__SenderEmail=${{ secrets.SMTPOPTIONS__SENDEREMAIL }}" >> .env
+          echo "SmtpOptions__SenderPassword=${{ secrets.SMTPOPTIONS__SENDERPASSWORD }}" >> .env
           echo "MongoDbOptions__ConnectionString=${{ secrets.MONGODBOPTIONS__CONNECTIONSTRING }}" >> .env
           echo "MongoDbOptions__DatabaseName=${{ secrets.MONGODBOPTIONS__DATABASENAME }}" >> .env
           echo "CorsOptions__AllowedOrigins__0=${{ secrets.CORSOPTIONS__ALLOWEDORIGINS__0 }}" >> .env

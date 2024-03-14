@@ -35,6 +35,10 @@ services:
       - MongoDbOptions__ConnectionString=mongodb://testAdmin:password@mongodb:27017/onxGraphTest?authMechanism=SCRAM-SHA-256&authSource=admin&retryWrites=true&w=majority
       - MongoDbOptions__DatabaseName=onxGraphTest
       - CorsOptions__AllowedOrigins__0=http://localhost:3001
+      - SmtpOptions__SmtpAddress=mailhog
+      - SmtpOptions__SmtpPort=1025
+      - SmtpOptions__SenderEmail="onxgraph@test.com"
+      - SmtpOptions__SenderPassword=
   client:
     container_name: client-test
     build:

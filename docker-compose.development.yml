@@ -4,13 +4,15 @@ services:
   mailhog:
     container_name: mailhog-development
     image: mailhog/mailhog:latest
-    command: ["-storage=maildir", "-maildir-path=/maildir"]
     volumes:
-      - "mailhog_development_data:/maildir"
+      - "mailhog_development_data:/home/mailhog"
     ports:
       - "2996:1025"
       - "2997:8025"
     restart: unless-stopped
+    environment:
+      - MH_STORAGE=maildir
+      - MH_MAILDIR_PATH=/home/mailhog
   mongodb:
     container_name: mongo-development
     image: mongo:latest
@@ -43,7 +45,7 @@ services:
       - './server/Server.API:/app'
       - '~/.aspnet/https:/https/'
     ports:
-      - '3000:3000'
+      - '3002:3002'
     restart: unless-stopped
     env_file:
       - server/server.API/.env

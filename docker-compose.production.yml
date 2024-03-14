@@ -31,6 +31,10 @@ services:
       - MongoDbOptions__ConnectionString=${MongoDbOptions__ConnectionString}
       - MongoDbOptions__DatabaseName=${MongoDbOptions__DatabaseName}
       - CorsOptions__AllowedOrigins__0=${CorsOptions__AllowedOrigins__0}
+      - SmtpOptions__SmtpAddress=${SmtpOptions__SmtpAddress}
+      - SmtpOptions__SmtpPort=${SmtpOptions__SmtpPort}
+      - SmtpOptions__SenderEmail=${SmtpOptions__SenderEmail}
+      - SmtpOptions__SenderPassword=${SmtpOptions__SenderPassword}
   client:
     container_name: vue-client-production
     image: stevanfreeborn/onx-graph-client:${CLIENT_VERSION}
