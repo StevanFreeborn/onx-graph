@@ -1,5 +1,3 @@
-using System.Net.Mail;
-
 namespace Server.API.Tests.Unit;
 
 public class DotNetEmailServiceTests

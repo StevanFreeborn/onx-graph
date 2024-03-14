@@ -44,3 +44,5 @@ global using Testcontainers.MongoDb;
 global using Xunit;
 global using DotNet.Testcontainers.Builders;
 global using DotNet.Testcontainers.Containers;
+global using System.Net.Mail;
+global using Server.API.Configuration;

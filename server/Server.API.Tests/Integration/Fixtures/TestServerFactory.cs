@@ -1,5 +1,3 @@
-using Server.API.Configuration;
-
 namespace Server.API.Tests.Integration.Fixtures;
 
 public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime

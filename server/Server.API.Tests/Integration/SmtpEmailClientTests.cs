@@ -1,5 +1,3 @@
-using System.Net.Mail;
-
 namespace Server.API.Tests.Integration;
 
 public class SmtpEmailClientTests : IAsyncLifetime
