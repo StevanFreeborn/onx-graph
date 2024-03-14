@@ -1,5 +1,6 @@
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Net;
+global using System.Net.Mail;
 global using System.Reflection;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
@@ -31,11 +32,10 @@ global using Serilog.Sinks.SystemConsole.Themes;
 
 global using Server.API.Authentication;
 global using Server.API.Configuration;
+global using Server.API.Email;
 global using Server.API.Identity;
 global using Server.API.Middleware;
 global using Server.API.Persistence.Mongo;
 global using Server.API.Swagger;
-global using Server.API.Email;
 
 global using Swashbuckle.AspNetCore.SwaggerGen;
-global using System.Net.Mail;
