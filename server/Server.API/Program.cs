@@ -109,6 +109,7 @@ builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
 // add cors
 var corsOptions = new CorsOptions();
 config.GetSection(nameof(CorsOptions)).Bind(corsOptions);
+builder.Services.ConfigureOptions<CorsOptionsSetup>();
 
 builder.Services.AddCors(
   options => options.AddPolicy(
