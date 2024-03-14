@@ -132,6 +132,10 @@ export class AuthService implements IAuthService {
         return Err(errors);
       }
 
+      if (res.status === 409) {
+        return Err([new Error('Registration failed. User already exists with this email.')]);
+      }
+
       if (res.ok === false) {
         return Err([new Error('Registration failed. Please try again.')]);
       }
