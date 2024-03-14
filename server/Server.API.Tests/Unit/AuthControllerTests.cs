@@ -168,7 +168,7 @@ public class AuthControllerTests
       .Returns(
         new CorsOptions
         {
-          AllowedOrigins = ["http://localhost:3000"]
+          AllowedOrigins = ["https://localhost:3001"]
         }
       );
 
@@ -219,7 +219,7 @@ public class AuthControllerTests
       .Returns(
         new CorsOptions
         {
-          AllowedOrigins = ["http://localhost:3000"]
+          AllowedOrigins = ["https://localhost:3001"]
         }
       );
 
