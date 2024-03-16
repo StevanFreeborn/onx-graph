@@ -1,3 +1,4 @@
+import { env } from '../env';
 import { expect, test } from '../fixtures/global.fixtures.js';
 
 test.describe('LoginView', () => {
@@ -69,5 +70,14 @@ test.describe('LoginView', () => {
     await page.getByLabel('Password').fill('Password123');
     await page.getByRole('button', { name: 'Login' }).click();
     await expect(page.getByText(/Email\/Password combination is not valid/)).toBeVisible();
+  });
+
+  test('when user submits the login form with valid credentials they should be redirected to the graphs page', async ({
+    page,
+  }) => {
+    await page.getByLabel('Email').fill(env.PW_TEST_USER_EMAIL);
+    await page.getByLabel('Password').fill(env.PW_TEST_USER_PASSWORD);
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page).toHaveURL(/\/graphs/);
   });
 });
