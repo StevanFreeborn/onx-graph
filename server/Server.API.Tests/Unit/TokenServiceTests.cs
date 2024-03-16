@@ -98,9 +98,11 @@ public class TokenServiceTests
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
 
+    var now = DateTimeOffset.UtcNow;
+
     _timeProviderMock
       .Setup(t => t.GetUtcNow())
-      .Returns(DateTimeOffset.UtcNow);
+      .Returns(now);
 
     var result = await _sut.GenerateRefreshToken(user.Id);
 
@@ -108,10 +110,8 @@ public class TokenServiceTests
     result.Value.Should().NotBeNull();
     result.Value.Should().BeOfType<RefreshToken>();
     result.Value.UserId.Should().Be(user.Id);
-    result.Value.ExpiresAt.Should().BeCloseTo(
-      DateTime.UtcNow.AddHours(12),
-      TimeSpan.FromSeconds(5)
-    );
+    result.Value.Token.Should().NotBeNullOrEmpty();
+    result.Value.ExpiresAt.Should().Be(now.AddHours(12).UtcDateTime);
   }
 
   [Fact]
@@ -411,5 +411,46 @@ public class TokenServiceTests
       DateTime.UtcNow.AddHours(12),
       TimeSpan.FromSeconds(5)
     );
+  }
+
+  [Fact]
+  public async Task GenerateVerificationToken_WhenCalled_ItShouldReturnVerificationToken()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    var now = DateTimeOffset.UtcNow;
+
+    _timeProviderMock
+      .Setup(t => t.GetUtcNow())
+      .Returns(now);
+
+    var result = await _sut.GenerateVerificationToken(user.Id);
+
+    result.IsSuccess.Should().BeTrue();
+    result.Value.Should().NotBeNull();
+    result.Value.Should().BeOfType<VerificationToken>();
+    result.Value.UserId.Should().Be(user.Id);
+    result.Value.Token.Should().NotBeNullOrEmpty();
+    result.Value.ExpiresAt.Should().Be(now.AddMinutes(15).UtcDateTime);
+  }
+
+  [Fact]
+  public async Task GenerateVerificationToken_WhenCalledAndTokenRepositoryThrowsException_ShouldReturnError()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    _timeProviderMock
+      .Setup(t => t.GetUtcNow())
+      .Returns(DateTimeOffset.UtcNow);
+
+    _tokenRepositoryMock
+      .Setup(t => t.CreateTokenAsync(It.IsAny<VerificationToken>()))
+      .ThrowsAsync(new Exception());
+
+    var result = await _sut.GenerateVerificationToken(user.Id);
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<GenerateVerificationTokenError>();
   }
 }

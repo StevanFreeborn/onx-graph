@@ -1,6 +1,8 @@
+using System.Text.RegularExpressions;
+
 namespace Server.API.Tests.Integration;
 
-public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory), IDisposable
+public partial class AuthControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory), IDisposable
 {
   public void Dispose()
   {
@@ -32,6 +34,9 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .Should()
       .NotBeNullOrEmpty();
   }
+
+  [GeneratedRegex(@"\/verify-account\?t=[a-zA-Z0-9]+")]
+  private static partial Regex VerifyAccountLinkRegex();
 
   [Fact]
   public async Task Register_WhenCalledAndGivenValidEmailAndPassword_ItShouldSendVerificationEmail()
@@ -68,6 +73,10 @@ public class AuthControllerTests(TestServerFactory serverFactory) : IntegrationT
       .ContainSingle(t =>
         t.Mailbox == testMailbox && t.Domain == testDomain
       );
+
+    var email = await _mailHogService.GetEmailAsync(emailSearchResult.Items.First().Id);
+    email.Content.Body.Should().Contain("Verify Account");
+    email.Content.Body.Should().MatchRegex(VerifyAccountLinkRegex());
   }
 
   [Fact]

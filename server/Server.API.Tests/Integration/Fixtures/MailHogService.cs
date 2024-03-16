@@ -18,17 +18,24 @@ public class MailHogService(HttpClient client)
     var response = await _client.GetFromJsonAsync<MailHogSearchResult>(url);
     return response ?? new MailHogSearchResult();
   }
+
+  public async Task<MailHogMessage> GetEmailAsync(string id)
+  {
+    var url = $"/api/v1/messages/{id}";
+    var response = await _client.GetFromJsonAsync<MailHogMessage>(url);
+    return response ?? new MailHogMessage();
+  }
 }
 
-public class MailHogSearchResult
+public record MailHogSearchResult
 {
-  public List<MailHogMessage> Items { get; init; } = [];
+  public List<MailHogSearchResultMessage> Items { get; init; } = [];
   public int Total { get; init; } = 0;
   public int Start { get; init; } = 0;
   public int Count { get; init; } = 0;
 }
 
-public class MailHogMessage
+public record MailHogSearchResultMessage
 {
   public string Id { get; init; } = string.Empty;
   public MailHogToOrFrom From { get; init; } = new();
@@ -38,7 +45,7 @@ public class MailHogMessage
   public DateTime Created { get; init; }
 }
 
-public class MailHogToOrFrom
+public record MailHogToOrFrom
 {
   public List<string> Relays { get; init; } = [];
   public string Mailbox { get; init; } = string.Empty;
@@ -46,6 +53,46 @@ public class MailHogToOrFrom
   public string @Params { get; init; } = string.Empty;
 }
 
+public record MailHogMessage
+{
+  public string ID { get; init; } = string.Empty;
+  public MailHogToOrFrom From { get; init; } = new();
+  public List<MailHogToOrFrom> To { get; init; } = [];
+  public MailHogMessageContent Content { get; init; } = new();
+  public string Created { get; init; } = string.Empty;
+  public object MIME { get; init; } = new();
+  public MailHogRaw Raw { get; init; } = new();
+}
+
+public record MailHogMessageContent
+{
+  public Headers Headers { get; init; } = new();
+  public string Body { get; init; } = string.Empty;
+  public int Size { get; init; }
+  public object MIME { get; init; } = new();
+}
+
+public record Headers
+{
+  public List<string> ContentTransferEncoding { get; init; } = [];
+  public List<string> ContentType { get; init; } = [];
+  public List<string> Date { get; init; } = [];
+  public List<string> From { get; init; } = [];
+  public List<string> MIMEVersion { get; init; } = [];
+  public List<string> MessageID { get; init; } = [];
+  public List<string> Received { get; init; } = [];
+  public List<string> ReturnPath { get; init; } = [];
+  public List<string> Subject { get; init; } = [];
+  public List<string> To { get; init; } = [];
+}
+
+public record MailHogRaw
+{
+  public string From { get; init; } = string.Empty;
+  public List<string> To { get; init; } = [];
+  public string Data { get; init; } = string.Empty;
+  public string Helo { get; init; } = string.Empty;
+}
 
 public class MailHogSearchRequest
 {

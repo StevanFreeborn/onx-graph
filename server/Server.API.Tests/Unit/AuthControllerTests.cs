@@ -21,7 +21,8 @@ public class AuthControllerTests
       _registerDtoValidatorMock.Object,
       _userServiceMock.Object,
       _emailServiceMock.Object,
-      _loggerMock.Object
+      _loggerMock.Object,
+      _tokenServiceMock.Object
     );
 
   [Fact]
@@ -184,6 +185,10 @@ public class AuthControllerTests
       .Setup(u => u.RegisterUserAsync(It.IsAny<User>()))
       .ReturnsAsync(registrationResult);
 
+    _tokenServiceMock
+      .Setup(t => t.GenerateVerificationToken(It.IsAny<string>()))
+      .ReturnsAsync(Result.Ok(new VerificationToken()));
+
     var req = CreateRegisterRequest(dto);
 
     var result = await AuthController.Register(req);
@@ -207,7 +212,7 @@ public class AuthControllerTests
   }
 
   [Fact]
-  public async Task Register_WhenRegistrationSucceeds_ItShouldSendAVerificationEmail()
+  public async Task Register_WhenRegistrationSucceedsAndVerificationTokenIsGenerated_ItShouldSendAVerificationEmail()
   {
     var dto = new RegisterDto("test@test.com", "@Password1234");
     var validationResult = new ValidationResult();
@@ -223,7 +228,7 @@ public class AuthControllerTests
 
     _emailServiceMock
       .Setup(e => e.SendEmailAsync(It.IsAny<EmailMessage>()))
-      .ReturnsAsync(Result.Fail(new EmailFailedError()));
+      .ReturnsAsync(Result.Ok());
 
     _registerDtoValidatorMock
       .Setup(v => v.ValidateAsync(It.IsAny<RegisterDto>(), default))
@@ -234,6 +239,10 @@ public class AuthControllerTests
     _userServiceMock
       .Setup(u => u.RegisterUserAsync(It.IsAny<User>()))
       .ReturnsAsync(registrationResult);
+
+    _tokenServiceMock
+      .Setup(t => t.GenerateVerificationToken(It.IsAny<string>()))
+      .ReturnsAsync(Result.Ok(new VerificationToken()));
 
     var req = CreateRegisterRequest(dto);
 
@@ -260,6 +269,63 @@ public class AuthControllerTests
       .Verify(
         e => e.SendEmailAsync(It.IsAny<EmailMessage>()),
         Times.Once
+      );
+  }
+
+  [Fact]
+  public async Task Register_WhenRegistrationSucceedsButGeneratingVerificationTokenFails_ItShouldNotSendAVerificationEmail()
+  {
+    var dto = new RegisterDto("test@test.com", "@Password1234");
+    var validationResult = new ValidationResult();
+
+    _corsOptions
+      .Setup(c => c.Value)
+      .Returns(
+        new CorsOptions
+        {
+          AllowedOrigins = ["https://localhost:3001"]
+        }
+      );
+
+    _registerDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<RegisterDto>(), default))
+      .ReturnsAsync(validationResult);
+
+    var registrationResult = Result.Ok("test");
+
+    _userServiceMock
+      .Setup(u => u.RegisterUserAsync(It.IsAny<User>()))
+      .ReturnsAsync(registrationResult);
+
+    _tokenServiceMock
+      .Setup(t => t.GenerateVerificationToken(It.IsAny<string>()))
+      .ReturnsAsync(Result.Fail(new GenerateVerificationTokenError()));
+
+    var req = CreateRegisterRequest(dto);
+
+    var result = await AuthController.Register(req);
+
+    result.Should()
+      .BeOfType<Created<RegisterUserResponse>>();
+
+    var createdResponse = result.As<Created<RegisterUserResponse>>();
+
+    createdResponse.StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.Created);
+
+    createdResponse.Value
+      .Should()
+      .BeOfType<RegisterUserResponse>();
+
+    createdResponse.Value?.Id
+      .Should()
+      .Be(registrationResult.Value);
+
+    _emailServiceMock
+      .Verify(
+        e => e.SendEmailAsync(It.IsAny<EmailMessage>()),
+        Times.Never
       );
   }
 
