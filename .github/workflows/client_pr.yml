@@ -70,6 +70,10 @@ jobs:
     name: Run playwright tests
     needs: lint-and-format
     runs-on: ubuntu-latest
+    env:
+      PW_DB_CONNECTION_STRING: ${{ secrets.PW_DB_CONNECTION_STRING }}
+      PW_TEST_USER_EMAIL: ${{ secrets.PW_TEST_USER_EMAIL }}
+      PW_TEST_USER_PASSWORD: ${{ secrets.PW_TEST_USER_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
