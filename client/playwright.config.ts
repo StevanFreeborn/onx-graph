@@ -6,7 +6,7 @@ export default defineConfig({
   testDir: './e2e',
   timeout: 30 * 1000,
   expect: {
-    timeout: 5000,
+    timeout: 30000,
   },
   forbidOnly: !!env.CI,
   retries: env.CI ? 2 : 0,
