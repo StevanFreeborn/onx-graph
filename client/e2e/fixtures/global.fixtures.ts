@@ -1,6 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { test as base } from '@playwright/test';
 import { AxeResults } from 'axe-core';
+import mailhog from 'mailhog';
+import { env } from '../env';
 
 type TestUser = {
   email: string;
@@ -11,6 +13,7 @@ type TestUser = {
 type GlobalFixtures = {
   accessibilityResults: AxeResults;
   user: TestUser;
+  mailhog: mailhog.API;
 };
 
 export const test = base.extend<GlobalFixtures>({
@@ -26,10 +29,11 @@ export const test = base.extend<GlobalFixtures>({
   },
   user: async ({}, use) =>
     await use({
-      email: 'test@test.com',
-      password: '@Password1',
-      username: 'test',
+      email: env.PW_TEST_USER_EMAIL,
+      password: env.PW_TEST_USER_PASSWORD,
+      username: env.PW_TEST_USER_USERNAME,
     }),
+  mailhog: async ({}, use) => await use(mailhog({ port: env.PW_MAILHOG_PORT })),
 });
 
 export * from '@playwright/test';
