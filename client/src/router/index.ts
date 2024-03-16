@@ -31,6 +31,11 @@ export const routes = [
         component: () => import('../views/RegisterView.vue'),
       },
       {
+        path: 'register-confirmation',
+        name: 'register-confirmation',
+        component: () => import('../views/RegisterConfirmationView.vue'),
+      },
+      {
         path: 'about',
         name: 'about',
         component: () => import('../views/AboutView.vue'),
