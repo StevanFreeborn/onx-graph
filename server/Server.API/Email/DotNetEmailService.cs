@@ -12,19 +12,19 @@ class DotNetEmailService(
 
   public async Task<Result> SendEmailAsync(EmailMessage message)
   {
-    var email = new MailMessage(_smtpOptions.SenderEmail, message.To)
-    {
-      Subject = message.Subject,
-      Body = message.HtmlContent,
-      IsBodyHtml = true
-    };
-
     var attempts = 0;
 
     while (attempts < 3)
     {
       try
       {
+        var email = new MailMessage(_smtpOptions.SenderEmail, message.To)
+        {
+          Subject = message.Subject,
+          Body = message.HtmlContent,
+          IsBodyHtml = true
+        };
+
         await _client.SendMailAsync(email);
         return Result.Ok();
       }
