@@ -6,4 +6,5 @@ namespace Server.API.Authentication;
 enum TokenType
 {
   Refresh = 0,
+  Verification = 1,
 }

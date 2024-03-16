@@ -59,7 +59,6 @@ class TokenService(
 
     var token = new RefreshToken
     {
-      Id = Guid.NewGuid().ToString(),
       UserId = userId,
       Token = GenerateToken(),
       ExpiresAt = expiresAt
@@ -74,6 +73,33 @@ class TokenService(
     {
       return Result.Fail(
         new GenerateRefreshTokenError().CausedBy(ex)
+      );
+    }
+  }
+
+  public async Task<Result<VerificationToken>> GenerateVerificationToken(string userId)
+  {
+    var expiresAt = _timeProvider
+      .GetUtcNow()
+      .AddMinutes(15)
+      .UtcDateTime;
+
+    var token = new VerificationToken
+    {
+      UserId = userId,
+      Token = GenerateToken(),
+      ExpiresAt = expiresAt
+    };
+
+    try
+    {
+      var createdToken = await _tokenRepository.CreateTokenAsync(token);
+      return Result.Ok(token);
+    }
+    catch (Exception ex)
+    {
+      return Result.Fail(
+        new GenerateVerificationTokenError().CausedBy(ex)
       );
     }
   }

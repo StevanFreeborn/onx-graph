@@ -20,6 +20,13 @@ interface ITokenService
   Task<Result<RefreshToken>> GenerateRefreshToken(string userId);
 
   /// <summary>
+  /// Generates a verification token for the given user.
+  /// </summary>
+  /// <param name="userId">The id of the user to generate the token for.</param>
+  /// <returns>The generated verification token as a <see cref="Result{T}"/>.</returns>
+  Task<Result<VerificationToken>> GenerateVerificationToken(string userId);
+
+  /// <summary>
   /// Refreshes a user's access token.
   /// </summary>
   /// <param name="userId">The id of the user to refresh the token for.</param>

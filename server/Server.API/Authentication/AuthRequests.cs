@@ -50,7 +50,8 @@ record RegisterRequest(
   [FromServices] IValidator<RegisterDto> Validator,
   [FromServices] IUserService UserService,
   [FromServices] IEmailService EmailService,
-  [FromServices] ILogger<RegisterRequest> Logger
+  [FromServices] ILogger<RegisterRequest> Logger,
+  [FromServices] ITokenService TokenService
 );
 
 /// <summary>

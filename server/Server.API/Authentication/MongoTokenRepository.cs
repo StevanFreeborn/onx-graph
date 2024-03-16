@@ -12,7 +12,7 @@ class MongoTokenRepository(
   private readonly MongoDbContext _context = context;
   private readonly TimeProvider _timeProvider = timeProvider;
 
-  public async Task<RefreshToken> CreateTokenAsync(RefreshToken token)
+  public async Task<BaseToken> CreateTokenAsync(BaseToken token)
   {
     await _context.Tokens.InsertOneAsync(token);
     return token;

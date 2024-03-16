@@ -6,11 +6,11 @@ namespace Server.API.Authentication;
 interface ITokenRepository
 {
   /// <summary>
-  /// Creates a refresh token.
+  /// Creates a token.
   /// </summary>
   /// <param name="token">The token to create.</param>
-  /// <returns>The created token as a <see cref="RefreshToken"/>.</returns>
-  Task<RefreshToken> CreateTokenAsync(RefreshToken token);
+  /// <returns>The created token as a <see cref="BaseToken"/>.</returns>
+  Task<BaseToken> CreateTokenAsync(BaseToken token);
 
   /// <summary>
   /// Gets a token by its token string.
