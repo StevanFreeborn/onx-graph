@@ -49,7 +49,7 @@ static class AuthController
           <h1>Welcome to OnxGraph!</h1>
           <p>We're excited to welcome you to OnxGraph! Before you begin we need to verify your account. Follow these steps to complete the verification process:</p>
           <p>Click the link below to verify your account:</p>
-          <a href='{req.CorsOptions.Value.AllowedOrigins[0]}/verify-account?t={tokenResult.Value.Token}'>Verify Account</a>
+          <a href='{req.CorsOptions.Value.AllowedOrigins[0]}/masses/verify-account?t={tokenResult.Value.Token}'>Verify Account</a>
           <p>If you didn't create an account with OnxGraph, please ignore this email.</p>
         """
       };

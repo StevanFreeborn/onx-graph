@@ -35,7 +35,7 @@ public partial class AuthControllerTests(TestServerFactory serverFactory) : Inte
       .NotBeNullOrEmpty();
   }
 
-  [GeneratedRegex(@"\/verify-account\?t=[a-zA-Z0-9]+")]
+  [GeneratedRegex(@"\/masses\/verify-account\?t=[a-zA-Z0-9]+")]
   private static partial Regex VerifyAccountLinkRegex();
 
   [Fact]
