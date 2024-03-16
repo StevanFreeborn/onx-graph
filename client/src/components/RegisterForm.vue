@@ -82,7 +82,7 @@
     }
 
     setIsSubmitting(false);
-    router.push('/login');
+    router.push('/masses/register-confirmation');
   }
 
   function handleInputChange(e: Event) {
