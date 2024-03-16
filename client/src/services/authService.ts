@@ -21,6 +21,7 @@ export interface IAuthService {
   register: (email: string, password: string) => Promise<Result<RegisterResponse, Error[]>>;
   refreshToken: () => Promise<Result<LoginResponse, Error[]>>;
   logout: () => Promise<Result<boolean, Error[]>>;
+  resendVerificationEmail: (email: string) => Promise<Result<boolean, Error[]>>;
 }
 
 export class AuthService implements IAuthService {
@@ -31,10 +32,32 @@ export class AuthService implements IAuthService {
     login: `${this.baseURL}/auth/login`,
     refreshToken: `${this.baseURL}/auth/refresh-token`,
     logout: `${this.baseURL}/auth/logout`,
+    resendVerificationEmail: `${this.baseURL}/auth/resend-verification-email`,
   };
 
   constructor(client: IClient) {
     this.client = client;
+  }
+
+  async resendVerificationEmail(email: string) {
+    const request = new ClientRequestWithBody(
+      this.endpoints.resendVerificationEmail,
+      undefined,
+      new ResendVerificationEmailRequest(email)
+    );
+
+    try {
+      const res = await this.client.post(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Resending verification email failed')]);
+      }
+
+      return Ok(true);
+    } catch (e) {
+      console.error(e);
+      return Err([new Error('Resending verification email failed')]);
+    }
   }
 
   async logout() {
@@ -168,6 +191,14 @@ class LoginRequest extends BaseAuthRequest {
 class RegisterRequest extends BaseAuthRequest {
   constructor(email: string, password: string) {
     super(email, password);
+  }
+}
+
+class ResendVerificationEmailRequest {
+  readonly email: string;
+
+  constructor(email: string) {
+    this.email = email;
   }
 }
 
