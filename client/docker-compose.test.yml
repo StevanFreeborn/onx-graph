@@ -44,7 +44,7 @@ services:
       - CorsOptions__AllowedOrigins__0=http://localhost:4001
       - SmtpOptions__SmtpAddress=mailhog
       - SmtpOptions__SmtpPort=1025
-      - SmtpOptions__SenderEmail="onxgraph@test.com"
+      - SmtpOptions__SenderEmail=onxgraph@test.com
       - SmtpOptions__SenderPassword=
   client:
     container_name: client-test
