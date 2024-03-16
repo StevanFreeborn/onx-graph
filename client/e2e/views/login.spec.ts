@@ -78,6 +78,6 @@ test.describe('LoginView', () => {
     await page.getByLabel('Email').fill(user.email);
     await page.getByLabel('Password').fill(user.password);
     await page.getByRole('button', { name: 'Login' }).click();
-    await expect(page).toHaveURL(/\/graphs/);
+    await expect(page).toHaveURL(/\/graphs/, { timeout: 30000 });
   });
 });

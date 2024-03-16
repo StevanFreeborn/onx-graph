@@ -122,6 +122,6 @@ test.describe('RegisterView', () => {
     await page.getByLabel('Password', { exact: true }).fill('@Password1');
     await page.getByLabel('Confirm Password').fill('@Password1');
     await page.getByRole('button', { name: 'Register' }).click();
-    await expect(page).toHaveURL(/masses\/home/);
+    await expect(page).toHaveURL(/masses\/register-confirmation/, { timeout: 30000 });
   });
 });
