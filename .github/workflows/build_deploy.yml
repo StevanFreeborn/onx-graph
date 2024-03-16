@@ -114,6 +114,7 @@ jobs:
         env:
           VERSION: ${{ needs.version_client.outputs.version }}
           VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          VITE_SENDING_EMAIL: ${{ secrets.SMTPOPTIONS__SENDEREMAIL }}
           CI: true
         run: |
           docker compose build
