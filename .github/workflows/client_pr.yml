@@ -71,9 +71,11 @@ jobs:
     needs: lint-and-format
     runs-on: ubuntu-latest
     env:
-      PW_DB_CONNECTION_STRING: ${{ secrets.PW_DB_CONNECTION_STRING }}
-      PW_TEST_USER_EMAIL: ${{ secrets.PW_TEST_USER_EMAIL }}
-      PW_TEST_USER_PASSWORD: ${{ secrets.PW_TEST_USER_PASSWORD }}
+      PW_DB_CONNECTION_STRING: "mongodb://testAdmin:password@localhost:4000/onxGraphTest?authMechanism=SCRAM-SHA-256&authSource=admin&retryWrites=true&w=majority"
+      PW_TEST_USER_EMAIL: "test@test.com"
+      PW_TEST_USER_PASSWORD: "@Password1"
+      PW_TEST_USER_USERNAME: "test"
+      PW_MAILHOG_PORT: 3999
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
