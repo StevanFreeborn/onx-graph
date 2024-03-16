@@ -1,4 +1,3 @@
-import { env } from '../env';
 import { expect, test } from '../fixtures/global.fixtures.js';
 
 test.describe('LoginView', () => {
@@ -74,9 +73,10 @@ test.describe('LoginView', () => {
 
   test('when user submits the login form with valid credentials they should be redirected to the graphs page', async ({
     page,
+    user,
   }) => {
-    await page.getByLabel('Email').fill(env.PW_TEST_USER_EMAIL);
-    await page.getByLabel('Password').fill(env.PW_TEST_USER_PASSWORD);
+    await page.getByLabel('Email').fill(user.email);
+    await page.getByLabel('Password').fill(user.password);
     await page.getByRole('button', { name: 'Login' }).click();
     await expect(page).toHaveURL(/\/graphs/);
   });
