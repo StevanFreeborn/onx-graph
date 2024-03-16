@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import ResendVerifyEmailForm from '@/components/ResendVerifyEmailForm.vue';
   import { RouterLink } from 'vue-router';
 
   const contactEmailAddress = import.meta.env.VITE_SENDING_EMAIL;
@@ -24,6 +25,7 @@
           folder. You can also use the form below to request a new verification email. Note
           requesting new verification email will invalidate the previous verification email.
         </p>
+        <ResendVerifyEmailForm />
         <p>
           If you still encounter any issues, please contact us at
           <a :href="emailLink">{{ contactEmailAddress }}</a> for assistance.
