@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import { useAuthService } from '@/composables/useAuthService.js';
   import { useMounted } from '@/composables/useMounted.js';
   import { useSubmitting } from '@/composables/useSubmitting.js';
   import { toTitleCase } from '@/utils/index.js';
@@ -26,6 +27,7 @@
   const sendStatus = ref<'idle' | 'sending' | 'success' | 'error'>('idle');
   const SEND_STATUS_TIMEOUT = 1000;
   const sendStatusTransition = `opacity ${SEND_STATUS_TIMEOUT / 1000}s ease-out`;
+  const authService = useAuthService();
 
   async function handleResendFormSubmit() {
     formState.errors = [];
@@ -57,12 +59,9 @@
     }
 
     sendStatus.value = 'sending';
+    const resendResult = await authService.resendVerificationEmail(formState.fields.email.value);
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const registerResult = await new Promise(resolve => setTimeout(() => resolve(true), 2000));
-
-    if (registerResult === false) {
+    if (resendResult.err) {
       sendStatus.value = 'error';
       setTimeout(() => {
         sendStatus.value = 'idle';
@@ -122,7 +121,7 @@
           </button>
           <span v-if="sendStatus === 'sending'">Sending email...</span>
           <Transition>
-            <span v-if="sendStatus === 'error'">Failed to send email. Please try again.</span>
+            <span v-if="sendStatus === 'error'">Unable to send email. Please try again.</span>
           </Transition>
           <Transition>
             <span v-if="sendStatus === 'success'">Email sent successfully.</span>
