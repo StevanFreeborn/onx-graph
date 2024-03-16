@@ -30,6 +30,13 @@ class GenerateRefreshTokenError : Error
   }
 }
 
+class GenerateVerificationTokenError : Error
+{
+  internal GenerateVerificationTokenError() : base("Failed to generate verification token")
+  {
+  }
+}
+
 /// <summary>
 /// An error indicating that a token was not found.
 /// </summary>
