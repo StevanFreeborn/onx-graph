@@ -17,7 +17,7 @@
         <p>
           Please check your email inbox shortly for a verification email from
           <a :href="emailLink">{{ contactEmailAddress }}</a
-          >. After verifying your email, you should be able to
+          >. After verifying your account, you should be able to
           <RouterLink to="/masses/login">login</RouterLink> to your account.
         </p>
         <p>
