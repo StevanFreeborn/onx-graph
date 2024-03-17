@@ -22,34 +22,34 @@ export default defineConfig({
   },
   projects: [
     {
+      name: 'docker-up',
+      testMatch: '**/setup/docker-up.ts',
+      teardown: 'docker-down',
+    },
+    {
       name: 'docker-down',
       testMatch: '**/cleanup/docker-down.ts',
-      dependencies: ['chrome', 'firefox', 'edge'],
     },
     {
       name: 'chrome',
       use: {
         ...devices['Desktop Chrome'],
       },
+      dependencies: ['docker-up'],
     },
     {
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
       },
+      dependencies: ['docker-up'],
     },
     {
       name: 'edge',
       use: {
         ...devices['Desktop Edge'],
       },
-    },
-  ],
-  webServer: [
-    {
-      command: 'npm run test:e2e:stack',
-      url: 'http://localhost:4001',
-      reuseExistingServer: !env.CI,
+      dependencies: ['docker-up'],
     },
   ],
 });
