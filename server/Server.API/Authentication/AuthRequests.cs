@@ -103,3 +103,38 @@ record RefreshTokenRequest(
   HttpContext Context,
   [FromServices] ITokenService TokenService
 );
+
+/// <summary>
+/// Represents the data needed to resend verification email
+/// </summary>
+record ResendVerificationEmailDto(string Email)
+{
+  internal ResendVerificationEmailDto() : this(string.Empty) { }
+}
+
+/// <summary>
+/// Validator for <see cref="LoginDto"/>
+/// </summary>
+class ResendVerificationEmailDtoValidator : AbstractValidator<ResendVerificationEmailDto>
+{
+  public ResendVerificationEmailDtoValidator()
+  {
+    RuleFor(dto => dto.Email)
+      .NotEmpty()
+      .EmailAddress()
+      .WithMessage("Email must be a valid email address.");
+  }
+}
+
+
+
+/// <summary>
+/// Represents a request to resend verification email
+/// </summary>
+record ResendVerificationEmailRequest(
+  [FromBody] ResendVerificationEmailDto Dto,
+  [FromServices] IValidator<ResendVerificationEmailDto> Validator,
+  [FromServices] IUserService UserService,
+  [FromServices] IEmailService EmailService,
+  [FromServices] ITokenService TokenService
+);
