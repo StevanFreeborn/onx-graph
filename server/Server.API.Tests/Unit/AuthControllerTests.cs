@@ -13,6 +13,7 @@ public class AuthControllerTests
   private readonly Mock<ILogger<RegisterRequest>> _loggerMock = new();
   private readonly Mock<IValidator<RegisterDto>> _registerDtoValidatorMock = new();
   private readonly Mock<IValidator<LoginDto>> _loginDtoValidatorMock = new();
+  private readonly Mock<IValidator<ResendVerificationEmailDto>> _resendVerificationEmailDtoValidatorMock = new();
 
   private RegisterRequest CreateRegisterRequest(RegisterDto dto) =>
     new(
@@ -856,10 +857,23 @@ public class AuthControllerTests
       .Be(loginResult.Value.AccessToken);
   }
 
+  private ResendVerificationEmailRequest CreateResendVerificationEmailRequest(ResendVerificationEmailDto dto) =>
+    new(
+      dto,
+      _resendVerificationEmailDtoValidatorMock.Object,
+      _userServiceMock.Object,
+      _emailServiceMock.Object,
+      _tokenServiceMock.Object
+    );
+
   [Fact]
   public async Task ResendVerificationEmail_WhenNoEmailIsProvided_ItShouldReturnAValidationProblemDetailWith400StatusCode()
   {
-    var result = await AuthController.ResendVerificationEmail();
+
+    var dto = new ResendVerificationEmailDto(string.Empty);
+    var request = CreateResendVerificationEmailRequest(dto);
+
+    var result = await AuthController.ResendVerificationEmail(request);
 
     result.Should()
       .BeOfType<ProblemHttpResult>();
@@ -873,7 +887,10 @@ public class AuthControllerTests
   [Fact]
   public async Task ResendVerificationEmail_WhenProvidedEmailIsInvalid_ItShouldReturnAValidationProblemDetailWith400StatusCode()
   {
-    var result = await AuthController.ResendVerificationEmail();
+    var dto = new ResendVerificationEmailDto("test");
+    var request = CreateResendVerificationEmailRequest(dto);
+
+    var result = await AuthController.ResendVerificationEmail(request);
 
     result.Should()
       .BeOfType<ProblemHttpResult>();
@@ -887,7 +904,10 @@ public class AuthControllerTests
   [Fact]
   public async Task ResendVerification_WhenUserIsAlreadyVerified_ItShouldReturnAProblemDetailWith400StatusCode()
   {
-    var result = await AuthController.ResendVerificationEmail();
+    var dto = new ResendVerificationEmailDto("test@test.com");
+    var request = CreateResendVerificationEmailRequest(dto);
+
+    var result = await AuthController.ResendVerificationEmail(request);
 
     result.Should()
       .BeOfType<ProblemHttpResult>();
@@ -901,7 +921,10 @@ public class AuthControllerTests
   [Fact]
   public async Task ResendVerificationEmail_WhenNoUserIsFound_ItShouldReturnAProblemDetailWith404StatusCode()
   {
-    var result = await AuthController.ResendVerificationEmail();
+    var dto = new ResendVerificationEmailDto("test@test.com");
+    var request = CreateResendVerificationEmailRequest(dto);
+
+    var result = await AuthController.ResendVerificationEmail(request);
 
     result.Should()
       .BeOfType<ProblemHttpResult>();
@@ -915,7 +938,10 @@ public class AuthControllerTests
   [Fact]
   public async Task ResendVerificationEmail_WhenResendingVerificationEmailFails_ItShouldReturnAProblemDetailWith500StatusCode()
   {
-    var result = await AuthController.ResendVerificationEmail();
+    var dto = new ResendVerificationEmailDto("test@test.com");
+    var request = CreateResendVerificationEmailRequest(dto);
+
+    var result = await AuthController.ResendVerificationEmail(request);
 
     result.Should()
       .BeOfType<ProblemHttpResult>();
@@ -929,7 +955,10 @@ public class AuthControllerTests
   [Fact]
   public async Task ResendVerificationEmail_WhenResendingVerificationEmailSucceeds_ItShouldReturn204StatusCode()
   {
-    var result = await AuthController.ResendVerificationEmail();
+    var dto = new ResendVerificationEmailDto("test@test.com");
+    var request = CreateResendVerificationEmailRequest(dto);
+
+    var result = await AuthController.ResendVerificationEmail(request);
 
     result.Should()
       .BeOfType<NoContent>();
