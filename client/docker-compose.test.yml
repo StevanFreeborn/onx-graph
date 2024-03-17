@@ -21,6 +21,7 @@ services:
   server:
     depends_on:
       - mongodb
+      - mailhog
     container_name: server-test
     build:
       target: production-stage
