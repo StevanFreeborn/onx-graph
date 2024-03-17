@@ -51,4 +51,38 @@ test.describe('RegisterConfirmationView', () => {
 
     await expect(form).toBeVisible();
   });
+
+  test('when user does not enter an email and submits the form to resend verification email then they should see an error message', async ({
+    page,
+  }) => {
+    const submit = page.getByRole('button', { name: /resend/i });
+
+    await submit.click();
+
+    await expect(page.getByText(/email is required/i)).toBeVisible();
+  });
+
+  test('when user enters an invalid email and submits the form to resend verification email then they should see an error message', async ({
+    page,
+  }) => {
+    const email = page.getByRole('textbox', { name: /email/i });
+    const submit = page.getByRole('button', { name: /resend/i });
+
+    await email.fill('test');
+    await submit.click();
+
+    await expect(page.getByText(/email must be a valid email/i)).toBeVisible();
+  });
+
+  test('when user fills out the form to resend verification email and submits it then they should see a success message', async ({
+    page,
+  }) => {
+    const email = page.getByRole('textbox', { name: /email/i });
+    const submit = page.getByRole('button', { name: /resend/i });
+
+    await email.fill('test@test.com');
+    await submit.click();
+
+    await expect(page.getByText(/email sent successfully/i)).toBeVisible();
+  });
 });
