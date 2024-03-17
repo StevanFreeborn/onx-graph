@@ -90,12 +90,22 @@ static class AuthController
 
     var loginResult = await req.UserService.LoginUserAsync(req.Dto.Email, req.Dto.Password);
 
-    if (loginResult.IsFailed)
+    if (loginResult.IsFailed && loginResult.Errors.Exists(e => e is InvalidLoginError))
     {
       return Results.Problem(
         title: "Login failed",
         detail: "Unable to login user. See errors for details.",
         statusCode: (int)HttpStatusCode.Unauthorized,
+        extensions: new Dictionary<string, object?> { { "Errors", loginResult.Errors } }
+      );
+    }
+
+    if (loginResult.IsFailed && loginResult.Errors.Exists(e => e is UserNotVerifiedError))
+    {
+      return Results.Problem(
+        title: "Login failed",
+        detail: "User is not verified. See errors for details.",
+        statusCode: (int)HttpStatusCode.Forbidden,
         extensions: new Dictionary<string, object?> { { "Errors", loginResult.Errors } }
       );
     }
