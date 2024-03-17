@@ -5,14 +5,6 @@ test.describe('RegisterView', () => {
     await page.goto('/masses/register');
   });
 
-  test.afterEach(async ({ dbcontext, user }) => {
-    await dbcontext.collection('users').deleteMany({
-      email: {
-        $ne: user.email,
-      },
-    });
-  });
-
   test('when user visits register it should pass all accessibility tests', async ({
     accessibilityResults,
   }) => {
@@ -117,9 +109,10 @@ test.describe('RegisterView', () => {
 
   test('when user submits the register form with valid data they should be redirected to the login page', async ({
     page,
+    newUser,
   }) => {
-    await page.getByLabel('Email').fill('test.user@gmail.com');
-    await page.getByLabel('Password', { exact: true }).fill('@Password1');
+    await page.getByLabel('Email').fill(newUser.email);
+    await page.getByLabel('Password', { exact: true }).fill(newUser.password);
     await page.getByLabel('Confirm Password').fill('@Password1');
     await page.getByRole('button', { name: 'Register' }).click();
     await expect(page).toHaveURL(/masses\/register-confirmation/, { timeout: 30000 });

@@ -73,7 +73,17 @@ test.describe('LoginView', () => {
 
   test('when user submits the login form with valid credentials they should be redirected to the graphs page', async ({
     page,
-    user,
+    verifiedUser: user,
+  }) => {
+    await page.getByLabel('Email').fill(user.email);
+    await page.getByLabel('Password').fill(user.password);
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page).toHaveURL(/\/graphs/, { timeout: 30000 });
+  });
+
+  test('when user submits the login form with valid credentials but they have not verified their account they should be redirect to the unverified page', async ({
+    page,
+    unverifiedUser: user,
   }) => {
     await page.getByLabel('Email').fill(user.email);
     await page.getByLabel('Password').fill(user.password);
