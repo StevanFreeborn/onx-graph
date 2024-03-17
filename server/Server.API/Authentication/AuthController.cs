@@ -179,7 +179,7 @@ static class AuthController
     return Results.Ok(new LoginUserResponse(refreshTokenResult.Value.AccessToken));
   }
 
-  internal static Task<IResult> ResendVerificationEmail()
+  internal static Task<IResult> ResendVerificationEmail(ResendVerificationEmailRequest req)
   {
     throw new NotImplementedException();
   }
