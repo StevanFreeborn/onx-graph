@@ -13,7 +13,7 @@ export default mergeConfig(
         provider: 'istanbul',
         reportsDirectory: './tests/coverage',
         include: ['**/src/**'],
-        exclude: ['**/views/**', ''],
+        exclude: ['**/views/**', '**/src/App.vue', '**/src/main.ts', '**/router/index.ts'],
         reporter: ['text', 'html'],
       },
     },
