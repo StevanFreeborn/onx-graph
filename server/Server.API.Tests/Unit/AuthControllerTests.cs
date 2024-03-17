@@ -855,4 +855,88 @@ public class AuthControllerTests
       .Should()
       .Be(loginResult.Value.AccessToken);
   }
+
+  [Fact]
+  public async Task ResendVerificationEmail_WhenNoEmailIsProvided_ItShouldReturnAValidationProblemDetailWith400StatusCode()
+  {
+    var result = await AuthController.ResendVerificationEmail();
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.BadRequest);
+  }
+
+  [Fact]
+  public async Task ResendVerificationEmail_WhenProvidedEmailIsInvalid_ItShouldReturnAValidationProblemDetailWith400StatusCode()
+  {
+    var result = await AuthController.ResendVerificationEmail();
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.BadRequest);
+  }
+
+  [Fact]
+  public async Task ResendVerification_WhenUserIsAlreadyVerified_ItShouldReturnAProblemDetailWith400StatusCode()
+  {
+    var result = await AuthController.ResendVerificationEmail();
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.BadRequest);
+  }
+
+  [Fact]
+  public async Task ResendVerificationEmail_WhenNoUserIsFound_ItShouldReturnAProblemDetailWith404StatusCode()
+  {
+    var result = await AuthController.ResendVerificationEmail();
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.NotFound);
+  }
+
+  [Fact]
+  public async Task ResendVerificationEmail_WhenResendingVerificationEmailFails_ItShouldReturnAProblemDetailWith500StatusCode()
+  {
+    var result = await AuthController.ResendVerificationEmail();
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.InternalServerError);
+  }
+
+  [Fact]
+  public async Task ResendVerificationEmail_WhenResendingVerificationEmailSucceeds_ItShouldReturn204StatusCode()
+  {
+    var result = await AuthController.ResendVerificationEmail();
+
+    result.Should()
+      .BeOfType<NoContent>();
+
+    result.As<NoContent>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.NoContent);
+  }
 }
