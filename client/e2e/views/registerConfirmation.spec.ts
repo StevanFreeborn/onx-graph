@@ -71,7 +71,7 @@ test.describe('RegisterConfirmationView', () => {
     await email.fill('test');
     await submit.click();
 
-    await expect(page.getByText(/email must be a valid email/i)).toBeVisible();
+    await expect(page.getByText(/enter a valid email/i)).toBeVisible();
   });
 
   test('when user fills out the form to resend verification email and submits it then they should see a success message', async ({
