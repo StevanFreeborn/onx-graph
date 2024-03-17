@@ -155,6 +155,7 @@ public partial class AuthControllerTests(TestServerFactory serverFactory) : Inte
   public async Task Login_WhenCalledAndGivenValidEmailAndPassword_ItShouldReturn200StatusCodeWithAccessTokenAndRefreshToken()
   {
     var (userPassword, existingUser) = FakeDataFactory.TestUser.Generate();
+    existingUser.IsVerified = true;
 
     await Context.Users.InsertOneAsync(existingUser);
 
@@ -181,6 +182,42 @@ public partial class AuthControllerTests(TestServerFactory serverFactory) : Inte
     loginResponseBody?.AccessToken
       .Should()
       .NotBeNullOrEmpty();
+  }
+
+  [Fact]
+  public async Task Login_WhenCalledAndGivenValidEmailAndPasswordButUserIsNotVerified_ItShouldReturn403StatusCodeWithProblemDetails()
+  {
+    var (userPassword, existingUser) = FakeDataFactory.TestUser.Generate();
+
+    await Context.Users.InsertOneAsync(existingUser);
+
+    var loginResponse = await _client.PostAsJsonAsync("/auth/login", new
+    {
+      email = existingUser.Email,
+      password = userPassword,
+    });
+
+    loginResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.Forbidden);
+
+    var loginResponseBody = await loginResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    loginResponseBody
+      .Should()
+      .NotBeNull();
+
+    loginResponseBody?.Title
+      .Should()
+      .Be("Login failed");
+
+    loginResponseBody?.Detail
+      .Should()
+      .Be("User is not verified. See errors for details.");
+
+    loginResponseBody?.Extensions
+      .Should()
+      .ContainKey("Errors");
   }
 
   [Fact]

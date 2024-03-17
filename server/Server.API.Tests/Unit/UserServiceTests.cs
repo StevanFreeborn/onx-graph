@@ -111,6 +111,7 @@ public class UserServiceTests
   public async Task LoginUserAsync_WhenRefreshTokenFailsToGenerate_ItShouldReturnLoginFailedError()
   {
     var (password, existingUser) = FakeDataFactory.TestUser.Generate();
+    existingUser.IsVerified = true;
 
     _userRepositoryMock
       .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
@@ -132,9 +133,10 @@ public class UserServiceTests
   }
 
   [Fact]
-  public async Task LoginUserAsync_WhenPasswordIsValid_ItShouldReturnAccessTokenAndRefreshToken()
+  public async Task LoginUserAsync_WhenPasswordIsValidAndUserIsVerified_ItShouldReturnAccessTokenAndRefreshToken()
   {
     var (password, existingUser) = FakeDataFactory.TestUser.Generate();
+    existingUser.IsVerified = true;
 
     _userRepositoryMock
       .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
@@ -179,5 +181,25 @@ public class UserServiceTests
       .ExpiresAt
       .Should()
       .BeAfter(DateTime.UtcNow);
+  }
+
+  [Fact]
+  public async Task LoginUserAsync_WhenUserIsNotVerified_ItShouldReturnUserNotVerifiedError()
+  {
+    var (password, existingUser) = FakeDataFactory.TestUser.Generate();
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
+      .ReturnsAsync(existingUser);
+
+    var result = await _sut.LoginUserAsync(existingUser.Email, password);
+
+    result.IsFailed
+      .Should()
+      .BeTrue();
+
+    result.Errors
+      .Should()
+      .Contain(e => e is UserNotVerifiedError);
   }
 }

@@ -546,6 +546,51 @@ public class AuthControllerTests
       .Be(loginResult.Value.AccessToken);
   }
 
+  [Fact]
+  public async Task Login_WhenLoginSucceedsButUserIsNotVerified_ItShouldReturnAProblemDetailWith403StatusCode()
+  {
+    var dto = new LoginDto("test@test.com", "@Password1234");
+    var validationResult = new ValidationResult();
+
+    _loginDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<LoginDto>(), default))
+      .ReturnsAsync(validationResult);
+
+    var loginResult = Result.Fail(new UserNotVerifiedError("userId"));
+
+    _userServiceMock
+      .Setup(u => u.LoginUserAsync(It.IsAny<string>(), It.IsAny<string>()))
+      .ReturnsAsync(loginResult);
+
+    var responseMock = new Mock<HttpResponse>();
+
+    responseMock
+      .Setup(r => r.Cookies)
+      .Returns(new Mock<IResponseCookies>().Object);
+
+    _httpContextMock
+      .Setup(c => c.Response)
+      .Returns(responseMock.Object);
+
+    var req = CreateLoginRequest(dto);
+
+    var result = await AuthController.Login(req);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.Forbidden);
+
+    result.As<ProblemHttpResult>()
+      .ProblemDetails
+      .Title
+      .Should()
+      .Be("Login failed");
+  }
+
   private LogoutRequest CreateLogoutRequest() =>
     new(
       _httpContextMock.Object,
