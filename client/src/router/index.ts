@@ -26,6 +26,11 @@ export const routes = [
         component: () => import('../views/LoginView.vue'),
       },
       {
+        path: 'unverified',
+        name: 'unverified',
+        component: () => import('../views/UnverifiedView.vue'),
+      },
+      {
         path: 'register',
         name: 'register',
         component: () => import('../views/RegisterView.vue'),
