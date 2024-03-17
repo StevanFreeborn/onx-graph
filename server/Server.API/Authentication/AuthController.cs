@@ -5,7 +5,20 @@ namespace Server.API.Authentication;
 /// </summary>
 static class AuthController
 {
-  // TODO: Need to implement email verification
+  private static EmailMessage BuildVerificationEmail(string email, string token, string origin)
+    => new()
+    {
+      To = email,
+      Subject = "Welcome to OnxGraph! Verify your account to get started.",
+      HtmlContent = $"""
+        <h1>Welcome to OnxGraph!</h1>
+        <p>We're excited to welcome you to OnxGraph! Before you begin we need to verify your account. Follow these steps to complete the verification process:</p>
+        <p>Click the link below to verify your account:</p>
+        <a href='{origin}/masses/verify-account?t={token}'>Verify Account</a>
+        <p>If you didn't create an account with OnxGraph, please ignore this email.</p>
+      """
+    };
+
   /// <summary>
   /// Registers a new user.
   /// </summary>
@@ -41,18 +54,11 @@ static class AuthController
 
     if (tokenResult.IsSuccess)
     {
-      var emailMessage = new EmailMessage
-      {
-        To = req.Dto.Email,
-        Subject = "Welcome to OnxGraph! Verify your account to get started.",
-        HtmlContent = $"""
-          <h1>Welcome to OnxGraph!</h1>
-          <p>We're excited to welcome you to OnxGraph! Before you begin we need to verify your account. Follow these steps to complete the verification process:</p>
-          <p>Click the link below to verify your account:</p>
-          <a href='{req.CorsOptions.Value.AllowedOrigins[0]}/masses/verify-account?t={tokenResult.Value.Token}'>Verify Account</a>
-          <p>If you didn't create an account with OnxGraph, please ignore this email.</p>
-        """
-      };
+      var emailMessage = BuildVerificationEmail(
+        req.Dto.Email,
+        tokenResult.Value.Token,
+        req.CorsOptions.Value.AllowedOrigins[0]
+      );
 
       var emailResult = await req.EmailService.SendEmailAsync(emailMessage);
 
