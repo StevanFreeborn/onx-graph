@@ -30,6 +30,11 @@ class UserService(
       return Result.Fail(new InvalidLoginError());
     }
 
+    if (existingUser.IsVerified is false)
+    {
+      return Result.Fail(new UserNotVerifiedError(existingUser.Id));
+    }
+
     var accessToken = _tokenService.GenerateAccessToken(existingUser);
     var refreshTokenResult = await _tokenService.GenerateRefreshToken(existingUser.Id);
 
