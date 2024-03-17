@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthService } from '../../src/services/authService';
+import { AuthService, UserNotVerifiedError } from '../../src/services/authService';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -37,6 +37,10 @@ describe('AuthService', () => {
 
   it('should have a register method', () => {
     expect(authService.register).toBeInstanceOf(Function);
+  });
+
+  it('should have a resendVerificationEmail method', () => {
+    expect(authService.resendVerificationEmail).toBeInstanceOf(Function);
   });
 
   describe('logout', () => {
@@ -166,6 +170,15 @@ describe('AuthService', () => {
       expect(result.ok).toBe(true);
       expect(result.val).toBe(body);
     });
+
+    it('should return error if user is not verified', async () => {
+      mockClient.post.mockReturnValue({ status: 403 });
+
+      const result = await authService.login('email', 'password');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([expect.any(UserNotVerifiedError)]);
+    });
   });
 
   describe('register', () => {
@@ -213,6 +226,37 @@ describe('AuthService', () => {
 
       expect(result.ok).toBe(true);
       expect(result.val).toBe(body);
+    });
+  });
+
+  describe('resendVerificationEmail', () => {
+    it('should return error if error occurs while resending verification email', async () => {
+      console.error = vi.fn();
+      mockClient.post.mockRejectedValue(new Error('error'));
+
+      const result = await authService.resendVerificationEmail('email');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([expect.any(Error)]);
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it('should return error if resending verification email fails', async () => {
+      mockClient.post.mockReturnValue({ ok: false });
+
+      const result = await authService.resendVerificationEmail('email');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([expect.any(Error)]);
+    });
+
+    it('should return true if resending verification email is successful', async () => {
+      mockClient.post.mockReturnValue({ ok: true });
+
+      const result = await authService.resendVerificationEmail('email');
+
+      expect(result.ok).toBe(true);
+      expect(result.val).toBe(true);
     });
   });
 });
