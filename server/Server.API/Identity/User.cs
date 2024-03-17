@@ -34,4 +34,9 @@ class User
   /// Gets or sets the user's updated date
   /// </summary>
   public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+  /// <summary>
+  /// Gets or sets whether the user has been verified.
+  /// </summary>
+  public bool IsVerified { get; set; } = false;
 }

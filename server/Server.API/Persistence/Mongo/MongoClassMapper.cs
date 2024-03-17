@@ -20,6 +20,7 @@ public static class MongoClassMapper
         cm.MapProperty(u => u.Password).SetElementName("password");
         cm.MapProperty(u => u.CreatedAt).SetElementName("createdAt");
         cm.MapProperty(u => u.UpdatedAt).SetElementName("updatedAt");
+        cm.MapProperty(u => u.IsVerified).SetElementName("isVerified");
       }
     );
 
