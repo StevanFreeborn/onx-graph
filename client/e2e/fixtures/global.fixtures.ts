@@ -1,4 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
+import { faker } from '@faker-js/faker';
 import { Page, test as base } from '@playwright/test';
 import { AxeResults } from 'axe-core';
 import mailhog from 'mailhog';
@@ -11,13 +12,20 @@ type TestUser = {
   username: string;
 };
 
+type NewUser = Omit<TestUser, 'username'>;
+
 type GlobalFixtures = {
   page: Page;
   accessibilityResults: AxeResults;
-  user: TestUser;
+  verifiedUser: TestUser;
+  unverifiedUser: TestUser;
+  newUser: NewUser;
   mailhog: mailhog.API;
   dbcontext: Db;
 };
+
+const testPassword = '@Password1';
+const testPasswordHash = '$2a$11$Xs1mALyCfYD7Er2542tlVupp7GnXIwj5kA/0e6d1Dapws80QwuWoq';
 
 export const test = base.extend<GlobalFixtures>({
   page: async ({ browser }, use) => {
@@ -36,13 +44,7 @@ export const test = base.extend<GlobalFixtures>({
       contentType: 'application/json',
     });
   },
-  user: async ({}, use) =>
-    await use({
-      email: env.PW_TEST_USER_EMAIL,
-      password: env.PW_TEST_USER_PASSWORD,
-      username: env.PW_TEST_USER_USERNAME,
-    }),
-  mailhog: async ({}, use) => await use(mailhog({ port: env.PW_MAILHOG_PORT })),
+  newUser: async ({}, use) => await use({ email: faker.internet.email(), password: testPassword }),
   dbcontext: async ({}, use) => {
     const mongoClient = new MongoClient(env.PW_DB_CONNECTION_STRING);
     await mongoClient.connect();
@@ -52,6 +54,41 @@ export const test = base.extend<GlobalFixtures>({
     await use(mongoClient.db(dbName));
     await mongoClient.close();
   },
+  verifiedUser: async ({ dbcontext }, use) => {
+    const user = {
+      _id: faker.database.mongodbObjectId(),
+      email: faker.internet.email(),
+      username: faker.internet.userName(),
+      password: testPasswordHash,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isVerified: true,
+    };
+
+    await dbcontext.collection('users').insertOne(user as any);
+
+    await use({ email: user.email, password: testPassword, username: user.username });
+
+    await dbcontext.collection('users').deleteOne({ email: user.email });
+  },
+  unverifiedUser: async ({ dbcontext }, use) => {
+    const user = {
+      _id: faker.database.mongodbObjectId(),
+      email: faker.internet.email(),
+      username: faker.internet.userName(),
+      password: testPasswordHash,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isVerified: false,
+    };
+
+    await dbcontext.collection('users').insertOne(user as any);
+
+    await use({ email: user.email, password: testPassword, username: user.username });
+
+    await dbcontext.collection('users').deleteOne({ email: user.email });
+  },
+  mailhog: async ({}, use) => await use(mailhog({ port: env.PW_MAILHOG_PORT })),
 });
 
 export * from '@playwright/test';
