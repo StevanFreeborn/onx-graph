@@ -8,7 +8,7 @@ setup('docker-compose up', async ({ request }) => {
     exec(`docker compose -f ${dockerComposePath} up --build`);
   });
 
-  await setup.step('wait for server to be ready', async () => {
+  await setup.step('wait for app to be ready', async () => {
     const baseUrl = setup.info().project.use.baseURL;
 
     expect(baseUrl).toBeDefined();
