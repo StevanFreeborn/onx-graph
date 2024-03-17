@@ -123,6 +123,10 @@ export class AuthService implements IAuthService {
         return Err([new Error('Email/Password combination is not valid')]);
       }
 
+      if (res.status === 403) {
+        return Err([new UserNotVerifiedError()]);
+      }
+
       if (res.ok === false) {
         return Err([new Error('Login failed. Please try again.')]);
       }
@@ -169,6 +173,12 @@ export class AuthService implements IAuthService {
       console.error(e);
       return Err([new Error('Registration failed. Please try again.')]);
     }
+  }
+}
+
+export class UserNotVerifiedError extends Error {
+  constructor() {
+    super('User is not verified. Please verify your account.');
   }
 }
 
