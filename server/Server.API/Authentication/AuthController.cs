@@ -179,8 +179,15 @@ static class AuthController
     return Results.Ok(new LoginUserResponse(refreshTokenResult.Value.AccessToken));
   }
 
-  internal static Task<IResult> ResendVerificationEmail(ResendVerificationEmailRequest req)
+  internal static async Task<IResult> ResendVerificationEmail(ResendVerificationEmailRequest req)
   {
-    throw new NotImplementedException();
+    var validationResult = await req.Validator.ValidateAsync(req.Dto);
+
+    if (validationResult.IsValid == false)
+    {
+      return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
+    return Results.Ok();
   }
 }
