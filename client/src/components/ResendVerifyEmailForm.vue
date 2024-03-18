@@ -66,7 +66,7 @@
       setTimeout(() => {
         sendStatus.value = 'idle';
       }, SEND_STATUS_TIMEOUT);
-      formState.errors.push('Failed to resend email.');
+      formState.errors.push(...resendResult.val.map(err => err.message));
       setIsSubmitting(false);
       return;
     }
