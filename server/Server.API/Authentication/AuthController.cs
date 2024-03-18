@@ -168,7 +168,12 @@ static class AuthController
     return Results.Ok(new LoginUserResponse(refreshTokenResult.Value.AccessToken));
   }
 
-  internal static async Task<IResult> ResendVerificationEmail(ResendVerificationEmailRequest req)
+  /// <summary>
+  /// Resends a user's verification email.
+  /// </summary>
+  /// <param name="req">The request as a <see cref="ResendVerificationEmailRequest"/> instance.</param>
+  /// <returns>A <see cref="Task"/> of <see cref="IResult"/>.</returns>
+  internal static async Task<IResult> ResendVerificationEmail([AsParameters] ResendVerificationEmailRequest req)
   {
     var validationResult = await req.Validator.ValidateAsync(req.Dto);
 
