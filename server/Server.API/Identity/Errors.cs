@@ -29,3 +29,13 @@ class UserNotVerifiedError : Error
   {
   }
 }
+
+/// <summary>
+/// An error indicating that a user is already verified.
+/// </summary>
+class UserAlreadyVerifiedError : Error
+{
+  internal UserAlreadyVerifiedError(string identifier) : base($"User is already verified with identifier: {identifier}")
+  {
+  }
+}
