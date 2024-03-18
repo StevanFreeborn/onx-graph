@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace Server.API.Tests.Integration;
 
 public partial class AuthControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory), IDisposable
