@@ -49,6 +49,24 @@ export class AuthService implements IAuthService {
     try {
       const res = await this.client.post(request);
 
+      if (res.status === 400) {
+        const body = await res.json();
+        const validationErrors = body.errors as Record<string, string[]>;
+        const errors = Object.values(validationErrors)
+          .flat()
+          .map(e => new Error(e));
+
+        return Err(errors);
+      }
+
+      if (res.status === 404) {
+        return Err([new Error('User not found. You may need to register.')]);
+      }
+
+      if (res.status === 409) {
+        return Err([new Error('User is already verified.')]);
+      }
+
       if (res.ok === false) {
         return Err([new Error('Resending verification email failed')]);
       }
