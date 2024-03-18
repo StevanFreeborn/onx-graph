@@ -188,6 +188,28 @@ static class AuthController
       return Results.ValidationProblem(validationResult.ToDictionary());
     }
 
+    var userResult = await req.UserService.GetUserByEmailAsync(req.Dto.Email);
+
+    if (userResult.IsFailed)
+    {
+      return Results.Problem(
+        title: "Resend verification email failed",
+        detail: "Unable to resend verification email. See errors for details.",
+        statusCode: (int)HttpStatusCode.NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", userResult.Errors } }
+      );
+    }
+
+    if (userResult.Value.IsVerified)
+    {
+      return Results.Problem(
+        title: "Resend verification email failed",
+        detail: "Unable to resend verification email. See errors for details.",
+        statusCode: (int)HttpStatusCode.BadRequest,
+        extensions: new Dictionary<string, object?> { { "Errors", new[] { new UserAlreadyVerifiedError(userResult.Value.Email) } } }
+      );
+    }
+
     return Results.Ok();
   }
 }
