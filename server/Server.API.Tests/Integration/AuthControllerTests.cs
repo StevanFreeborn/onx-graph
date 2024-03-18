@@ -679,4 +679,34 @@ public partial class AuthControllerTests(TestServerFactory serverFactory) : Inte
       .Should()
       .BeNull();
   }
+
+  [Fact]
+  public Task ResendVerificationToken_WhenCalledAndNoEmailIsProvided_ItShouldReturn400StatusCodeWithValidationProblemDetails()
+  {
+    throw new NotImplementedException();
+  }
+
+  [Fact]
+  public Task ResendVerificationToken_WhenCalledAndGivenInvalidEmail_ItShouldReturn400StatusCodeWithValidationProblemDetails()
+  {
+    throw new NotImplementedException();
+  }
+
+  [Fact]
+  public Task ResendVerificationToken_WhenCalledAndGivenEmailForNonExistingUser_ItShouldReturn404StatusCodeWithProblemDetails()
+  {
+    throw new NotImplementedException();
+  }
+
+  [Fact]
+  public Task ResendVerificationToken_WhenCalledAndGivenEmailForAlreadyVerifiedUser_ItShouldReturn400StatusCodeWithProblemDetails()
+  {
+    throw new NotImplementedException();
+  }
+
+  [Fact]
+  public Task ResendVerificationToken_WhenCalledAndGivenEmailForExistingUser_ItShouldReturn204StatusCodeSendEmailAndRevokeExistingVerificationTokens()
+  {
+    throw new NotImplementedException();
+  }
 }
