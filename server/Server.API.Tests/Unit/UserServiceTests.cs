@@ -202,4 +202,42 @@ public class UserServiceTests
       .Should()
       .Contain(e => e is UserNotVerifiedError);
   }
+
+  [Fact]
+  public async Task GetUserByEmailAsync_WhenUserDoesNotExist_ItShouldReturnUserDoesNotExistError()
+  {
+    _userRepositoryMock
+      .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
+      .ReturnsAsync(null as User);
+
+    var result = await _sut.GetUserByEmailAsync("test@test.com");
+
+    result.IsFailed
+      .Should()
+      .BeTrue();
+
+    result.Errors
+      .Should()
+      .Contain(e => e is UserDoesNotExistError);
+  }
+
+  [Fact]
+  public async Task GetUserByEmailAsync_WhenUserExists_ItShouldReturnUser()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
+      .ReturnsAsync(user);
+
+    var result = await _sut.GetUserByEmailAsync(user.Email);
+
+    result.IsSuccess
+      .Should()
+      .BeTrue();
+
+    result.Value
+      .Should()
+      .Be(user);
+  }
 }
