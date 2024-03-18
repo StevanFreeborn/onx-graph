@@ -57,8 +57,15 @@ class MongoTokenRepository(
     await _context.Tokens.ReplaceOneAsync(filter, updatedToken);
   }
 
-  public Task RevokeUserVerificationTokensAsync(string userId)
+  public async Task RevokeUserVerificationTokensAsync(string userId)
   {
-    throw new NotImplementedException();
+    var filter = Builders<BaseToken>.Filter.And(
+      Builders<BaseToken>.Filter.Eq(x => x.UserId, userId),
+      Builders<BaseToken>.Filter.Eq(x => x.TokenType, TokenType.Verification)
+    );
+
+    var update = Builders<BaseToken>.Update.Set(x => x.Revoked, true);
+
+    await _context.Tokens.UpdateManyAsync(filter, update);
   }
 }
