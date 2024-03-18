@@ -5,20 +5,6 @@ namespace Server.API.Authentication;
 /// </summary>
 static class AuthController
 {
-  private static EmailMessage BuildVerificationEmail(string email, string token, string origin)
-    => new()
-    {
-      To = email,
-      Subject = "Welcome to OnxGraph! Verify your account to get started.",
-      HtmlContent = $"""
-        <h1>Welcome to OnxGraph!</h1>
-        <p>We're excited to welcome you to OnxGraph! Before you begin we need to verify your account. Follow these steps to complete the verification process:</p>
-        <p>Click the link below to verify your account:</p>
-        <a href='{origin}/masses/verify-account?t={token}'>Verify Account</a>
-        <p>If you didn't create an account with OnxGraph, please ignore this email.</p>
-      """
-    };
-
   /// <summary>
   /// Registers a new user.
   /// </summary>
@@ -212,4 +198,18 @@ static class AuthController
 
     return Results.Ok();
   }
+
+  private static EmailMessage BuildVerificationEmail(string email, string token, string origin)
+  => new()
+  {
+    To = email,
+    Subject = "Welcome to OnxGraph! Verify your account to get started.",
+    HtmlContent = $"""
+        <h1>Welcome to OnxGraph!</h1>
+        <p>We're excited to welcome you to OnxGraph! Before you begin we need to verify your account. Follow these steps to complete the verification process:</p>
+        <p>Click the link below to verify your account:</p>
+        <a href='{origin}/masses/verify-account?t={token}'>Verify Account</a>
+        <p>If you didn't create an account with OnxGraph, please ignore this email.</p>
+      """
+  };
 }
