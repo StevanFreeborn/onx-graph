@@ -197,6 +197,11 @@ class TokenService(
     await _tokenRepository.UpdateTokenAsync(updatedToken);
   }
 
+  public Task RevokeUserVerificationTokensAsync(string userId)
+  {
+    throw new NotImplementedException();
+  }
+
   private string GenerateToken()
   {
     var randomBytes = new byte[32];

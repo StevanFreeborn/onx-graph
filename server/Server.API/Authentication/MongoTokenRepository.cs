@@ -56,4 +56,9 @@ class MongoTokenRepository(
     var filter = Builders<BaseToken>.Filter.Eq(x => x.Id, updatedToken.Id);
     await _context.Tokens.ReplaceOneAsync(filter, updatedToken);
   }
+
+  public Task RevokeUserVerificationTokensAsync(string userId)
+  {
+    throw new NotImplementedException();
+  }
 }
