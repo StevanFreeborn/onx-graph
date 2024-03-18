@@ -196,7 +196,39 @@ static class AuthController
       );
     }
 
-    return Results.Ok();
+    await req.TokenService.RevokeUserVerificationTokensAsync(userResult.Value.Id);
+
+    var tokenResult = await req.TokenService.GenerateVerificationToken(userResult.Value.Id);
+
+    if (tokenResult.IsFailed)
+    {
+      return Results.Problem(
+        title: "Resend verification email failed",
+        detail: "Unable to resend verification email. See errors for details.",
+        statusCode: (int)HttpStatusCode.InternalServerError,
+        extensions: new Dictionary<string, object?> { { "Errors", tokenResult.Errors } }
+      );
+    }
+
+    var emailMessage = BuildVerificationEmail(
+      userResult.Value.Email,
+      tokenResult.Value.Token,
+      req.CorsOptions.Value.AllowedOrigins[0]
+    );
+
+    var emailResult = await req.EmailService.SendEmailAsync(emailMessage);
+
+    if (emailResult.IsFailed)
+    {
+      return Results.Problem(
+        title: "Resend verification email failed",
+        detail: "Unable to resend verification email. See errors for details.",
+        statusCode: (int)HttpStatusCode.InternalServerError,
+        extensions: new Dictionary<string, object?> { { "Errors", emailResult.Errors } }
+      );
+    }
+
+    return Results.NoContent();
   }
 
   private static EmailMessage BuildVerificationEmail(string email, string token, string origin)
