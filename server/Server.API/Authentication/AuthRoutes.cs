@@ -50,5 +50,14 @@ static class AuthRoutes
       .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("RefreshToken")
       .WithDescription("Refresh a user's token");
+
+    group
+      .MapPost("resend-verification-email", AuthController.ResendVerificationEmail)
+      .Produces((int)HttpStatusCode.NoContent)
+      .ProducesValidationProblem()
+      .Produces<ProblemDetails>((int)HttpStatusCode.NotFound)
+      .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
+      .WithName("ResendVerificationEmail")
+      .WithDescription("Resend a user's verification email");
   }
 }
