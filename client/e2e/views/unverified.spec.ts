@@ -21,6 +21,19 @@ test.describe('UnverifiedView', () => {
     await expect(page.getByText(/you have not verified your account/i)).toBeVisible();
   });
 
+  test('when user visits register confirmation they should be told the verification link expired after 15 minutes', async ({
+    page,
+  }) => {
+    await expect(page.getByText(/expires after 15 minutes/i)).toBeVisible();
+  });
+
+  test('when user visits register confirmation they should be told if they are unverified after 48 hours their account will be deleted', async ({
+    page,
+  }) => {
+    await expect(page.getByText(/unverified after 48 hours/i)).toBeVisible();
+    await expect(page.getByText(/account will be deleted/i)).toBeVisible();
+  });
+
   test('when user visits unverified they should see a link to the login page', async ({ page }) => {
     const link = page.getByRole('link', { name: /login/i }).last();
 

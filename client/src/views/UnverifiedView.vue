@@ -21,6 +21,10 @@
           <RouterLink to="/masses/login">login</RouterLink> to your account.
         </p>
         <p>
+          Please note that verification links expire after 15 minutes. In addition if an account is
+          not verified within 48 hours, it will have been deleted.
+        </p>
+        <p>
           If you cannot find the email take a peek in your spam folder. If necessary you can use the
           form below to request a new verification email. Note requesting new verification email
           will invalidate the previous verification email.
