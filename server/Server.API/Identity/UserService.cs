@@ -14,6 +14,18 @@ class UserService(
   private readonly IUserRepository _userRepository = userRepository;
   private readonly ILogger<UserService> _logger = logger;
 
+  public async Task<Result<User>> GetUserByEmailAsync(string userEmail)
+  {
+    var existingUser = await _userRepository.GetUserByEmailAsync(userEmail);
+
+    if (existingUser is null)
+    {
+      return Result.Fail(new UserDoesNotExistError(userEmail));
+    }
+
+    return Result.Ok(existingUser);
+  }
+
   public async Task<Result<(string AccessToken, RefreshToken RefreshToken)>> LoginUserAsync(string email, string password)
   {
     var existingUser = await _userRepository.GetUserByEmailAsync(email);
