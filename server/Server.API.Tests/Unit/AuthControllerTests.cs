@@ -866,11 +866,26 @@ public class AuthControllerTests
       _tokenServiceMock.Object
     );
 
-  [Fact]
-  public async Task ResendVerificationEmail_WhenNoEmailIsProvided_ItShouldReturnAValidationProblemDetailWith400StatusCode()
+  [Theory]
+  [InlineData("")]
+  [InlineData("test")]
+  public async Task ResendVerificationEmail_WhenProvidedEmailIsInvalid_ItShouldReturnAValidationProblemDetailWith400StatusCode(string email)
   {
+    var expectedEmailKey = "Email";
+    var expectedErrorMessage = "Email must be a valid email address.";
 
-    var dto = new ResendVerificationEmailDto(string.Empty);
+    var validationResult = new ValidationResult(
+      new[]
+      {
+        new ValidationFailure(expectedEmailKey, expectedErrorMessage)
+      }
+    );
+
+    _resendVerificationEmailDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<ResendVerificationEmailDto>(), default))
+      .ReturnsAsync(validationResult);
+
+    var dto = new ResendVerificationEmailDto(email);
     var request = CreateResendVerificationEmailRequest(dto);
 
     var result = await AuthController.ResendVerificationEmail(request);
@@ -882,23 +897,18 @@ public class AuthControllerTests
       .StatusCode
       .Should()
       .Be((int)HttpStatusCode.BadRequest);
-  }
 
-  [Fact]
-  public async Task ResendVerificationEmail_WhenProvidedEmailIsInvalid_ItShouldReturnAValidationProblemDetailWith400StatusCode()
-  {
-    var dto = new ResendVerificationEmailDto("test");
-    var request = CreateResendVerificationEmailRequest(dto);
+    var validationProblemDetails = result
+      .As<ProblemHttpResult>()
+      .ProblemDetails as ValidationProblemDetails;
 
-    var result = await AuthController.ResendVerificationEmail(request);
-
-    result.Should()
-      .BeOfType<ProblemHttpResult>();
-
-    result.As<ProblemHttpResult>()
-      .StatusCode
+    validationProblemDetails?.Errors
       .Should()
-      .Be((int)HttpStatusCode.BadRequest);
+      .ContainKey(expectedEmailKey);
+
+    validationProblemDetails?.Errors[expectedEmailKey]
+      .Should()
+      .Contain(expectedErrorMessage);
   }
 
   [Fact]
