@@ -202,7 +202,7 @@ static class AuthController
       return Results.Problem(
         title: problemTitle,
         detail: problemDetail,
-        statusCode: (int)HttpStatusCode.BadRequest,
+        statusCode: (int)HttpStatusCode.Conflict,
         extensions: new Dictionary<string, object?> { { "Errors", new[] { new UserAlreadyVerifiedError(userResult.Value.Email) } } }
       );
     }

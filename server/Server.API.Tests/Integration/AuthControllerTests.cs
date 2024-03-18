@@ -749,7 +749,7 @@ public partial class AuthControllerTests(TestServerFactory serverFactory) : Inte
 
     resendResponse.StatusCode
       .Should()
-      .Be(HttpStatusCode.BadRequest);
+      .Be(HttpStatusCode.Conflict);
 
     var resendResponseBody = resendResponse.Content.ReadFromJsonAsync<ProblemDetails>();
 

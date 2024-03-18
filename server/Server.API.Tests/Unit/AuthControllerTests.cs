@@ -937,7 +937,7 @@ public class AuthControllerTests
     result.As<ProblemHttpResult>()
       .StatusCode
       .Should()
-      .Be((int)HttpStatusCode.BadRequest);
+      .Be((int)HttpStatusCode.Conflict);
   }
 
   [Fact]
