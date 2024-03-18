@@ -211,4 +211,54 @@ public class MongoTokenRepositoryTests : IClassFixture<TestDb>, IDisposable
       .Should()
       .BeTrue();
   }
+
+  [Fact]
+  public async Task RevokeUserVerificationTokensAsync_WhenCalled_ItShouldRevokeTokens()
+  {
+    var userId = ObjectId.GenerateNewId().ToString();
+    var tokens = FakeDataFactory.VerificationToken.Generate(3);
+
+    var testTokens = tokens
+      .Select(t => t with
+      {
+        UserId = userId
+      })
+      .ToList();
+
+    var revokedToken = testTokens[0] with
+    {
+      Revoked = true
+    };
+
+    var unrevokedToken = testTokens[1] with
+    {
+      Revoked = false
+    };
+
+    var unrevokedToken2 = testTokens[2] with
+    {
+      Revoked = false
+    };
+
+    await _context.Tokens.InsertManyAsync(
+      new List<VerificationToken>
+      {
+        revokedToken,
+        unrevokedToken,
+        unrevokedToken2
+      }
+    );
+
+    await _sut.RevokeUserVerificationTokensAsync(userId);
+
+    var result = await _context.Tokens
+      .Find(t => t.UserId == userId)
+      .ToListAsync();
+
+    result
+      .Should()
+      .HaveCount(3);
+
+    result.Should().OnlyContain(t => t.Revoked);
+  }
 }

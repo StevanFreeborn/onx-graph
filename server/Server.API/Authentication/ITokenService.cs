@@ -48,4 +48,11 @@ interface ITokenService
   /// <param name="refreshToken">The refresh token.</param>
   /// <returns>A <see cref="Task"/>.</returns>
   Task RevokeRefreshTokenAsync(string userId, string refreshToken);
+
+  /// <summary>
+  /// Revokes all the verification tokens for a user.
+  /// </summary>
+  /// <param name="userId">The user id.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task RevokeUserVerificationTokensAsync(string userId);
 }

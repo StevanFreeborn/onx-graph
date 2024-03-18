@@ -453,4 +453,17 @@ public class TokenServiceTests
     result.Errors.Should().ContainSingle();
     result.Errors.First().Should().BeOfType<GenerateVerificationTokenError>();
   }
+
+  [Fact]
+  public async Task RevokeUserVerificationTokens_WhenCalled_ItShouldCallTokenRepository()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    await _sut.RevokeUserVerificationTokensAsync(user.Id);
+
+    _tokenRepositoryMock.Verify(
+      t => t.RevokeUserVerificationTokensAsync(user.Id),
+      Times.Once
+    );
+  }
 }

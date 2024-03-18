@@ -39,4 +39,11 @@ interface ITokenRepository
   /// <param name="updatedToken">The updated token.</param>
   /// <returns>A <see cref="Task"/>.</returns>
   Task UpdateTokenAsync(BaseToken updatedToken);
+
+  /// <summary>
+  /// Revoke all verification tokens for given user.
+  /// </summary>
+  /// <param name="userId">The user id.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task RevokeUserVerificationTokensAsync(string userId);
 }
