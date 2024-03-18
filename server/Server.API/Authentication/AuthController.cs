@@ -76,11 +76,14 @@ static class AuthController
 
     var loginResult = await req.UserService.LoginUserAsync(req.Dto.Email, req.Dto.Password);
 
+    var problemTitle = "Login failed";
+    var problemDetail = "Unable to login user. See errors for details.";
+
     if (loginResult.IsFailed && loginResult.Errors.Exists(e => e is InvalidLoginError))
     {
       return Results.Problem(
-        title: "Login failed",
-        detail: "Unable to login user. See errors for details.",
+        title: problemTitle,
+        detail: problemDetail,
         statusCode: (int)HttpStatusCode.Unauthorized,
         extensions: new Dictionary<string, object?> { { "Errors", loginResult.Errors } }
       );
@@ -89,8 +92,8 @@ static class AuthController
     if (loginResult.IsFailed && loginResult.Errors.Exists(e => e is UserNotVerifiedError))
     {
       return Results.Problem(
-        title: "Login failed",
-        detail: "User is not verified. See errors for details.",
+        title: problemTitle,
+        detail: problemDetail,
         statusCode: (int)HttpStatusCode.Forbidden,
         extensions: new Dictionary<string, object?> { { "Errors", loginResult.Errors } }
       );
@@ -176,11 +179,14 @@ static class AuthController
 
     var userResult = await req.UserService.GetUserByEmailAsync(req.Dto.Email);
 
+    var problemTitle = "Resend verification email failed";
+    var problemDetail = "Unable to resend verification email. See errors for details.";
+
     if (userResult.IsFailed)
     {
       return Results.Problem(
-        title: "Resend verification email failed",
-        detail: "Unable to resend verification email. See errors for details.",
+        title: problemTitle,
+        detail: problemDetail,
         statusCode: (int)HttpStatusCode.NotFound,
         extensions: new Dictionary<string, object?> { { "Errors", userResult.Errors } }
       );
@@ -189,8 +195,8 @@ static class AuthController
     if (userResult.Value.IsVerified)
     {
       return Results.Problem(
-        title: "Resend verification email failed",
-        detail: "Unable to resend verification email. See errors for details.",
+        title: problemTitle,
+        detail: problemDetail,
         statusCode: (int)HttpStatusCode.BadRequest,
         extensions: new Dictionary<string, object?> { { "Errors", new[] { new UserAlreadyVerifiedError(userResult.Value.Email) } } }
       );
@@ -203,8 +209,8 @@ static class AuthController
     if (tokenResult.IsFailed)
     {
       return Results.Problem(
-        title: "Resend verification email failed",
-        detail: "Unable to resend verification email. See errors for details.",
+        title: problemTitle,
+        detail: problemDetail,
         statusCode: (int)HttpStatusCode.InternalServerError,
         extensions: new Dictionary<string, object?> { { "Errors", tokenResult.Errors } }
       );
