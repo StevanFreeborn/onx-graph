@@ -22,14 +22,14 @@ test.describe('RegisterConfirmationView', () => {
   test('when user visits register confirmation they should be told the verification link expires in 15 minutes', async ({
     page,
   }) => {
-    await expect(page.getByText(/expires in 15 minutes/i)).toBeVisible();
+    await expect(page.getByText(/link will expire in 15 minutes/i)).toBeVisible();
   });
 
   test('when user visits register confirmation they should be told if they are unverified after 48 hours their account will be deleted', async ({
     page,
   }) => {
     await expect(page.getByText(/not verified after 48 hours/i)).toBeVisible();
-    await expect(page.getByText(/account will have been deleted/i)).toBeVisible();
+    await expect(page.getByText(/will be deleted/i)).toBeVisible();
   });
 
   test('when user visits register confirmation they should see a link to the login page', async ({

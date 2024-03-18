@@ -23,7 +23,7 @@
         <p>
           Please note that the verification link will expire in 15 minutes. If you do not verify
           your account within that time, you will need to request a new verification email. In
-          addition if your account is not verified within 48 hours, it will be deleted.
+          addition if your account is not verified after 48 hours, it will be deleted.
         </p>
         <p>
           If you do not receive the email within the next few minutes, please check your spam
