@@ -25,6 +25,5 @@ interface IUserService
   /// </summary>
   /// <param name="userEmail">The email of the user to get.</param>
   /// <returns>A <see cref="User"/> instance if found; otherwise a <see cref="UserDoesNotExistError"/> instance.</returns>
-  /// <summary>
   Task<Result<User>> GetUserByEmailAsync(string userEmail);
 }
