@@ -199,17 +199,7 @@ public class MongoTokenRepositoryTests : IClassFixture<TestDb>, IDisposable
       .Should()
       .HaveCount(3);
 
-    result[0].Revoked
-      .Should()
-      .BeTrue();
-
-    result[1].Revoked
-      .Should()
-      .BeTrue();
-
-    result[2].Revoked
-      .Should()
-      .BeTrue();
+    result.Should().OnlyContain(t => t.Revoked);
   }
 
   [Fact]
