@@ -197,10 +197,8 @@ class TokenService(
     await _tokenRepository.UpdateTokenAsync(updatedToken);
   }
 
-  public Task RevokeUserVerificationTokensAsync(string userId)
-  {
-    throw new NotImplementedException();
-  }
+  public Task RevokeUserVerificationTokensAsync(string userId) =>
+    _tokenRepository.RevokeUserVerificationTokensAsync(userId);
 
   private string GenerateToken()
   {
