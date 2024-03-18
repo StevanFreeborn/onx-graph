@@ -914,6 +914,17 @@ public class AuthControllerTests
   [Fact]
   public async Task ResendVerification_WhenUserIsAlreadyVerified_ItShouldReturnAProblemDetailWith400StatusCode()
   {
+    var (_, existingUser) = FakeDataFactory.TestUser.Generate();
+    existingUser.IsVerified = true;
+
+    _resendVerificationEmailDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<ResendVerificationEmailDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    _userServiceMock
+      .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Ok(existingUser));
+
     var dto = new ResendVerificationEmailDto("test@test.com");
     var request = CreateResendVerificationEmailRequest(dto);
 
