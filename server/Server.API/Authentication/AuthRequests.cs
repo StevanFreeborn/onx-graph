@@ -136,5 +136,6 @@ record ResendVerificationEmailRequest(
   [FromServices] IValidator<ResendVerificationEmailDto> Validator,
   [FromServices] IUserService UserService,
   [FromServices] IEmailService EmailService,
-  [FromServices] ITokenService TokenService
+  [FromServices] ITokenService TokenService,
+  [FromServices] IOptions<CorsOptions> CorsOptions
 );
