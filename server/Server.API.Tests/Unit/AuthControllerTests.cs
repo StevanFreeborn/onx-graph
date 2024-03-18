@@ -863,7 +863,8 @@ public class AuthControllerTests
       _resendVerificationEmailDtoValidatorMock.Object,
       _userServiceMock.Object,
       _emailServiceMock.Object,
-      _tokenServiceMock.Object
+      _tokenServiceMock.Object,
+      _corsOptions.Object
     );
 
   [Theory]
@@ -986,6 +987,33 @@ public class AuthControllerTests
   [Fact]
   public async Task ResendVerificationEmail_WhenResendingVerificationEmailSucceeds_ItShouldReturn204StatusCode()
   {
+    var (_, existingUser) = FakeDataFactory.TestUser.Generate();
+
+    _resendVerificationEmailDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<ResendVerificationEmailDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    _userServiceMock
+      .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Ok(existingUser));
+
+    _tokenServiceMock
+      .Setup(t => t.GenerateVerificationToken(It.IsAny<string>()))
+      .ReturnsAsync(Result.Ok(new VerificationToken()));
+
+    _corsOptions
+      .Setup(c => c.Value)
+      .Returns(
+        new CorsOptions
+        {
+          AllowedOrigins = new[] { "https://localhost:3001" }
+        }
+      );
+
+    _emailServiceMock
+      .Setup(e => e.SendEmailAsync(It.IsAny<EmailMessage>()))
+      .ReturnsAsync(Result.Ok());
+
     var dto = new ResendVerificationEmailDto("test@test.com");
     var request = CreateResendVerificationEmailRequest(dto);
 
@@ -998,5 +1026,23 @@ public class AuthControllerTests
       .StatusCode
       .Should()
       .Be((int)HttpStatusCode.NoContent);
+
+    _tokenServiceMock
+      .Verify(
+        t => t.RevokeUserVerificationTokensAsync(existingUser.Id),
+        Times.Once
+      );
+
+    _tokenServiceMock
+      .Verify(
+        t => t.GenerateVerificationToken(existingUser.Id),
+        Times.Once
+      );
+
+    _emailServiceMock
+      .Verify(
+        e => e.SendEmailAsync(It.IsAny<EmailMessage>()),
+        Times.Once
+      );
   }
 }
