@@ -11,6 +11,7 @@
     "Instantiator",
     "mailhog",
     "Pinia",
+    "Resends",
     "rushstack",
     "Swashbuckle",
     "Testcontainers",
