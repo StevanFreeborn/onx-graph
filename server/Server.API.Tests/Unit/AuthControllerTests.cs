@@ -925,7 +925,7 @@ public class AuthControllerTests
       .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
       .ReturnsAsync(Result.Ok(existingUser));
 
-    var dto = new ResendVerificationEmailDto("test@test.com");
+    var dto = new ResendVerificationEmailDto(existingUser.Email);
     var request = CreateResendVerificationEmailRequest(dto);
 
     var result = await AuthController.ResendVerificationEmail(request);
@@ -942,7 +942,17 @@ public class AuthControllerTests
   [Fact]
   public async Task ResendVerificationEmail_WhenNoUserIsFound_ItShouldReturnAProblemDetailWith404StatusCode()
   {
-    var dto = new ResendVerificationEmailDto("test@test.com");
+    var testEmail = "test@test.com";
+
+    _resendVerificationEmailDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<ResendVerificationEmailDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    _userServiceMock
+      .Setup(u => u.GetUserByEmailAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Fail(new UserDoesNotExistError(testEmail)));
+
+    var dto = new ResendVerificationEmailDto(testEmail);
     var request = CreateResendVerificationEmailRequest(dto);
 
     var result = await AuthController.ResendVerificationEmail(request);
