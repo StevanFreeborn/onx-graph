@@ -211,7 +211,7 @@ public partial class AuthControllerTests(TestServerFactory serverFactory) : Inte
 
     loginResponseBody?.Detail
       .Should()
-      .Be("User is not verified. See errors for details.");
+      .Be("Unable to login user. See errors for details.");
 
     loginResponseBody?.Extensions
       .Should()
@@ -678,33 +678,158 @@ public partial class AuthControllerTests(TestServerFactory serverFactory) : Inte
       .BeNull();
   }
 
-  [Fact]
-  public Task ResendVerificationToken_WhenCalledAndNoEmailIsProvided_ItShouldReturn400StatusCodeWithValidationProblemDetails()
+  [Theory]
+  [InlineData("")]
+  [InlineData("invalid_email@")]
+  public async Task ResendVerificationToken_WhenCalledAndGivenInvalidEmail_ItShouldReturn400StatusCodeWithValidationProblemDetails(string email)
   {
-    throw new NotImplementedException();
+    var resendResponse = await _client.PostAsJsonAsync("/auth/resend-verification-email", new
+    {
+      email,
+    });
+
+    resendResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.BadRequest);
+
+    var resendResponseBody = await resendResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+
+    resendResponseBody
+      .Should()
+      .NotBeNull();
+
+    resendResponseBody?.Errors
+      .Should()
+      .NotBeNullOrEmpty();
   }
 
   [Fact]
-  public Task ResendVerificationToken_WhenCalledAndGivenInvalidEmail_ItShouldReturn400StatusCodeWithValidationProblemDetails()
+  public async Task ResendVerificationToken_WhenCalledAndGivenEmailForNonExistingUser_ItShouldReturn404StatusCodeWithProblemDetails()
   {
-    throw new NotImplementedException();
+    var resendResponse = await _client.PostAsJsonAsync("/auth/resend-verification-email", new
+    {
+      email = "test@test.com",
+    });
+
+    resendResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.NotFound);
+
+    var resendResponseBody = resendResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    resendResponseBody.Result
+      .Should()
+      .NotBeNull();
+
+    resendResponseBody.Result?.Title
+      .Should()
+      .Be("Resend verification email failed");
+
+    resendResponseBody.Result?.Detail
+      .Should()
+      .Be("Unable to resend verification email. See errors for details.");
+
+    resendResponseBody.Result?.Extensions
+      .Should()
+      .ContainKey("Errors");
   }
 
   [Fact]
-  public Task ResendVerificationToken_WhenCalledAndGivenEmailForNonExistingUser_ItShouldReturn404StatusCodeWithProblemDetails()
+  public async Task ResendVerificationToken_WhenCalledAndGivenEmailForAlreadyVerifiedUser_ItShouldReturn400StatusCodeWithProblemDetails()
   {
-    throw new NotImplementedException();
+    var (_, existingUser) = FakeDataFactory.TestUser.Generate();
+    existingUser.IsVerified = true;
+
+    Context.Users.InsertOne(existingUser);
+
+    var resendResponse = await _client.PostAsJsonAsync("/auth/resend-verification-email", new
+    {
+      email = existingUser.Email,
+    });
+
+    resendResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.BadRequest);
+
+    var resendResponseBody = resendResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    resendResponseBody.Result
+      .Should()
+      .NotBeNull();
+
+    resendResponseBody.Result?.Title
+      .Should()
+      .Be("Resend verification email failed");
+
+    resendResponseBody.Result?.Detail
+      .Should()
+      .Be("Unable to resend verification email. See errors for details.");
+
+    resendResponseBody.Result?.Extensions
+      .Should()
+      .ContainKey("Errors");
   }
 
   [Fact]
-  public Task ResendVerificationToken_WhenCalledAndGivenEmailForAlreadyVerifiedUser_ItShouldReturn400StatusCodeWithProblemDetails()
+  public async Task ResendVerificationToken_WhenCalledAndGivenEmailForExistingUser_ItShouldReturn204StatusCodeSendEmailAndRevokeExistingVerificationTokens()
   {
-    throw new NotImplementedException();
-  }
+    var (password, existingUser) = FakeDataFactory.TestUser.Generate();
+    var existingVerificationToken = FakeDataFactory.VerificationToken.Generate() with { UserId = existingUser.Id };
+    var emailParts = existingUser.Email.Split('@');
+    var testMailbox = emailParts[0];
+    var testDomain = emailParts[1];
 
-  [Fact]
-  public Task ResendVerificationToken_WhenCalledAndGivenEmailForExistingUser_ItShouldReturn204StatusCodeSendEmailAndRevokeExistingVerificationTokens()
-  {
-    throw new NotImplementedException();
+    await Context.Users.InsertOneAsync(existingUser);
+    await Context.Tokens.InsertOneAsync(existingVerificationToken);
+
+    var resendResponse = await _client.PostAsJsonAsync("/auth/resend-verification-email", new
+    {
+      email = existingUser.Email,
+    });
+
+    resendResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+    var resendResponseBody = await resendResponse.Content.ReadAsStringAsync();
+
+    resendResponseBody
+      .Should()
+      .BeEmpty();
+
+    var newToken = await Context.Tokens
+      .Find(
+        t =>
+          t.UserId == existingUser.Id &&
+          t.TokenType == TokenType.Verification &&
+          t.Token != existingVerificationToken.Token &&
+          t.Revoked == false
+      )
+      .FirstOrDefaultAsync();
+
+    newToken
+      .Should()
+      .NotBeNull();
+
+    var revokedToken = await Context.Tokens
+      .Find(t => t.Id == existingVerificationToken.Id)
+      .FirstOrDefaultAsync();
+
+    revokedToken
+      .Should()
+      .NotBeNull();
+
+    revokedToken?.Revoked.Should().BeTrue();
+
+    var emailSearchResult = await _mailHogService.SearchEmailAsync(new(MailHogSearchKind.To, existingUser.Email));
+    emailSearchResult.Count.Should().Be(1);
+    emailSearchResult.Items.Should().NotBeNullOrEmpty();
+    emailSearchResult.Items.First().To
+      .Should()
+      .ContainSingle(t =>
+        t.Mailbox == testMailbox && t.Domain == testDomain
+      );
+
+    var email = await _mailHogService.GetEmailAsync(emailSearchResult.Items.First().Id);
+    email.Content.Body.Should().Contain("Verify Account");
+    email.Content.Body.Should().MatchRegex(VerifyAccountLinkRegex());
   }
 }
