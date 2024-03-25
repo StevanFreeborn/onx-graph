@@ -92,55 +92,66 @@
 </script>
 
 <template>
-  <form
-    aria-label="resend verification email form"
-    class="resend-form"
-    novalidate
-    @submit.prevent="handleResendFormSubmit"
-  >
-    <div class="form-row">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <div class="form-row">
-          <input
-            :disabled="isMounted === false"
-            type="email"
-            id="email"
-            name="email"
-            required
-            v-model="formState.fields.email.value"
-            @input="handleInputChange"
-            :class="{ invalid: formState.fields.email.errorMessage }"
-          />
-          <button
-            :disabled="isMounted === false || isSubmitting"
-            class="resend-button"
-            type="submit"
-          >
-            Resend
-          </button>
-          <span v-if="sendStatus === 'sending'">Sending email...</span>
-          <Transition>
-            <span v-if="sendStatus === 'error'">Unable to send email. Please try again.</span>
-          </Transition>
-          <Transition>
-            <span v-if="sendStatus === 'success'">Email sent successfully.</span>
-          </Transition>
+  <div class="container">
+    <form
+      aria-label="resend verification email form"
+      class="resend-form"
+      novalidate
+      @submit.prevent="handleResendFormSubmit"
+    >
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <div class="form-row">
+            <input
+              :disabled="isMounted === false"
+              type="email"
+              id="email"
+              name="email"
+              required
+              v-model="formState.fields.email.value"
+              @input="handleInputChange"
+              :class="{ invalid: formState.fields.email.errorMessage }"
+            />
+            <button
+              :disabled="isMounted === false || isSubmitting"
+              class="resend-button"
+              type="submit"
+            >
+              Resend
+            </button>
+            <span v-if="sendStatus === 'sending'">Sending email...</span>
+            <Transition>
+              <span v-if="sendStatus === 'error'">Unable to send email. Please try again.</span>
+            </Transition>
+            <Transition>
+              <span v-if="sendStatus === 'success'">Email sent successfully.</span>
+            </Transition>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="form-row">
-      <span class="error-message" v-if="formState.fields.email.errorMessage">
-        {{ formState.fields.email.errorMessage ?? '' }}
-      </span>
-      <span class="error-message" v-if="formState.errors.length">
-        {{ formState.errors.join(' ') ?? '' }}
-      </span>
-    </div>
-  </form>
+      <div class="form-row">
+        <span class="error-message" v-if="formState.fields.email.errorMessage">
+          {{ formState.fields.email.errorMessage ?? '' }}
+        </span>
+        <span class="error-message" v-if="formState.errors.length">
+          {{ formState.errors.join(' ') ?? '' }}
+        </span>
+      </div>
+    </form>
+  </div>
 </template>
 
 <style scoped>
+  .container {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    border-radius: 1rem;
+    background-color: var(--color-background-soft);
+    width: 100%;
+  }
+
   .resend-form {
     display: flex;
     flex-direction: column;
