@@ -89,11 +89,12 @@ test.describe('RegisterConfirmationView', () => {
 
   test('when user fills out the form to resend verification email and submits it then they should see a success message', async ({
     page,
+    unverifiedUser: user,
   }) => {
     const email = page.getByRole('textbox', { name: /email/i });
     const submit = page.getByRole('button', { name: /resend/i });
 
-    await email.fill('test@test.com');
+    await email.fill(user.email);
     await submit.click();
 
     await expect(page.getByText(/email sent successfully/i)).toBeVisible();
