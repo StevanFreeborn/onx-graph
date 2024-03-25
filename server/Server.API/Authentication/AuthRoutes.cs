@@ -59,5 +59,10 @@ static class AuthRoutes
       .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("ResendVerificationEmail")
       .WithDescription("Resend a user's verification email");
+
+    group
+      .MapPost("verify-account", AuthController.VerifyAccount)
+      .Produces((int)HttpStatusCode.NoContent)
+      .ProducesValidationProblem();
   }
 }

@@ -126,8 +126,6 @@ class ResendVerificationEmailDtoValidator : AbstractValidator<ResendVerification
   }
 }
 
-
-
 /// <summary>
 /// Represents a request to resend verification email
 /// </summary>
@@ -138,4 +136,33 @@ record ResendVerificationEmailRequest(
   [FromServices] IEmailService EmailService,
   [FromServices] ITokenService TokenService,
   [FromServices] IOptions<CorsOptions> CorsOptions
+);
+
+/// <summary>
+/// Represents the data needed to verify an account
+/// </summary>
+record VerifyAccountDto(string Token)
+{
+  internal VerifyAccountDto() : this(string.Empty) { }
+}
+
+/// <summary>
+/// Validator for <see cref="VerifyAccountDto"/>
+/// </summary>
+class VerifyAccountDtoValidator : AbstractValidator<VerifyAccountDto>
+{
+  public VerifyAccountDtoValidator()
+  {
+    RuleFor(dto => dto.Token).NotEmpty();
+  }
+}
+
+/// <summary>
+/// Represents a request to verify an account
+/// </summary>
+record VerifyAccountRequest(
+  [FromBody] VerifyAccountDto Dto,
+  [FromServices] IValidator<VerifyAccountDto> Validator,
+  [FromServices] IUserService UserService,
+  [FromServices] ITokenService TokenService
 );

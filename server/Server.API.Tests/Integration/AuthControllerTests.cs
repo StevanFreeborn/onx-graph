@@ -832,4 +832,27 @@ public partial class AuthControllerTests(TestServerFactory serverFactory) : Inte
     email.Content.Body.Should().Contain("Verify Account");
     email.Content.Body.Should().MatchRegex(VerifyAccountLinkRegex());
   }
+
+  [Fact]
+  public async Task VerifyAccount_WhenCalledAndNoTokenIsGiven_ItShouldReturn400StatusCodeWithValidationProblemDetails()
+  {
+    var verifyResponse = await _client.PostAsJsonAsync("/auth/verify-account", new
+    {
+      token = "",
+    });
+
+    verifyResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.BadRequest);
+
+    var verifyResponseBody = await verifyResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+
+    verifyResponseBody
+      .Should()
+      .NotBeNull();
+
+    verifyResponseBody?.Errors
+      .Should()
+      .NotBeNullOrEmpty();
+  }
 }

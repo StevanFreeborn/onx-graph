@@ -242,6 +242,18 @@ static class AuthController
     return Results.NoContent();
   }
 
+  internal static async Task<IResult> VerifyAccount([AsParameters] VerifyAccountRequest req)
+  {
+    var validationResult = await req.Validator.ValidateAsync(req.Dto);
+
+    if (validationResult.IsValid == false)
+    {
+      return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
+    return Results.NoContent();
+  }
+
   private static EmailMessage BuildVerificationEmail(string email, string token, string origin)
   => new()
   {

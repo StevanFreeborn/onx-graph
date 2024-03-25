@@ -14,6 +14,7 @@ public class AuthControllerTests
   private readonly Mock<IValidator<RegisterDto>> _registerDtoValidatorMock = new();
   private readonly Mock<IValidator<LoginDto>> _loginDtoValidatorMock = new();
   private readonly Mock<IValidator<ResendVerificationEmailDto>> _resendVerificationEmailDtoValidatorMock = new();
+  private readonly Mock<IValidator<VerifyAccountDto>> _verifyAccountDtoValidatorMock = new();
 
   private RegisterRequest CreateRegisterRequest(RegisterDto dto) =>
     new(
@@ -1102,5 +1103,57 @@ public class AuthControllerTests
         e => e.SendEmailAsync(It.IsAny<EmailMessage>()),
         Times.Once
       );
+  }
+
+  private VerifyAccountRequest CreateVerifyAccountRequest(VerifyAccountDto dto) =>
+    new(
+      dto,
+      _verifyAccountDtoValidatorMock.Object,
+      _userServiceMock.Object,
+      _tokenServiceMock.Object
+    );
+
+  [Fact]
+  public async Task VerifyAccount_WhenTokenIsNotProvided_ItShouldReturnAValidationProblemDetailWith400StatusCode()
+  {
+    var expectedTokenKey = "Token";
+    var expectedErrorMessage = "'Token' must not be empty.";
+
+    var dto = new VerifyAccountDto();
+
+    var validationResult = new ValidationResult(
+      new[]
+      {
+        new ValidationFailure(expectedTokenKey, expectedErrorMessage)
+      }
+    );
+
+    _verifyAccountDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<VerifyAccountDto>(), default))
+      .ReturnsAsync(validationResult);
+
+    var request = CreateVerifyAccountRequest(dto);
+
+    var result = await AuthController.VerifyAccount(request);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.BadRequest);
+
+    var validationProblemDetails = result
+      .As<ProblemHttpResult>()
+      .ProblemDetails as ValidationProblemDetails;
+
+    validationProblemDetails?.Errors
+      .Should()
+      .ContainKey(expectedTokenKey);
+
+    validationProblemDetails?.Errors[expectedTokenKey]
+      .Should()
+      .Contain(expectedErrorMessage);
   }
 }

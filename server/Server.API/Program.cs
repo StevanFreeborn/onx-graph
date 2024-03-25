@@ -105,6 +105,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
 builder.Services.AddScoped<IValidator<ResendVerificationEmailDto>, ResendVerificationEmailDtoValidator>();
+builder.Services.AddScoped<IValidator<VerifyAccountDto>, VerifyAccountDtoValidator>();
 
 // add cors
 var corsOptions = new CorsOptions();
