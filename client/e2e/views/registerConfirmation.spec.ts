@@ -1,4 +1,4 @@
-import { expect, test } from '../fixtures/global.fixtures.js';
+import { expect, test } from '../fixtures/global.fixtures';
 
 test.describe('RegisterConfirmationView', () => {
   test.beforeEach(async ({ page }) => {
