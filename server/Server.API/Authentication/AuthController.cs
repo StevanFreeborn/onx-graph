@@ -242,6 +242,11 @@ static class AuthController
     return Results.NoContent();
   }
 
+  /// <summary>
+  /// Verifies a user's account.
+  /// </summary>
+  /// <param name="req">The request as a <see cref="VerifyAccountRequest"/> instance.</param>
+  /// <returns>A <see cref="Task"/> of <see cref="IResult"/>.</returns>
   internal static async Task<IResult> VerifyAccount([AsParameters] VerifyAccountRequest req)
   {
     var validationResult = await req.Validator.ValidateAsync(req.Dto);
