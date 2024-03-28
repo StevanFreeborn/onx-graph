@@ -1109,6 +1109,7 @@ public class AuthControllerTests
     new(
       dto,
       _verifyAccountDtoValidatorMock.Object,
+      _userServiceMock.Object,
       _tokenServiceMock.Object
     );
 
@@ -1157,7 +1158,34 @@ public class AuthControllerTests
   }
 
   [Fact]
-  public async Task VerifyAccount_WhenVerifyingTokenFails_ItShouldReturnAProblemDetailWith400StatusCode()
+  public async Task VerifyAccount_WhenTokenDoesNotExist_ItShouldReturnAProblemDetailWith404StatusCode()
+  {
+    var token = "test";
+    var dto = new VerifyAccountDto(token);
+
+    _verifyAccountDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<VerifyAccountDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    _tokenServiceMock
+      .Setup(t => t.VerifyVerificationTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Fail(new TokenDoesNotExistError(token)));
+
+    var request = CreateVerifyAccountRequest(dto);
+
+    var result = await AuthController.VerifyAccount(request);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.NotFound);
+  }
+
+  [Fact]
+  public async Task VerifyAccount_WhenTokenIsExpired_ItShouldReturnAProblemDetailWith400StatusCode()
   {
     var token = "test";
     var dto = new VerifyAccountDto(token);
@@ -1181,5 +1209,114 @@ public class AuthControllerTests
       .StatusCode
       .Should()
       .Be((int)HttpStatusCode.BadRequest);
+  }
+
+  [Fact]
+  public async Task VerifyAccount_WhenTokenBelongsToNonExistentUser_ItShouldReturnAProblemDetailWith404StatusCode()
+  {
+    var token = FakeDataFactory.VerificationToken.Generate();
+    var dto = new VerifyAccountDto(token.Token);
+
+    _verifyAccountDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<VerifyAccountDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    _tokenServiceMock
+      .Setup(t => t.VerifyVerificationTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Ok(new BaseToken()));
+
+    _userServiceMock
+      .Setup(u => u.VerifyUserAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Fail(new UserDoesNotExistError(token.UserId)));
+
+    var request = CreateVerifyAccountRequest(dto);
+
+    var result = await AuthController.VerifyAccount(request);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.NotFound);
+  }
+
+  [Fact]
+  public async Task VerifyAccount_WhenTokenBelongsToVerifiedUser_ItShouldReturnAProblemDetailWith409StatusCode()
+  {
+    var token = FakeDataFactory.VerificationToken.Generate();
+    var dto = new VerifyAccountDto(token.Token);
+
+    _verifyAccountDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<VerifyAccountDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    _tokenServiceMock
+      .Setup(t => t.VerifyVerificationTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Ok(new BaseToken()));
+
+    _userServiceMock
+      .Setup(u => u.VerifyUserAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Fail(new UserAlreadyVerifiedError(token.UserId)));
+
+    var request = CreateVerifyAccountRequest(dto);
+
+    var result = await AuthController.VerifyAccount(request);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.Conflict);
+  }
+
+  [Fact]
+  public async Task VerifyAccount_WhenVerifyingTokenSucceeds_ItShouldReturn204StatusCode()
+  {
+    var token = FakeDataFactory.VerificationToken.Generate();
+    var dto = new VerifyAccountDto(token.Token);
+
+    _verifyAccountDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<VerifyAccountDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    _tokenServiceMock
+      .Setup(t => t.VerifyVerificationTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Ok(token as BaseToken));
+
+    _userServiceMock
+      .Setup(u => u.VerifyUserAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Ok());
+
+    var request = CreateVerifyAccountRequest(dto);
+
+    var result = await AuthController.VerifyAccount(request);
+
+    result.Should()
+      .BeOfType<NoContent>();
+
+    result.As<NoContent>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.NoContent);
+
+    _tokenServiceMock
+      .Verify(
+        t => t.RevokeVerificationTokenAsync(
+          It.Is<string>(t => t == token.Token)
+        ),
+        Times.Once
+      );
+
+    _tokenServiceMock
+      .Verify(
+        t => t.RemoveAllInvalidVerificationTokensAsync(
+          It.Is<string>(t => t == token.UserId)
+        ),
+        Times.Once
+      );
   }
 }

@@ -107,12 +107,12 @@ class TokenService(
   public async Task<Result<(string AccessToken, RefreshToken RefreshToken)>> RefreshAccessTokenAsync(string userId, string refreshToken)
   {
     var token = await _tokenRepository.GetTokenAsync(refreshToken, TokenType.Refresh);
-    var user = await _userRepository.GetUserById(userId);
+    var user = await _userRepository.GetUserByIdAsync(userId);
 
     if (token is null)
     {
       return Result.Fail(
-        new TokenDoesNotExist(refreshToken)
+        new TokenDoesNotExistError(refreshToken)
       );
     }
 
@@ -165,6 +165,8 @@ class TokenService(
 
   public async Task RemoveAllInvalidRefreshTokensAsync(string userId) => await _tokenRepository.RemoveAllInvalidRefreshTokensAsync(userId);
 
+  public async Task RemoveAllInvalidVerificationTokensAsync(string userId) => await _tokenRepository.RemoveAllInvalidVerificationTokensAsync(userId);
+
   public async Task RevokeRefreshTokenAsync(string userId, string refreshToken)
   {
     var token = await _tokenRepository.GetTokenAsync(refreshToken, TokenType.Refresh);
@@ -202,14 +204,14 @@ class TokenService(
   public Task RevokeVerificationTokenAsync(string token) =>
     _tokenRepository.RevokeVerificationTokenAsync(token);
 
-  public async Task<Result<bool>> VerifyVerificationTokenAsync(string token)
+  public async Task<Result<BaseToken>> VerifyVerificationTokenAsync(string token)
   {
     var verificationToken = await _tokenRepository.GetTokenAsync(token, TokenType.Verification);
 
     if (verificationToken is null)
     {
       return Result.Fail(
-        new TokenDoesNotExist(token)
+        new TokenDoesNotExistError(token)
       );
     }
 
@@ -227,7 +229,7 @@ class TokenService(
       );
     }
 
-    return Result.Ok(true);
+    return Result.Ok(verificationToken);
   }
 
   private string GenerateToken()

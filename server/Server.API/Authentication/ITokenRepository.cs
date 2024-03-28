@@ -54,4 +54,11 @@ interface ITokenRepository
   /// <param name="token">The token to revoke.</param>
   /// <returns>A <see cref="Task"/>.</returns>
   Task RevokeVerificationTokenAsync(string token);
+
+  /// <summary>
+  /// Removes all the invalid verification tokens for a user.
+  /// </summary>
+  /// <param name="userId">The user id.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task RemoveAllInvalidVerificationTokensAsync(string userId);
 }

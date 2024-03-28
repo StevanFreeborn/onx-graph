@@ -163,5 +163,6 @@ class VerifyAccountDtoValidator : AbstractValidator<VerifyAccountDto>
 record VerifyAccountRequest(
   [FromBody] VerifyAccountDto Dto,
   [FromServices] IValidator<VerifyAccountDto> Validator,
+  [FromServices] IUserService UserService,
   [FromServices] ITokenService TokenService
 );

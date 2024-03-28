@@ -63,6 +63,12 @@ static class AuthRoutes
     group
       .MapPost("verify-account", AuthController.VerifyAccount)
       .Produces((int)HttpStatusCode.NoContent)
-      .ProducesValidationProblem();
+      .ProducesValidationProblem()
+      .Produces<ProblemDetails>((int)HttpStatusCode.BadRequest)
+      .Produces<ProblemDetails>((int)HttpStatusCode.NotFound)
+      .Produces<ProblemDetails>((int)HttpStatusCode.Conflict)
+      .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
+      .WithName("VerifyAccount")
+      .WithDescription("Verify a user's account");
   }
 }

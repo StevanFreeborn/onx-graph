@@ -40,9 +40,9 @@ class GenerateVerificationTokenError : Error
 /// <summary>
 /// An error indicating that a token was not found.
 /// </summary>
-class TokenDoesNotExist : Error
+class TokenDoesNotExistError : Error
 {
-  internal TokenDoesNotExist(string identifier) : base($"Token does not exist with identifier: {identifier}")
+  internal TokenDoesNotExistError(string identifier) : base($"Token does not exist with identifier: {identifier}")
   {
   }
 }

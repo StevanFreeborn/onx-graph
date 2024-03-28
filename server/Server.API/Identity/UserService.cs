@@ -79,6 +79,27 @@ class UserService(
     return Result.Ok(createdUser.Id);
   }
 
+  public async Task<Result> VerifyUserAsync(string userId)
+  {
+    var existingUser = await _userRepository.GetUserByIdAsync(userId);
+
+    if (existingUser is null)
+    {
+      return Result.Fail(new UserDoesNotExistError(userId));
+    }
+
+    if (existingUser.IsVerified)
+    {
+      return Result.Fail(new UserAlreadyVerifiedError(userId));
+    }
+
+    existingUser.IsVerified = true;
+
+    await _userRepository.UpdateUserAsync(existingUser);
+
+    return Result.Ok();
+  }
+
   private async Task<string> GenerateUniqueUsernameAsync(string email)
   {
     var random = new Random();

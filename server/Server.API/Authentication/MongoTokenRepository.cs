@@ -90,4 +90,18 @@ class MongoTokenRepository(
 
     await _context.Tokens.UpdateOneAsync(filter, update);
   }
+
+  public Task RemoveAllInvalidVerificationTokensAsync(string userId)
+  {
+    var filter = Builders<BaseToken>.Filter.And(
+      Builders<BaseToken>.Filter.Eq(x => x.UserId, userId),
+      Builders<BaseToken>.Filter.Eq(x => x.TokenType, TokenType.Verification),
+      Builders<BaseToken>.Filter.Or(
+        Builders<BaseToken>.Filter.Eq(x => x.Revoked, true),
+        Builders<BaseToken>.Filter.Lt(x => x.ExpiresAt, _timeProvider.GetUtcNow().DateTime)
+      )
+    );
+
+    return _context.Tokens.DeleteManyAsync(filter);
+  }
 }

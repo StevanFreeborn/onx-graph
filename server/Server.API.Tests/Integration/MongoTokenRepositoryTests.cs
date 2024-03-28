@@ -273,4 +273,61 @@ public class MongoTokenRepositoryTests : IClassFixture<TestDb>, IDisposable
       .Should()
       .BeTrue();
   }
+
+  [Fact]
+  public async Task RemoveAllInvalidVerificationTokensAsync_WhenCalled_ItShouldRemoveTokens()
+  {
+    var userId = ObjectId.GenerateNewId().ToString();
+    var tokens = FakeDataFactory.VerificationToken.Generate(3);
+
+    var testTokens = tokens
+      .Select(t => t with
+      {
+        UserId = userId
+      })
+      .ToList();
+
+    var revokedToken = testTokens[0] with
+    {
+      Revoked = true
+    };
+
+    var expiredToken = testTokens[1] with
+    {
+      ExpiresAt = DateTime.UtcNow.AddDays(-1)
+    };
+
+    var unexpiredOrRevokedToken = testTokens[2] with
+    {
+      Revoked = false,
+      ExpiresAt = DateTime.UtcNow.AddDays(1)
+    };
+
+    await _context.Tokens.InsertManyAsync(
+      new List<VerificationToken>
+      {
+        revokedToken,
+        expiredToken,
+        unexpiredOrRevokedToken
+      }
+    );
+
+    _timeProviderMock
+      .Setup(x => x.GetUtcNow())
+      .Returns(DateTimeOffset.UtcNow);
+
+    await _sut.RemoveAllInvalidVerificationTokensAsync(userId);
+
+    var result = await _context.Tokens
+      .Find(t => t.UserId == userId)
+      .ToListAsync();
+
+    result
+      .Should()
+      .HaveCount(1);
+
+    result[0].Id
+      .Should()
+      .Be(unexpiredOrRevokedToken.Id);
+  }
 }

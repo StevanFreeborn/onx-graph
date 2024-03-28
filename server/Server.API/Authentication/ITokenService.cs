@@ -59,7 +59,7 @@ interface ITokenService
   /// <summary>
   /// Verifies a verification token.
   /// </summary>
-  Task<Result<bool>> VerifyVerificationTokenAsync(string token);
+  Task<Result<BaseToken>> VerifyVerificationTokenAsync(string token);
 
   /// <summary>
   /// Revoke verification token.
@@ -67,4 +67,11 @@ interface ITokenService
   /// <param name="token">The token to revoke.</param>
   /// <returns>A <see cref="Task"/>.</returns>
   Task RevokeVerificationTokenAsync(string token);
+
+  /// <summary>
+  /// Removes all the invalid verification tokens for a user.
+  /// </summary>
+  /// <param name="userId">The user id.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task RemoveAllInvalidVerificationTokensAsync(string userId);
 }

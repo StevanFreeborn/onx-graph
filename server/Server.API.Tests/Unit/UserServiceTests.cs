@@ -240,4 +240,67 @@ public class UserServiceTests
       .Should()
       .Be(user);
   }
+
+  [Fact]
+  public async Task VerifyUserAsync_WhenUserDoesNotExist_ItShouldReturnUserDoesNotExistError()
+  {
+    _userRepositoryMock
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
+      .ReturnsAsync(null as User);
+
+    var result = await _sut.VerifyUserAsync("123");
+
+    result.IsFailed
+      .Should()
+      .BeTrue();
+
+    result.Errors
+      .Should()
+      .Contain(e => e is UserDoesNotExistError);
+  }
+
+  [Fact]
+  public async Task VerifyUserAsync_WhenUserIsAlreadyVerified_ItShouldReturnUserAlreadyVerifiedError()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    user.IsVerified = true;
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
+      .ReturnsAsync(user);
+
+    var result = await _sut.VerifyUserAsync(user.Id);
+
+    result.IsFailed
+      .Should()
+      .BeTrue();
+
+    result.Errors
+      .Should()
+      .Contain(e => e is UserAlreadyVerifiedError);
+  }
+
+  [Fact]
+  public async Task VerifyUserAsync_WhenUserIsNotVerified_ItShouldVerifyUser()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
+      .ReturnsAsync(user);
+
+    var result = await _sut.VerifyUserAsync(user.Id);
+
+    result.IsSuccess
+      .Should()
+      .BeTrue();
+
+    _userRepositoryMock
+      .Verify(
+        u => u.UpdateUserAsync(
+          It.Is<User>(u => u.IsVerified)
+        ),
+        Times.Once
+      );
+  }
 }
