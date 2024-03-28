@@ -46,6 +46,11 @@ export const routes = [
         component: () => import('../views/AboutView.vue'),
       },
       {
+        path: 'verify-account',
+        name: 'verify-account',
+        component: () => import('../views/VerifyAccountView.vue'),
+      },
+      {
         path: '/:pathMatch(.*)*',
         // name: 'not-found',
         component: () => import('../views/NotFoundView.vue'),
