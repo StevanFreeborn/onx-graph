@@ -855,4 +855,123 @@ public partial class AuthControllerTests(TestServerFactory serverFactory) : Inte
       .Should()
       .NotBeNullOrEmpty();
   }
+
+  [Fact]
+  public async Task VerifyAccount_WhenCalledAndTokenDoesNotExist_ItShouldReturn400StatusCodeWithProblemDetails()
+  {
+    var verifyResponse = await _client.PostAsJsonAsync("/auth/verify-account", new
+    {
+      token = "non_existing_token",
+    });
+
+    verifyResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.BadRequest);
+
+    var verifyResponseBody = await verifyResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    verifyResponseBody
+      .Should()
+      .NotBeNull();
+
+    verifyResponseBody?.Title
+      .Should()
+      .Be("Verification failed");
+
+    verifyResponseBody?.Detail
+      .Should()
+      .Be("Unable to verify account. See errors for details.");
+
+    verifyResponseBody?.Extensions
+      .Should()
+      .ContainKey("Errors");
+  }
+
+  [Fact]
+  public async Task VerifyAccount_WhenCalledAndTokenIsExpired_ItShouldReturn400StatusCodeWithProblemDetails()
+  {
+    var verificationToken = FakeDataFactory.VerificationToken.Generate() with
+    {
+      ExpiresAt = DateTime.UtcNow.AddMinutes(-30),
+    };
+
+    await Context.Tokens.InsertOneAsync(verificationToken);
+
+    var verifyResponse = await _client.PostAsJsonAsync("/auth/verify-account", new
+    {
+      token = verificationToken.Token,
+    });
+
+    verifyResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.BadRequest);
+
+    var verifyResponseBody = await verifyResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    verifyResponseBody
+      .Should()
+      .NotBeNull();
+
+    verifyResponseBody?.Title
+      .Should()
+      .Be("Verification failed");
+
+    verifyResponseBody?.Detail
+      .Should()
+      .Be("Unable to verify account. See errors for details.");
+
+    verifyResponseBody?.Extensions
+      .Should()
+      .ContainKey("Errors");
+
+    var revokedToken = await Context.Tokens
+      .Find(t => t.Id == verificationToken.Id)
+      .FirstOrDefaultAsync();
+
+    revokedToken
+      .Should()
+      .NotBeNull();
+
+    revokedToken?.Revoked
+      .Should()
+      .BeTrue();
+  }
+
+  [Fact]
+  public async Task VerifyAccount_WhenCalledAndTokenIsRevoked_ItShouldReturn400StatusCodeWithProblemDetails()
+  {
+    var verificationToken = FakeDataFactory.VerificationToken.Generate() with
+    {
+      Revoked = true,
+    };
+
+    await Context.Tokens.InsertOneAsync(verificationToken);
+
+    var verifyResponse = await _client.PostAsJsonAsync("/auth/verify-account", new
+    {
+      token = verificationToken.Token,
+    });
+
+    verifyResponse.StatusCode
+      .Should()
+      .Be(HttpStatusCode.BadRequest);
+
+    var verifyResponseBody = await verifyResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+    verifyResponseBody
+      .Should()
+      .NotBeNull();
+
+    verifyResponseBody?.Title
+      .Should()
+      .Be("Verification failed");
+
+    verifyResponseBody?.Detail
+      .Should()
+      .Be("Unable to verify account. See errors for details.");
+
+    verifyResponseBody?.Extensions
+      .Should()
+      .ContainKey("Errors");
+  }
 }

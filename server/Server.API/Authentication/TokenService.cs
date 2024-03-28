@@ -106,7 +106,7 @@ class TokenService(
 
   public async Task<Result<(string AccessToken, RefreshToken RefreshToken)>> RefreshAccessTokenAsync(string userId, string refreshToken)
   {
-    var token = await _tokenRepository.GetTokenAsync(refreshToken);
+    var token = await _tokenRepository.GetTokenAsync(refreshToken, TokenType.Refresh);
     var user = await _userRepository.GetUserById(userId);
 
     if (token is null)
@@ -167,7 +167,7 @@ class TokenService(
 
   public async Task RevokeRefreshTokenAsync(string userId, string refreshToken)
   {
-    var token = await _tokenRepository.GetTokenAsync(refreshToken);
+    var token = await _tokenRepository.GetTokenAsync(refreshToken, TokenType.Refresh);
 
     if (token is null)
     {
@@ -191,7 +191,6 @@ class TokenService(
     var updatedToken = token with
     {
       Revoked = true,
-      UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime
     };
 
     await _tokenRepository.UpdateTokenAsync(updatedToken);
@@ -199,6 +198,37 @@ class TokenService(
 
   public Task RevokeUserVerificationTokensAsync(string userId) =>
     _tokenRepository.RevokeUserVerificationTokensAsync(userId);
+
+  public Task RevokeVerificationTokenAsync(string token) =>
+    _tokenRepository.RevokeVerificationTokenAsync(token);
+
+  public async Task<Result<bool>> VerifyVerificationTokenAsync(string token)
+  {
+    var verificationToken = await _tokenRepository.GetTokenAsync(token, TokenType.Verification);
+
+    if (verificationToken is null)
+    {
+      return Result.Fail(
+        new TokenDoesNotExist(token)
+      );
+    }
+
+    if (verificationToken.Revoked)
+    {
+      return Result.Fail(
+        new InvalidTokenError(token)
+      );
+    }
+
+    if (verificationToken.ExpiresAt < _timeProvider.GetUtcNow().UtcDateTime)
+    {
+      return Result.Fail(
+        new ExpiredTokenError(token)
+      );
+    }
+
+    return Result.Ok(true);
+  }
 
   private string GenerateToken()
   {

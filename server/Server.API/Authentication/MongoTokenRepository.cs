@@ -18,10 +18,10 @@ class MongoTokenRepository(
     return token;
   }
 
-  public async Task<BaseToken?> GetTokenAsync(string refreshToken)
+  public async Task<BaseToken?> GetTokenAsync(string token, TokenType tokenType)
   {
     return await _context.Tokens
-      .Find(x => x.Token == refreshToken)
+      .Find(x => x.Token == token && x.TokenType == tokenType)
       .FirstOrDefaultAsync();
   }
 
@@ -46,15 +46,21 @@ class MongoTokenRepository(
       Builders<BaseToken>.Filter.Eq(x => x.TokenType, TokenType.Refresh)
     );
 
-    var update = Builders<BaseToken>.Update.Set(x => x.Revoked, true);
+    var update = Builders<BaseToken>.Update
+      .Set(x => x.Revoked, true)
+      .Set(x => x.UpdatedAt, _timeProvider.GetUtcNow().DateTime);
 
     return _context.Tokens.UpdateManyAsync(filter, update);
   }
 
   public async Task UpdateTokenAsync(BaseToken updatedToken)
   {
-    var filter = Builders<BaseToken>.Filter.Eq(x => x.Id, updatedToken.Id);
-    await _context.Tokens.ReplaceOneAsync(filter, updatedToken);
+    var token = updatedToken with
+    {
+      UpdatedAt = _timeProvider.GetUtcNow().DateTime
+    };
+    var filter = Builders<BaseToken>.Filter.Eq(x => x.Id, token.Id);
+    await _context.Tokens.ReplaceOneAsync(filter, token);
   }
 
   public async Task RevokeUserVerificationTokensAsync(string userId)
@@ -64,8 +70,24 @@ class MongoTokenRepository(
       Builders<BaseToken>.Filter.Eq(x => x.TokenType, TokenType.Verification)
     );
 
-    var update = Builders<BaseToken>.Update.Set(x => x.Revoked, true);
+    var update = Builders<BaseToken>.Update
+      .Set(x => x.Revoked, true)
+      .Set(x => x.UpdatedAt, _timeProvider.GetUtcNow().DateTime);
 
     await _context.Tokens.UpdateManyAsync(filter, update);
+  }
+
+  public async Task RevokeVerificationTokenAsync(string token)
+  {
+    var filter = Builders<BaseToken>.Filter.And(
+      Builders<BaseToken>.Filter.Eq(x => x.Token, token),
+      Builders<BaseToken>.Filter.Eq(x => x.TokenType, TokenType.Verification)
+    );
+
+    var update = Builders<BaseToken>.Update
+      .Set(x => x.Revoked, true)
+      .Set(x => x.UpdatedAt, _timeProvider.GetUtcNow().DateTime);
+
+    await _context.Tokens.UpdateOneAsync(filter, update);
   }
 }

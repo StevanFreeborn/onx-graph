@@ -251,6 +251,23 @@ static class AuthController
       return Results.ValidationProblem(validationResult.ToDictionary());
     }
 
+    var verificationResult = await req.TokenService.VerifyVerificationTokenAsync(req.Dto.Token);
+
+    if (verificationResult.IsFailed)
+    {
+      if (verificationResult.Errors.Exists(e => e is ExpiredTokenError))
+      {
+        await req.TokenService.RevokeVerificationTokenAsync(req.Dto.Token);
+      }
+
+      return Results.Problem(
+        title: "Verification failed",
+        detail: "Unable to verify account. See errors for details.",
+        statusCode: (int)HttpStatusCode.BadRequest,
+        extensions: new Dictionary<string, object?> { { "Errors", verificationResult.Errors } }
+      );
+    }
+
     return Results.NoContent();
   }
 

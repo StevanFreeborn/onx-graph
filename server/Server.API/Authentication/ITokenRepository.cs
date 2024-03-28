@@ -16,8 +16,9 @@ interface ITokenRepository
   /// Gets a token by its token string.
   /// </summary>
   /// <param name="token">The token string.</param>
+  /// <param name="tokenType">The type of token.</param>
   /// <returns>The token as a <see cref="BaseToken"/> instance.</returns>
-  Task<BaseToken?> GetTokenAsync(string token);
+  Task<BaseToken?> GetTokenAsync(string token, TokenType tokenType);
 
   /// <summary>
   /// Removes all the invalid refresh tokens for a user.
@@ -46,4 +47,11 @@ interface ITokenRepository
   /// <param name="userId">The user id.</param>
   /// <returns>A <see cref="Task"/>.</returns>
   Task RevokeUserVerificationTokensAsync(string userId);
+
+  /// <summary>
+  /// Revoke a verification token.
+  /// </summary>
+  /// <param name="token">The token to revoke.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task RevokeVerificationTokenAsync(string token);
 }

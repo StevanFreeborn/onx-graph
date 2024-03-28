@@ -45,7 +45,7 @@ public class MongoTokenRepositoryTests : IClassFixture<TestDb>, IDisposable
 
     await _context.Tokens.InsertOneAsync(testToken);
 
-    var result = await _sut.GetTokenAsync(testToken.Token);
+    var result = await _sut.GetTokenAsync(testToken.Token, testToken.TokenType);
 
     result
       .Should()
@@ -61,7 +61,7 @@ public class MongoTokenRepositoryTests : IClassFixture<TestDb>, IDisposable
   {
     var testToken = FakeDataFactory.RefreshToken.Generate();
 
-    var result = await _sut.GetTokenAsync(testToken.Token);
+    var result = await _sut.GetTokenAsync(testToken.Token, testToken.TokenType);
 
     result
       .Should()
@@ -250,5 +250,27 @@ public class MongoTokenRepositoryTests : IClassFixture<TestDb>, IDisposable
       .HaveCount(3);
 
     result.Should().OnlyContain(t => t.Revoked);
+  }
+
+  [Fact]
+  public async Task RevokeVerificationTokenAsync_WhenCalled_ItShouldRevokeToken()
+  {
+    var testToken = FakeDataFactory.VerificationToken.Generate();
+
+    await _context.Tokens.InsertOneAsync(testToken);
+
+    await _sut.RevokeVerificationTokenAsync(testToken.Token);
+
+    var result = await _context.Tokens
+      .Find(t => t.Token == testToken.Token)
+      .SingleOrDefaultAsync();
+
+    result
+      .Should()
+      .NotBeNull();
+
+    result?.Revoked
+      .Should()
+      .BeTrue();
   }
 }

@@ -55,4 +55,16 @@ interface ITokenService
   /// <param name="userId">The user id.</param>
   /// <returns>A <see cref="Task"/>.</returns>
   Task RevokeUserVerificationTokensAsync(string userId);
+
+  /// <summary>
+  /// Verifies a verification token.
+  /// </summary>
+  Task<Result<bool>> VerifyVerificationTokenAsync(string token);
+
+  /// <summary>
+  /// Revoke verification token.
+  /// </summary>
+  /// <param name="token">The token to revoke.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task RevokeVerificationTokenAsync(string token);
 }

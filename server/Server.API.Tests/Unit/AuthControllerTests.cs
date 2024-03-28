@@ -1109,12 +1109,11 @@ public class AuthControllerTests
     new(
       dto,
       _verifyAccountDtoValidatorMock.Object,
-      _userServiceMock.Object,
       _tokenServiceMock.Object
     );
 
   [Fact]
-  public async Task VerifyAccount_WhenTokenIsNotProvided_ItShouldReturnAValidationProblemDetailWith400StatusCode()
+  public async Task VerifyAccount_WhenValidatingTokenFails_ItShouldReturnAValidationProblemDetailWith400StatusCode()
   {
     var expectedTokenKey = "Token";
     var expectedErrorMessage = "'Token' must not be empty.";
@@ -1155,5 +1154,32 @@ public class AuthControllerTests
     validationProblemDetails?.Errors[expectedTokenKey]
       .Should()
       .Contain(expectedErrorMessage);
+  }
+
+  [Fact]
+  public async Task VerifyAccount_WhenVerifyingTokenFails_ItShouldReturnAProblemDetailWith400StatusCode()
+  {
+    var token = "test";
+    var dto = new VerifyAccountDto(token);
+
+    _verifyAccountDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<VerifyAccountDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    _tokenServiceMock
+      .Setup(t => t.VerifyVerificationTokenAsync(It.IsAny<string>()))
+      .ReturnsAsync(Result.Fail(new ExpiredTokenError(token)));
+
+    var request = CreateVerifyAccountRequest(dto);
+
+    var result = await AuthController.VerifyAccount(request);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be((int)HttpStatusCode.BadRequest);
   }
 }
