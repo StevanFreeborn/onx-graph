@@ -264,5 +264,34 @@ describe('AuthService', () => {
     });
   });
 
-  describe('verifyAccount', () => {});
+  describe('verifyAccount', () => {
+    it('should return error if error occurs while verifying account', async () => {
+      console.error = vi.fn();
+      mockClient.post.mockRejectedValue(new Error('error'));
+
+      const result = await authService.verifyAccount('token');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([expect.any(Error)]);
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it('should return error if verifying account fails', async () => {
+      mockClient.post.mockReturnValue({ ok: false });
+
+      const result = await authService.verifyAccount('token');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([expect.any(Error)]);
+    });
+
+    it('should return true if verifying account is successful', async () => {
+      mockClient.post.mockReturnValue({ ok: true });
+
+      const result = await authService.verifyAccount('token');
+
+      expect(result.ok).toBe(true);
+      expect(result.val).toBe(true);
+    });
+  });
 });
