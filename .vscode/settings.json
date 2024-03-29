@@ -18,4 +18,5 @@
     "textbox",
     "VITE"
   ],
+  "editor.formatOnSave": true,
 }
