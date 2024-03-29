@@ -242,6 +242,11 @@ static class AuthController
     return Results.NoContent();
   }
 
+  /// <summary>
+  /// Verifies a user's account.
+  /// </summary>
+  /// <param name="req">The request as a <see cref="VerifyAccountRequest"/> instance.</param>
+  /// <returns>A <see cref="Task"/> of <see cref="IResult"/>.</returns>
   internal static async Task<IResult> VerifyAccount([AsParameters] VerifyAccountRequest req)
   {
     var validationResult = await req.Validator.ValidateAsync(req.Dto);
@@ -312,17 +317,17 @@ static class AuthController
     return Results.NoContent();
   }
 
-  private static EmailMessage BuildVerificationEmail(string email, string token, string origin)
-  => new()
-  {
-    To = email,
-    Subject = "Welcome to OnxGraph! Verify your account to get started.",
-    HtmlContent = $"""
-        <h1>Welcome to OnxGraph!</h1>
-        <p>We're excited to welcome you to OnxGraph! Before you begin we need to verify your account. Follow these steps to complete the verification process:</p>
-        <p>Click the link below to verify your account:</p>
-        <a href='{origin}/masses/verify-account?t={token}'>Verify Account</a>
-        <p>If you didn't create an account with OnxGraph, please ignore this email.</p>
-      """
-  };
+  private static EmailMessage BuildVerificationEmail(string email, string token, string origin) => 
+    new()
+    {
+      To = email,
+      Subject = "Welcome to OnxGraph! Verify your account to get started.",
+      HtmlContent = $"""
+          <h1>Welcome to OnxGraph!</h1>
+          <p>We're excited to welcome you to OnxGraph! Before you begin we need to verify your account. Follow these steps to complete the verification process:</p>
+          <p>Click the link below to verify your account:</p>
+          <a href='{origin}/masses/verify-account?t={token}'>Verify Account</a>
+          <p>If you didn't create an account with OnxGraph, please ignore this email.</p>
+        """
+    };
 }
