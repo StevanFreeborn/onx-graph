@@ -48,13 +48,11 @@ export class AuthService implements IAuthService {
       const res = await this.client.post(request);
 
       if (res.status === 400) {
-        return Err([new Error('Token is not valid. Please request a new token.')]);
+        return Err([new Error('Token is not valid. It is either expired or revoked.')]);
       }
 
       if (res.status === 404) {
-        return Err([
-          new Error('Token or account not found. You may need to request a new token or register.'),
-        ]);
+        return Err([new Error('Token or account related to token was not found.')]);
       }
 
       if (res.status === 409) {
