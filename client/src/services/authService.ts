@@ -42,7 +42,34 @@ export class AuthService implements IAuthService {
   }
 
   async verifyAccount(token: string) {
-    throw new Error('Method not implemented.');
+    const request = new ClientRequestWithBody(this.endpoints.verifyAccount, undefined, { token });
+
+    try {
+      const res = await this.client.post(request);
+
+      if (res.status === 400) {
+        return Err([new Error('Token is not valid. Please request a new token.')]);
+      }
+
+      if (res.status === 404) {
+        return Err([
+          new Error('Token or account not found. You may need to request a new token or register.'),
+        ]);
+      }
+
+      if (res.status === 409) {
+        return Err([new Error('User is already verified.')]);
+      }
+
+      if (res.ok === false) {
+        return Err([new Error('Verifying account failed')]);
+      }
+
+      return Ok(true);
+    } catch (e) {
+      console.error(e);
+      return Err([new Error('Verifying account failed')]);
+    }
   }
 
   async resendVerificationEmail(email: string) {
