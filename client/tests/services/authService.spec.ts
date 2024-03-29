@@ -43,6 +43,10 @@ describe('AuthService', () => {
     expect(authService.resendVerificationEmail).toBeInstanceOf(Function);
   });
 
+  it('should have a verifyAccount method', () => {
+    expect(authService.verifyAccount).toBeInstanceOf(Function);
+  });
+
   describe('logout', () => {
     it('should return error if logout fails', async () => {
       mockClient.post.mockReturnValue({ ok: false });
@@ -259,4 +263,6 @@ describe('AuthService', () => {
       expect(result.val).toBe(true);
     });
   });
+
+  describe('verifyAccount', () => {});
 });

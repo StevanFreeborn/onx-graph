@@ -22,6 +22,7 @@ export interface IAuthService {
   refreshToken: () => Promise<Result<LoginResponse, Error[]>>;
   logout: () => Promise<Result<boolean, Error[]>>;
   resendVerificationEmail: (email: string) => Promise<Result<boolean, Error[]>>;
+  verifyAccount: (token: string) => Promise<Result<boolean, Error[]>>;
 }
 
 export class AuthService implements IAuthService {
@@ -33,10 +34,15 @@ export class AuthService implements IAuthService {
     refreshToken: `${this.baseURL}/auth/refresh-token`,
     logout: `${this.baseURL}/auth/logout`,
     resendVerificationEmail: `${this.baseURL}/auth/resend-verification-email`,
+    verifyAccount: `${this.baseURL}/auth/verify-account`,
   };
 
   constructor(client: IClient) {
     this.client = client;
+  }
+
+  async verifyAccount(token: string) {
+    throw new Error('Method not implemented.');
   }
 
   async resendVerificationEmail(email: string) {
