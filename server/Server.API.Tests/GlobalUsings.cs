@@ -48,3 +48,4 @@ global using Server.API.Tests.Integration.Utilities;
 global using Testcontainers.MongoDb;
 
 global using Xunit;
+global using Microsoft.Extensions.Time.Testing;
