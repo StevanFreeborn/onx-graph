@@ -17,6 +17,7 @@ global using FluentValidation;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.OpenApi.Any;
@@ -27,7 +28,9 @@ global using MongoDB.Bson.Serialization.IdGenerators;
 global using MongoDB.Driver;
 
 global using Serilog;
+global using Serilog.Events;
 global using Serilog.Formatting.Compact;
+global using Serilog.Sinks.Grafana.Loki;
 global using Serilog.Sinks.SystemConsole.Themes;
 
 global using Server.API.Authentication;
@@ -39,4 +42,3 @@ global using Server.API.Persistence.Mongo;
 global using Server.API.Swagger;
 
 global using Swashbuckle.AspNetCore.SwaggerGen;
-global using Microsoft.AspNetCore.RateLimiting;

@@ -317,7 +317,7 @@ static class AuthController
     return Results.NoContent();
   }
 
-  private static EmailMessage BuildVerificationEmail(string email, string token, string origin) => 
+  private static EmailMessage BuildVerificationEmail(string email, string token, string origin) =>
     new()
     {
       To = email,
