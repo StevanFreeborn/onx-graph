@@ -39,3 +39,4 @@ global using Server.API.Persistence.Mongo;
 global using Server.API.Swagger;
 
 global using Swashbuckle.AspNetCore.SwaggerGen;
+global using Microsoft.AspNetCore.RateLimiting;

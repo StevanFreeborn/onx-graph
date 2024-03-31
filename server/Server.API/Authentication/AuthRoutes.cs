@@ -8,7 +8,7 @@ static class AuthRoutes
   /// <summary>
   /// Maps auth endpoints
   /// </summary>
-  internal static void MapAuthEndpoints(this WebApplication app)
+  internal static RouteGroupBuilder MapVersionOneAuthEndpoints(this WebApplication app)
   {
     var group = app.MapGroup("auth");
 
@@ -70,5 +70,7 @@ static class AuthRoutes
       .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("VerifyAccount")
       .WithDescription("Verify a user's account");
+
+    return group;
   }
 }

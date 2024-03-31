@@ -145,8 +145,30 @@ builder.Services.AddTransient<IEmailClient, SmtpEmailClient>();
 builder.Services.AddScoped<IEmailService, DotNetEmailService>();
 
 
+// add rate limiting and whitelist client origin
+builder.Services.AddRateLimiter(options =>
+{
+  options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+  options.AddFixedWindowLimiter(
+    "fixed",
+    options =>
+    {
+      options.Window = TimeSpan.FromHours(1);
+      options.PermitLimit = 100;
+    }
+  );
+});
+
 // build the app
 var app = builder.Build();
+
+
+// add rate limiting middleware
+if (app.Environment.IsProduction())
+{
+  app.UseRateLimiter();
+}
 
 
 // add request logging middleware
@@ -176,11 +198,15 @@ app.UseHttpsRedirection();
 // build the api version set
 var versionSet = app.NewApiVersionSet()
   .HasApiVersion(new ApiVersion(1, 0))
+  .ReportApiVersions()
   .Build();
 
 
 // map endpoints
-app.MapAuthEndpoints();
+app
+  .MapVersionOneAuthEndpoints()
+  .WithApiVersionSet(versionSet)
+  .MapToApiVersion(versionOne);
 
 
 // use cors
