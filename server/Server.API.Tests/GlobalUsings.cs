@@ -29,6 +29,7 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
+global using Microsoft.Extensions.Time.Testing;
 global using Microsoft.IdentityModel.Tokens;
 
 global using MongoDB.Bson;
@@ -48,4 +49,3 @@ global using Server.API.Tests.Integration.Utilities;
 global using Testcontainers.MongoDb;
 
 global using Xunit;
-global using Microsoft.Extensions.Time.Testing;

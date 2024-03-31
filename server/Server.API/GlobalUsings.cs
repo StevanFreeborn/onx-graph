@@ -7,6 +7,7 @@ global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.RegularExpressions;
+global using System.Threading.RateLimiting;
 
 global using Asp.Versioning;
 
@@ -28,7 +29,6 @@ global using MongoDB.Bson.Serialization.IdGenerators;
 global using MongoDB.Driver;
 
 global using Serilog;
-global using Serilog.Events;
 global using Serilog.Formatting.Compact;
 global using Serilog.Sinks.Grafana.Loki;
 global using Serilog.Sinks.SystemConsole.Themes;
