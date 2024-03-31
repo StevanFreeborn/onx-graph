@@ -62,12 +62,34 @@ class AccountMonitor(
   {
     _logger.LogInformation("Deleting unverified accounts");
 
-    // TODO: Implement account deletion logic
-    var users = await _dbContext.Users.Find(u => true).ToListAsync();
-
-    foreach (var user in users)
+    try
     {
-      _logger.LogInformation($"User: {user.Id}");
+      var userFilter = Builders<User>.Filter.And(
+        Builders<User>.Filter.Lt(x => x.CreatedAt, _timeProvider.GetUtcNow().DateTime.AddHours(-48)),
+        Builders<User>.Filter.Eq(x => x.IsVerified, false)
+      );
+
+      var usersToDelete = await _dbContext.Users.Find(userFilter).ToListAsync();
+
+      var tokenFilter = Builders<BaseToken>.Filter.In(
+        x => x.UserId,
+        usersToDelete.Select(x => x.Id)
+      );
+
+      var usersToDeleteFilter = Builders<User>.Filter.In(
+        x => x.Id,
+        usersToDelete.Select(x => x.Id)
+      );
+
+      await _dbContext.Tokens.DeleteManyAsync(tokenFilter);
+
+      var result = await _dbContext.Users.DeleteManyAsync(usersToDeleteFilter);
+
+      _logger.LogInformation("Deleted {Count} unverified accounts", result.DeletedCount);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "An error occurred while deleting unverified accounts");
     }
   }
 }

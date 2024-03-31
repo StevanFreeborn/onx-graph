@@ -1,3 +1,5 @@
+using System.Threading.RateLimiting;
+
 Log.Logger = new LoggerConfiguration()
   .WriteTo.Console()
   .CreateBootstrapLogger();
@@ -174,13 +176,17 @@ try
   {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-    options.AddFixedWindowLimiter(
-      "fixed",
-      options =>
-      {
-        options.Window = TimeSpan.FromHours(1);
-        options.PermitLimit = 100;
-      }
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
+      httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers["X-Forwarded-For"].ToString(),
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+              PermitLimit = 10,
+              QueueLimit = 0,
+              Window = TimeSpan.FromMinutes(1)
+            }
+        )
     );
   });
 
