@@ -5,7 +5,7 @@
   import ResendVerifyEmailForm from './ResendVerifyEmailForm.vue';
 
   const props = defineProps<{
-    token: LocationQueryValue | LocationQueryValue[];
+    token?: LocationQueryValue | LocationQueryValue[];
   }>();
 
   type VerificationStatus =
@@ -26,7 +26,7 @@
     verificationStatus.value = 'Retrieving Token';
 
     setTimeout(async () => {
-      if (typeof props.token !== 'string') {
+      if (!props.token || typeof props.token !== 'string') {
         verificationStatus.value = 'Unverified';
         return;
       }
@@ -39,6 +39,7 @@
         setTimeout(() => {
           verificationStatus.value = 'Unverified';
           errorMessages.value = response.val.map(err => err.message);
+          console.log('here');
         }, WAIT_TIME);
         return;
       }
