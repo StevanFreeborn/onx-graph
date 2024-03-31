@@ -156,6 +156,7 @@ try
   // add as scoped as we want a new instance per request
   builder.Services.AddScoped<IUserRepository, MongoUserRepository>();
   builder.Services.AddScoped<IUserService, UserService>();
+  builder.Services.AddHostedService<AccountMonitor>();
 
 
   // add time provider
