@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { faker } from '@faker-js/faker';
-import { Page, test as base } from '@playwright/test';
+import { Page, TestInfo, test as base } from '@playwright/test';
 import { AxeResults } from 'axe-core';
 import mailhog from 'mailhog';
 import { Db, MongoClient } from 'mongodb';
@@ -12,13 +12,17 @@ type TestUser = {
   username: string;
 };
 
+type VerifiedUser = TestUser;
+
+type UnverifiedUser = TestUser & { verificationToken: string };
+
 type NewUser = Omit<TestUser, 'username'>;
 
 type GlobalFixtures = {
   page: Page;
-  accessibilityResults: AxeResults;
-  verifiedUser: TestUser;
-  unverifiedUser: TestUser;
+  getAccessibilityResults: (page: Page, testInfo: TestInfo) => Promise<AxeResults>;
+  verifiedUser: VerifiedUser;
+  unverifiedUser: UnverifiedUser;
   newUser: NewUser;
   mailhog: mailhog.API;
   dbcontext: Db;
@@ -34,16 +38,18 @@ export const test = base.extend<GlobalFixtures>({
     await use(page);
     await page.close();
   },
-  accessibilityResults: async ({ page }, use: (r: AxeResults) => Promise<void>, testInfo) => {
-    const results = await new AxeBuilder({ page }).disableRules('color-contrast').analyze();
-
-    await use(results);
-
-    await testInfo.attach('accessibility-scan-results', {
-      body: JSON.stringify(results, null, 2),
-      contentType: 'application/json',
-    });
-  },
+  getAccessibilityResults: async (
+    {},
+    use: (r: (page: Page, testInfo: TestInfo) => Promise<AxeResults>) => Promise<void>
+  ) =>
+    await use(async (page, testInfo) => {
+      const results = await new AxeBuilder({ page }).disableRules('color-contrast').analyze();
+      await testInfo.attach('accessibility-scan-results', {
+        body: JSON.stringify(results, null, 2),
+        contentType: 'application/json',
+      });
+      return results;
+    }),
   newUser: async ({}, use) => await use({ email: faker.internet.email(), password: testPassword }),
   dbcontext: async ({}, use) => {
     const mongoClient = new MongoClient(env.PW_DB_CONNECTION_STRING);
@@ -82,11 +88,31 @@ export const test = base.extend<GlobalFixtures>({
       isVerified: false,
     };
 
-    await dbcontext.collection('users').insertOne(user as any);
+    const FIFTEEN_MINUTES = 1000 * 60 * 15;
 
-    await use({ email: user.email, password: testPassword, username: user.username });
+    const verificationToken = {
+      _id: faker.database.mongodbObjectId(),
+      userId: user._id,
+      token: faker.string.uuid(),
+      expiresAt: new Date(Date.now() + FIFTEEN_MINUTES),
+      revoked: false,
+      tokenType: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await dbcontext.collection('users').insertOne(user as any);
+    await dbcontext.collection('tokens').insertOne(verificationToken as any);
+
+    await use({
+      email: user.email,
+      password: testPassword,
+      username: user.username,
+      verificationToken: verificationToken.token,
+    });
 
     await dbcontext.collection('users').deleteOne({ email: user.email });
+    await dbcontext.collection('tokens').deleteOne({ _id: verificationToken._id as any });
   },
   mailhog: async ({}, use) => await use(mailhog({ port: env.PW_MAILHOG_PORT })),
 });

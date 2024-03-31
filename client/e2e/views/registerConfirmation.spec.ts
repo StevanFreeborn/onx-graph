@@ -1,33 +1,38 @@
 import { expect, test } from '../fixtures/global.fixtures';
 
 test.describe('RegisterConfirmationView', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/masses/register-confirmation');
-  });
-
   test('when user visits register confirmation it should pass all accessibility tests', async ({
-    accessibilityResults,
+    page,
+    getAccessibilityResults,
   }) => {
+    await page.goto('/masses/register-confirmation');
+
+    const accessibilityResults = await getAccessibilityResults(page, test.info());
+
     expect(accessibilityResults.violations.length).toBe(0);
   });
 
   test('when user visits register confirmation they should see a heading', async ({ page }) => {
+    await page.goto('/masses/register-confirmation');
     await expect(page.getByRole('heading', { name: /registration successful/i })).toBeVisible();
   });
 
   test('when user visits register confirmation they should see a message', async ({ page }) => {
+    await page.goto('/masses/register-confirmation');
     await expect(page.getByText(/your registration was successful/i)).toBeVisible();
   });
 
   test('when user visits register confirmation they should be told the verification link expires in 15 minutes', async ({
     page,
   }) => {
+    await page.goto('/masses/register-confirmation');
     await expect(page.getByText(/link will expire in 15 minutes/i)).toBeVisible();
   });
 
   test('when user visits register confirmation they should be told if they are unverified after 48 hours their account will be deleted', async ({
     page,
   }) => {
+    await page.goto('/masses/register-confirmation');
     await expect(page.getByText(/not verified after 48 hours/i)).toBeVisible();
     await expect(page.getByText(/will be deleted/i)).toBeVisible();
   });
@@ -35,6 +40,8 @@ test.describe('RegisterConfirmationView', () => {
   test('when user visits register confirmation they should see a link to the login page', async ({
     page,
   }) => {
+    await page.goto('/masses/register-confirmation');
+
     const link = page.getByRole('link', { name: /login/i }).last();
 
     await expect(link).toBeVisible();
@@ -44,6 +51,8 @@ test.describe('RegisterConfirmationView', () => {
   test('when user clicks on the login link they should be taken to the login page', async ({
     page,
   }) => {
+    await page.goto('/masses/register-confirmation');
+
     const link = page.getByRole('link', { name: /login/i }).last();
     await link.click();
     await expect(page).toHaveURL(/masses\/login/);
@@ -52,6 +61,8 @@ test.describe('RegisterConfirmationView', () => {
   test('when user visits registration confirmation they should be informed of email address used for sending verification email', async ({
     page,
   }) => {
+    await page.goto('/masses/register-confirmation');
+
     const email = page.getByRole('link', { name: /.+@.+\..+/i }).first();
 
     await expect(email).toBeVisible();
@@ -60,6 +71,8 @@ test.describe('RegisterConfirmationView', () => {
   test('when user visits registration confirmation they should see a form to resend verification email', async ({
     page,
   }) => {
+    await page.goto('/masses/register-confirmation');
+
     const form = page.getByRole('form');
 
     await expect(form).toBeVisible();
@@ -68,6 +81,8 @@ test.describe('RegisterConfirmationView', () => {
   test('when user does not enter an email and submits the form to resend verification email then they should see an error message', async ({
     page,
   }) => {
+    await page.goto('/masses/register-confirmation');
+
     const submit = page.getByRole('button', { name: /resend/i });
 
     await submit.click();
@@ -78,6 +93,8 @@ test.describe('RegisterConfirmationView', () => {
   test('when user enters an invalid email and submits the form to resend verification email then they should see an error message', async ({
     page,
   }) => {
+    await page.goto('/masses/register-confirmation');
+
     const email = page.getByRole('textbox', { name: /email/i });
     const submit = page.getByRole('button', { name: /resend/i });
 
@@ -91,12 +108,16 @@ test.describe('RegisterConfirmationView', () => {
     page,
     unverifiedUser: user,
   }) => {
+    test.setTimeout(70000);
+
+    await page.goto('/masses/register-confirmation');
+
     const email = page.getByRole('textbox', { name: /email/i });
     const submit = page.getByRole('button', { name: /resend/i });
 
     await email.fill(user.email);
     await submit.click();
 
-    await expect(page.getByText(/email sent successfully/i)).toBeVisible();
+    await expect(page.getByText(/email sent successfully/i)).toBeVisible({ timeout: 60000 });
   });
 });

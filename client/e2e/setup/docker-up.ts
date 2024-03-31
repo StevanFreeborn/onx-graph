@@ -3,6 +3,8 @@ import { expect, test as setup } from '@playwright/test';
 import { exec } from 'child_process';
 
 setup('docker-compose up', async ({ request }) => {
+  setup.setTimeout(180000);
+
   await setup.step('execute docker-compose up', async () => {
     const dockerComposePath = `${process.cwd()}/docker-compose.test.yml`;
     exec(`docker compose -f ${dockerComposePath} up --build`);

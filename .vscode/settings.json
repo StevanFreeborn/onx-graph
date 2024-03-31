@@ -6,6 +6,7 @@
   "cSpell.words": [
     "Bson",
     "composables",
+    "Dapws",
     "dbcontext",
     "Hmac",
     "Instantiator",
@@ -16,7 +17,8 @@
     "Swashbuckle",
     "Testcontainers",
     "textbox",
-    "VITE"
+    "VITE",
+    "Vupp"
   ],
   "editor.formatOnSave": true,
 }

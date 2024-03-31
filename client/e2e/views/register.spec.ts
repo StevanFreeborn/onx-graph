@@ -1,41 +1,49 @@
 import { expect, test } from '../fixtures/global.fixtures';
 
 test.describe('RegisterView', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/masses/register');
-  });
-
   test('when user visits register it should pass all accessibility tests', async ({
-    accessibilityResults,
+    page,
+    getAccessibilityResults,
   }) => {
+    await page.goto('/masses/register');
+
+    const accessibilityResults = await getAccessibilityResults(page, test.info());
+
     expect(accessibilityResults.violations.length).toBe(0);
   });
 
   test('when user visits register they should see a heading', async ({ page }) => {
+    await page.goto('/masses/register');
     await expect(page.getByRole('heading', { name: 'Register' })).toBeVisible();
   });
 
   test('when user visits register the should see a form', async ({ page }) => {
+    await page.goto('/masses/register');
     await expect(page.getByRole('form')).toBeVisible();
   });
 
   test('when user visits register they should see an email input', async ({ page }) => {
+    await page.goto('/masses/register');
     await expect(page.getByLabel('Email')).toBeVisible();
   });
 
   test('when user visits register they should see a password input', async ({ page }) => {
+    await page.goto('/masses/register');
     await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
   });
 
   test('when user visits register they should see a confirm password input', async ({ page }) => {
+    await page.goto('/masses/register');
     await expect(page.getByLabel('Confirm Password')).toBeVisible();
   });
 
   test('when user visits register they should see a register button', async ({ page }) => {
+    await page.goto('/masses/register');
     await expect(page.getByRole('button', { name: 'Register' })).toBeVisible();
   });
 
   test('when user visits register they should see a link to the login page', async ({ page }) => {
+    await page.goto('/masses/register');
     const link = page.getByText('Login');
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute('href', '/masses/login');
@@ -44,6 +52,7 @@ test.describe('RegisterView', () => {
   test('when user clicks on the login link they should be taken to the login page', async ({
     page,
   }) => {
+    await page.goto('/masses/register');
     const link = page.getByText('Login');
     await link.click();
     await page.waitForURL(/masses\/login/);
@@ -53,6 +62,7 @@ test.describe('RegisterView', () => {
   test('when user submits the register form with no email they should see an error message', async ({
     page,
   }) => {
+    await page.goto('/masses/register');
     await page.getByLabel('Password', { exact: true }).fill('@Password123');
     await page.getByLabel('Confirm Password').fill('@Password123');
     await page.getByRole('button', { name: 'Register' }).click();
@@ -62,6 +72,7 @@ test.describe('RegisterView', () => {
   test('when user submits the register form with no password they should see an error message', async ({
     page,
   }) => {
+    await page.goto('/masses/register');
     await page.getByLabel('Email').fill('test.user@gmail.com');
     await page.getByLabel('Confirm Password').fill('@Password123');
     await page.getByRole('button', { name: 'Register' }).click();
@@ -71,6 +82,7 @@ test.describe('RegisterView', () => {
   test('when user submits the register form with no confirm password they should see an error message', async ({
     page,
   }) => {
+    await page.goto('/masses/register');
     await page.getByLabel('Email').fill('test.user@gmail.com');
     await page.getByLabel('Password', { exact: true }).fill('@Password123');
     await page.getByRole('button', { name: 'Register' }).click();
@@ -80,6 +92,7 @@ test.describe('RegisterView', () => {
   test('when user submits the register form with non matching passwords they should see an error message', async ({
     page,
   }) => {
+    await page.goto('/masses/register');
     await page.getByLabel('Email').fill('test.user@gmail.com');
     await page.getByLabel('Password', { exact: true }).fill('@Password12');
     await page.getByLabel('Confirm Password').fill('@Password123');
@@ -90,6 +103,7 @@ test.describe('RegisterView', () => {
   test('when user submits the register form with invalid email they should see an error message', async ({
     page,
   }) => {
+    await page.goto('/masses/register');
     await page.getByLabel('Email').fill('test.user');
     await page.getByLabel('Password', { exact: true }).fill('@Password123');
     await page.getByLabel('Confirm Password').fill('@Password123');
@@ -100,6 +114,7 @@ test.describe('RegisterView', () => {
   test('when user submits the register form with invalid password they should see an error message', async ({
     page,
   }) => {
+    await page.goto('/masses/register');
     await page.getByLabel('Email').fill('test.user@gmail.com');
     await page.getByLabel('Password', { exact: true }).fill('password');
     await page.getByLabel('Confirm Password').fill('password');
@@ -111,6 +126,7 @@ test.describe('RegisterView', () => {
     page,
     newUser,
   }) => {
+    await page.goto('/masses/register');
     await page.getByLabel('Email').fill(newUser.email);
     await page.getByLabel('Password', { exact: true }).fill(newUser.password);
     await page.getByLabel('Confirm Password').fill('@Password1');
