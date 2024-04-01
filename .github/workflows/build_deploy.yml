@@ -52,7 +52,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "<>"
           git add .
-          git commit -m "chore: update client version"
+          git commit -m "chore: update client version [SKIP CI]"
           git push
         continue-on-error: true
       - name: Get updated version
@@ -94,8 +94,8 @@ jobs:
       - name: Commit version changes
         run: |
           git add .
-          git commit -m "chore: update server version"
-          git push
+          git commit -m "chore: update server version [SKIP CI]"
+          git push origin main
         continue-on-error: true
       - name: Get updated version
         working-directory: server/Server.API
