@@ -9,8 +9,10 @@
       "main"
     ],
     "plugins": [
-      "@semantic-release/commit-analyzer"
-    ]
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/git"
+    ],
+    "tagFormat": "v${version}-client"
   },
   "scripts": {
     "dev": "vite",
