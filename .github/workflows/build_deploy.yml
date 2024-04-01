@@ -119,7 +119,7 @@ jobs:
         env:
           VERSION: ${{ needs.version_server.outputs.updated_version }}
         run: |
-          docker compose build
+          docker compose build --no-cache
           docker compose push
       - name: Build and push client image
         working-directory: client
@@ -129,7 +129,7 @@ jobs:
           VITE_SENDING_EMAIL: ${{ secrets.SMTPOPTIONS__SENDEREMAIL }}
           CI: true
         run: |
-          docker compose build
+          docker compose build --no-cache
           docker compose push
   deploy:
     name: Deploy
