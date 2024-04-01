@@ -41,12 +41,17 @@ public class AccountMonitorTests(TestDb testDb) : IClassFixture<TestDb>, IDispos
   {
     _fakeTimeProvider.SetUtcNow(DateTime.UtcNow);
 
-    var (_, user) = FakeDataFactory.TestUser.Generate();
-    user.CreatedAt = DateTime.UtcNow.AddHours(-49);
+    var (_, unverifiedOldUser) = FakeDataFactory.TestUser.Generate();
+    unverifiedOldUser.CreatedAt = DateTime.UtcNow.AddHours(-49);
 
-    var token = FakeDataFactory.RefreshToken.Generate() with { UserId = user.Id };
+    var (_, verifiedOldUser) = FakeDataFactory.TestUser.Generate();
+    verifiedOldUser.CreatedAt = DateTime.UtcNow.AddHours(-49);
+    verifiedOldUser.IsVerified = true;
 
-    await _context.Users.InsertOneAsync(user);
+    var token = FakeDataFactory.RefreshToken.Generate() with { UserId = unverifiedOldUser.Id };
+
+    await _context.Users.InsertOneAsync(unverifiedOldUser);
+    await _context.Users.InsertOneAsync(verifiedOldUser);
     await _context.Tokens.InsertOneAsync(token);
 
     var sut = new AccountMonitor(
@@ -59,11 +64,23 @@ public class AccountMonitorTests(TestDb testDb) : IClassFixture<TestDb>, IDispos
 
     _fakeTimeProvider.Advance(TimeSpan.FromMinutes(16));
 
-    var existingUser = await _context.Users.Find(u => u.Id == user.Id).FirstOrDefaultAsync();
-    var existingToken = await _context.Tokens.Find(t => t.UserId == user.Id).FirstOrDefaultAsync();
+    var isDeleted = false;
+    var retries = 10;
 
-    existingUser.Should().BeNull();
-    existingToken.Should().BeNull();
+    do
+    {
+      var existingOldUnverifiedUser = await _context.Users.Find(u => u.Id == unverifiedOldUser.Id).FirstOrDefaultAsync();
+      var existingToken = await _context.Tokens.Find(t => t.UserId == unverifiedOldUser.Id).FirstOrDefaultAsync();
+      isDeleted = existingOldUnverifiedUser is null && existingToken is null;
+
+      var delay = 1000;
+      await Task.Delay(delay);
+      retries--;
+    } while (isDeleted is false && retries > 0);
+
+    var existingOldVerifiedUser = await _context.Users.Find(u => u.Id == verifiedOldUser.Id).FirstOrDefaultAsync();
+
+    existingOldVerifiedUser.Should().NotBeNull();
   }
 
   [Fact]
