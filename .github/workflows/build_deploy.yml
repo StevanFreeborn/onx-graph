@@ -97,6 +97,7 @@ jobs:
           github_token: ${{ secrets.ACTIONS_PAT }}
           branch: ${{ github.ref }}
           tags: true
+          force_with_lease: true
       - name: Get updated version
         working-directory: server/Server.API
         id: get-updated-version
