@@ -13,10 +13,6 @@ import { ClientFactory, ClientFactoryKey } from './services/client';
 
 const app = createApp(App);
 
-// Trying to implement dependency injection using
-// a factory pattern. The idea being that this
-// will allow for easier testing of components
-// that depend on these services.
 app.provide(ClientFactoryKey, new ClientFactory());
 app.provide(AuthServiceFactoryKey, new AuthServiceFactory());
 
