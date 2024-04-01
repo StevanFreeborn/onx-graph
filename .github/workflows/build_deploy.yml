@@ -21,7 +21,6 @@ jobs:
     outputs:
       current_version: ${{ steps.get-current-version.outputs.version }}
       updated_version: ${{ steps.get-updated-version.outputs.version }}
-      commit: ${{ steps.get-latest-commit.outputs.commit }}
     permissions:
       contents: write
     steps:
@@ -60,9 +59,6 @@ jobs:
         id: get-updated-version
         working-directory: client
         run: echo "version=$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT
-      - name: Get latest commit
-        id: get-latest-commit
-        run: echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   version_server:
     name: Version server
     needs: version_client
@@ -70,12 +66,10 @@ jobs:
     outputs:
       current_version: ${{ steps.get-current-version.outputs.version }}
       updated_version: ${{ steps.get-updated-version.outputs.version }}
-      commit: ${{ steps.get-latest-commit.outputs.commit }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.version_client.outputs.commit }}
           fetch-depth: 0
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
@@ -92,7 +86,7 @@ jobs:
       - name: Configure git
         run: |
           git config --global user.name "GitHub Actions"
-          git config --global user.email "<>"
+          git config --global user.email "65925598+StevanFreeborn@users.noreply.github.com"
       - name: Run versionize to update version
         working-directory: server/Server.API
         run: versionize -i --exit-insignificant-commits
@@ -107,9 +101,6 @@ jobs:
         working-directory: server/Server.API
         id: get-updated-version
         run: echo "version=$(versionize inspect)" >> $GITHUB_OUTPUT
-      - name: Get latest commit
-        id: get-latest-commit
-        run: echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   build_images:
     name: Build images
     needs: [version_client, version_server]
@@ -118,7 +109,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.version_server.outputs.commit }}
+          fetch-depth: 0
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -149,7 +140,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.version_server.outputs.commit }}
+          fetch-depth: 0
       - name: Generate .env file
         run: |
           echo "SERVER_VERSION=${{ needs.version_server.outputs.updated_version }}" >> .env
