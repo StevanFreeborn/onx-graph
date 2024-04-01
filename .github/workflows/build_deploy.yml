@@ -21,9 +21,13 @@ jobs:
     outputs:
       version: ${{ steps.get-current-version.outputs.version }}
       commit: ${{ steps.get-latest-commit.outputs.commit }}
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -38,6 +42,8 @@ jobs:
         working-directory: client
         run: npx semantic-release
         continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Commit version changes
         run: |
           git config --global user.name "GitHub Actions"
@@ -61,6 +67,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ needs.version_client.outputs.commit }}
+          fetch-depth: 0
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
