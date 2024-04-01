@@ -10,8 +10,6 @@ try
   var config = builder.Configuration;
   config.AddEnvironmentVariables();
 
-  // TODO: Clean up with extension methods
-
   // add serilog
   builder.Host.UseSerilog((context, loggerConfiguration) =>
   {
