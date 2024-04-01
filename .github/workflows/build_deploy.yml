@@ -83,14 +83,16 @@ jobs:
         run: echo "version=$(versionize inspect)" >> $GITHUB_OUTPUT
       - name: Print current version
         run: echo "${{ steps.get-version.outputs.version }}"
+      - name: Configure git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "<>"
       - name: Run versionize to update version
         working-directory: server/Server.API
         run: versionize -i --exit-insignificant-commits
         continue-on-error: true
       - name: Commit version changes
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "<>"
           git add .
           git commit -m "chore: update server version"
           git push
