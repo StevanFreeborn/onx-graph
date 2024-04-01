@@ -89,14 +89,13 @@ jobs:
           git config --global user.email "65925598+StevanFreeborn@users.noreply.github.com"
       - name: Run versionize to update version
         working-directory: server/Server.API
-        run: versionize -i --exit-insignificant-commits
+        run: versionize -i --exit-insignificant-commits --commit-suffix "[skip ci]"
         continue-on-error: true
-      - name: Commit version changes
-        run: |
-          git add .
-          git commit -m "chore: update server version [SKIP CI]"
-          git push origin main
-        continue-on-error: true
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
       - name: Get updated version
         working-directory: server/Server.API
         id: get-updated-version
