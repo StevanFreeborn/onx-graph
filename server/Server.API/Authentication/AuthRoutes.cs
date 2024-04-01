@@ -8,7 +8,7 @@ static class AuthRoutes
   /// <summary>
   /// Maps auth endpoints
   /// </summary>
-  internal static void MapAuthEndpoints(this WebApplication app)
+  internal static RouteGroupBuilder MapVersionOneAuthEndpoints(this WebApplication app)
   {
     var group = app.MapGroup("auth");
 
@@ -50,5 +50,27 @@ static class AuthRoutes
       .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("RefreshToken")
       .WithDescription("Refresh a user's token");
+
+    group
+      .MapPost("resend-verification-email", AuthController.ResendVerificationEmail)
+      .Produces((int)HttpStatusCode.NoContent)
+      .ProducesValidationProblem()
+      .Produces<ProblemDetails>((int)HttpStatusCode.NotFound)
+      .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
+      .WithName("ResendVerificationEmail")
+      .WithDescription("Resend a user's verification email");
+
+    group
+      .MapPost("verify-account", AuthController.VerifyAccount)
+      .Produces((int)HttpStatusCode.NoContent)
+      .ProducesValidationProblem()
+      .Produces<ProblemDetails>((int)HttpStatusCode.BadRequest)
+      .Produces<ProblemDetails>((int)HttpStatusCode.NotFound)
+      .Produces<ProblemDetails>((int)HttpStatusCode.Conflict)
+      .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
+      .WithName("VerifyAccount")
+      .WithDescription("Verify a user's account");
+
+    return group;
   }
 }

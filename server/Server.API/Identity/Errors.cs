@@ -19,3 +19,23 @@ class UserDoesNotExistError : Error
   {
   }
 }
+
+/// <summary>
+/// An error indicating that a user is not verified.
+/// </summary>
+class UserNotVerifiedError : Error
+{
+  internal UserNotVerifiedError(string identifier) : base($"User is not verified with identifier: {identifier}")
+  {
+  }
+}
+
+/// <summary>
+/// An error indicating that a user is already verified.
+/// </summary>
+class UserAlreadyVerifiedError : Error
+{
+  internal UserAlreadyVerifiedError(string identifier) : base($"User is already verified with identifier: {identifier}")
+  {
+  }
+}

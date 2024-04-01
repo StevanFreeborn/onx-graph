@@ -3,7 +3,7 @@ require('@rushstack/eslint-patch/modern-module-resolution');
 
 module.exports = {
   root: true,
-  ignorePatterns: ['e2e/dbscripts/**/*'],
+  ignorePatterns: ['e2e/dbscripts/**/*', 'node_modules/**/*', 'tests/coverage/**/*'],
   extends: [
     'plugin:vue/vue3-essential',
     'eslint:recommended',

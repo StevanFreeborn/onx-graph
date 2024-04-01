@@ -2,11 +2,17 @@ namespace Server.API.Tests.Integration.Fixtures;
 
 public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-  private readonly MongoDbContainer _container = new MongoDbBuilder().Build();
+  private readonly MongoDbContainer _mongoDbContainer = new MongoDbBuilder().Build();
+  private readonly IContainer _mailHogContainer = new ContainerBuilder()
+    .WithImage("mailhog/mailhog")
+    .WithPortBinding(1025, true)
+    .WithPortBinding(8025, true)
+    .Build();
 
   public async Task InitializeAsync()
   {
-    await _container.StartAsync();
+    await _mongoDbContainer.StartAsync();
+    await _mailHogContainer.StartAsync();
   }
 
   protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -27,11 +33,31 @@ public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
         options.Issuer = TestJwtTokenBuilder.TestJwtIssuer;
         options.ExpiryInMinutes = TestJwtTokenBuilder.TestJwtExpiryInMinutes;
       });
+
       services.Configure<MongoDbOptions>(options =>
       {
-        options.ConnectionString = _container.GetConnectionString();
+        options.ConnectionString = _mongoDbContainer.GetConnectionString();
         options.DatabaseName = "tests";
       });
+
+      services.Configure<SmtpOptions>(options =>
+      {
+        options.SmtpAddress = _mailHogContainer.Hostname;
+        options.SmtpPort = _mailHogContainer.GetMappedPublicPort(1025);
+        options.SenderEmail = "onxGraphTesting@test.com";
+        options.SenderPassword = string.Empty;
+      });
+
+      services.Configure<CorsOptions>(options =>
+      {
+        options.AllowedOrigins = ["https://localhost:3001"];
+      });
+
+      var mailHogBaseUrl = $"http://{_mailHogContainer.Hostname}:{_mailHogContainer.GetMappedPublicPort(8025)}";
+
+      services.AddHttpClient<MailHogService>(
+        client => client.BaseAddress = new Uri(mailHogBaseUrl)
+      );
     });
 
     builder.ConfigureServices(
@@ -54,6 +80,7 @@ public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
               ClockSkew = TimeSpan.FromSeconds(0),
             }
         );
+
         services.PostConfigure<JwtBearerOptions>(
           "AllowExpiredToken",
           options =>
@@ -76,6 +103,7 @@ public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
   new public async Task DisposeAsync()
   {
-    await _container.DisposeAsync();
+    await _mongoDbContainer.DisposeAsync();
+    await _mailHogContainer.DisposeAsync();
   }
 }

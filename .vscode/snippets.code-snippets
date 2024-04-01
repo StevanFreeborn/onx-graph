@@ -1,0 +1,20 @@
+{
+  "Create new single file component for typescript": {
+    "prefix": "sfc-ts",
+    "body": [
+      "<script setup lang=\"ts\">",
+      "  ",
+      "</script>",
+      "",
+      "<template>",
+      "  ",
+      "</template>",
+      "",
+      "",
+      "<style scoped>",
+      "  ",
+      "</style>"
+    ],
+    "description": "Create new single file component for typescript"
+  }
+}

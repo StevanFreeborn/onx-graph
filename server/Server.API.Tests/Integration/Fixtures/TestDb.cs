@@ -2,7 +2,7 @@ namespace Server.API.Tests.Integration.Fixtures;
 
 public class TestDb : IDisposable
 {
-  private readonly MongoDbContainer _container = new MongoDbBuilder().Build();
+  private readonly MongoDbContainer _container;
   internal MongoDbContext Context { get; init; }
 
   public TestDb()
@@ -20,7 +20,7 @@ public class TestDb : IDisposable
 
   public void Dispose()
   {
-    _container.DisposeAsync().AsTask().Wait();
+    _container.DisposeAsync().AsTask();
     GC.SuppressFinalize(this);
   }
 }

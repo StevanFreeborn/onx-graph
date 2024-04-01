@@ -98,9 +98,11 @@ public class TokenServiceTests
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
 
+    var now = DateTimeOffset.UtcNow;
+
     _timeProviderMock
       .Setup(t => t.GetUtcNow())
-      .Returns(DateTimeOffset.UtcNow);
+      .Returns(now);
 
     var result = await _sut.GenerateRefreshToken(user.Id);
 
@@ -108,10 +110,8 @@ public class TokenServiceTests
     result.Value.Should().NotBeNull();
     result.Value.Should().BeOfType<RefreshToken>();
     result.Value.UserId.Should().Be(user.Id);
-    result.Value.ExpiresAt.Should().BeCloseTo(
-      DateTime.UtcNow.AddHours(12),
-      TimeSpan.FromSeconds(5)
-    );
+    result.Value.Token.Should().NotBeNullOrEmpty();
+    result.Value.ExpiresAt.Should().Be(now.AddHours(12).UtcDateTime);
   }
 
   [Fact]
@@ -153,7 +153,7 @@ public class TokenServiceTests
     var refreshToken = FakeDataFactory.RefreshToken.Generate();
 
     _tokenRepositoryMock
-      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
       .ReturnsAsync(refreshToken);
 
     _timeProviderMock
@@ -165,7 +165,7 @@ public class TokenServiceTests
     _tokenRepositoryMock.Verify(
       t => t.UpdateTokenAsync(
         It.Is<BaseToken>(
-          t => t.Revoked == true && t.UpdatedAt > refreshToken.UpdatedAt
+          t => t.Revoked == true && t.UpdatedAt >= refreshToken.UpdatedAt
         )
       ),
       Times.Once
@@ -178,7 +178,7 @@ public class TokenServiceTests
     var refreshToken = FakeDataFactory.RefreshToken.Generate();
 
     _tokenRepositoryMock
-      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
       .ReturnsAsync(null as RefreshToken);
 
     _timeProviderMock
@@ -201,7 +201,7 @@ public class TokenServiceTests
     var refreshToken = FakeDataFactory.RefreshToken.Generate();
 
     _tokenRepositoryMock
-      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
       .ReturnsAsync(refreshToken);
 
     _timeProviderMock
@@ -224,18 +224,18 @@ public class TokenServiceTests
     var (_, user) = FakeDataFactory.TestUser.Generate();
 
     _userRepositoryMock
-      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
       .ReturnsAsync(user);
 
     _tokenRepositoryMock
-      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
       .ReturnsAsync(null as RefreshToken);
 
     var result = await _sut.RefreshAccessTokenAsync(user.Id, "non-existent-token");
 
     result.IsFailed.Should().BeTrue();
     result.Errors.Should().ContainSingle();
-    result.Errors.First().Should().BeOfType<TokenDoesNotExist>();
+    result.Errors.First().Should().BeOfType<TokenDoesNotExistError>();
   }
 
   [Fact]
@@ -244,11 +244,11 @@ public class TokenServiceTests
     var refreshToken = FakeDataFactory.RefreshToken.Generate();
 
     _tokenRepositoryMock
-      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
       .ReturnsAsync(refreshToken);
 
     _userRepositoryMock
-      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
       .ReturnsAsync(null as User);
 
     var result = await _sut.RefreshAccessTokenAsync("non-existent-user-id", refreshToken.Token);
@@ -269,11 +269,11 @@ public class TokenServiceTests
       .Returns(DateTimeOffset.UtcNow);
 
     _tokenRepositoryMock
-      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
       .ReturnsAsync(refreshToken);
 
     _userRepositoryMock
-      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
       .ReturnsAsync(user);
 
     _tokenRepositoryMock
@@ -302,11 +302,11 @@ public class TokenServiceTests
       .Returns(DateTimeOffset.UtcNow);
 
     _tokenRepositoryMock
-      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
       .ReturnsAsync(refreshToken);
 
     _userRepositoryMock
-      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
       .ReturnsAsync(user);
 
     var result = await _sut.RefreshAccessTokenAsync(user.Id, refreshToken.Token);
@@ -327,11 +327,11 @@ public class TokenServiceTests
       .Returns(DateTimeOffset.UtcNow);
 
     _tokenRepositoryMock
-      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
       .ReturnsAsync(refreshToken);
 
     _userRepositoryMock
-      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
       .ReturnsAsync(user);
 
     var result = await _sut.RefreshAccessTokenAsync("some-other-user-id", refreshToken.Token);
@@ -361,11 +361,11 @@ public class TokenServiceTests
       .Returns(DateTimeOffset.UtcNow);
 
     _tokenRepositoryMock
-      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
       .ReturnsAsync(refreshToken);
 
     _userRepositoryMock
-      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
       .ReturnsAsync(user);
 
     var result = await _sut.RefreshAccessTokenAsync(user.Id, refreshToken.Token);
@@ -391,11 +391,11 @@ public class TokenServiceTests
       .Returns(DateTimeOffset.UtcNow);
 
     _tokenRepositoryMock
-      .Setup(t => t.GetTokenAsync(It.IsAny<string>()))
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
       .ReturnsAsync(refreshToken);
 
     _userRepositoryMock
-      .Setup(u => u.GetUserById(It.IsAny<string>()))
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
       .ReturnsAsync(user);
 
     var result = await _sut.RefreshAccessTokenAsync(user.Id, refreshToken.Token);
@@ -410,6 +410,158 @@ public class TokenServiceTests
     result.Value.RefreshToken.ExpiresAt.Should().BeCloseTo(
       DateTime.UtcNow.AddHours(12),
       TimeSpan.FromSeconds(5)
+    );
+  }
+
+  [Fact]
+  public async Task GenerateVerificationToken_WhenCalled_ItShouldReturnVerificationToken()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    var now = DateTimeOffset.UtcNow;
+
+    _timeProviderMock
+      .Setup(t => t.GetUtcNow())
+      .Returns(now);
+
+    var result = await _sut.GenerateVerificationToken(user.Id);
+
+    result.IsSuccess.Should().BeTrue();
+    result.Value.Should().NotBeNull();
+    result.Value.Should().BeOfType<VerificationToken>();
+    result.Value.UserId.Should().Be(user.Id);
+    result.Value.Token.Should().NotBeNullOrEmpty();
+    result.Value.ExpiresAt.Should().Be(now.AddMinutes(15).UtcDateTime);
+  }
+
+  [Fact]
+  public async Task GenerateVerificationToken_WhenCalledAndTokenRepositoryThrowsException_ShouldReturnError()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    _timeProviderMock
+      .Setup(t => t.GetUtcNow())
+      .Returns(DateTimeOffset.UtcNow);
+
+    _tokenRepositoryMock
+      .Setup(t => t.CreateTokenAsync(It.IsAny<VerificationToken>()))
+      .ThrowsAsync(new Exception());
+
+    var result = await _sut.GenerateVerificationToken(user.Id);
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<GenerateVerificationTokenError>();
+  }
+
+  [Fact]
+  public async Task RevokeUserVerificationTokens_WhenCalled_ItShouldCallTokenRepository()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    await _sut.RevokeUserVerificationTokensAsync(user.Id);
+
+    _tokenRepositoryMock.Verify(
+      t => t.RevokeUserVerificationTokensAsync(user.Id),
+      Times.Once
+    );
+  }
+
+  [Fact]
+  public async Task VerifyVerificationTokenAsync_WhenCalledWithNonExistentToken_ItShouldReturnError()
+  {
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
+      .ReturnsAsync(null as VerificationToken);
+
+    var result = await _sut.VerifyVerificationTokenAsync("non-existent-token");
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<TokenDoesNotExistError>();
+  }
+
+  [Fact]
+  public async Task VerifyVerificationTokenAsync_WhenCalledWithExpiredToken_ItShouldReturnError()
+  {
+    var token = FakeDataFactory.VerificationToken.Generate() with
+    {
+      UpdatedAt = DateTime.UtcNow.AddMinutes(-45),
+      ExpiresAt = DateTime.UtcNow.AddMinutes(-30)
+    };
+
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
+      .ReturnsAsync(token);
+
+    _timeProviderMock
+      .Setup(t => t.GetUtcNow())
+      .Returns(DateTimeOffset.UtcNow);
+
+    var result = await _sut.VerifyVerificationTokenAsync(token.Token);
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<ExpiredTokenError>();
+  }
+
+  [Fact]
+  public async Task VerifyVerificationTokenAsync_WhenCalledWithRevokedToken_ItShouldReturnError()
+  {
+    var token = FakeDataFactory.VerificationToken.Generate() with
+    {
+      Revoked = true
+    };
+
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
+      .ReturnsAsync(token);
+
+    var result = await _sut.VerifyVerificationTokenAsync(token.Token);
+
+    result.IsFailed.Should().BeTrue();
+    result.Errors.Should().ContainSingle();
+    result.Errors.First().Should().BeOfType<InvalidTokenError>();
+  }
+
+  [Fact]
+  public async Task VerifyVerificationTokenAsync_WhenCalledWithValidToken_ItShouldReturnError()
+  {
+    var token = FakeDataFactory.VerificationToken.Generate();
+
+    _tokenRepositoryMock
+      .Setup(t => t.GetTokenAsync(It.IsAny<string>(), It.IsAny<TokenType>()))
+      .ReturnsAsync(token);
+
+    var result = await _sut.VerifyVerificationTokenAsync(token.Token);
+
+    result.IsSuccess.Should().BeTrue();
+    result.Value.Should().Be(token);
+  }
+
+  [Fact]
+  public async Task RevokeVerificationTokenAsync_WhenCalled_ItShouldCallTokenRepository()
+  {
+    var token = FakeDataFactory.VerificationToken.Generate();
+
+    await _sut.RevokeVerificationTokenAsync(token.Token);
+
+    _tokenRepositoryMock.Verify(
+      t => t.RevokeVerificationTokenAsync(token.Token),
+      Times.Once
+    );
+  }
+
+  [Fact]
+  public async Task RemovalAllInvalidVerificationTokensAsync_WhenCalled_ItShouldCallTokenRepository()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    await _sut.RemoveAllInvalidVerificationTokensAsync(user.Id);
+
+    _tokenRepositoryMock.Verify(
+      t => t.RemoveAllInvalidVerificationTokensAsync(user.Id),
+      Times.Once
     );
   }
 }

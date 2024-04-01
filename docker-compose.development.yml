@@ -1,6 +1,61 @@
 version: '3.8'
 name: onxgraph-development
 services:
+  loki:
+    container_name: loki-development
+    image: grafana/loki:main
+    command: -config.file=/etc/loki/local-config.yaml
+    healthcheck:
+        test: wget -q --tries=1 -O- http://localhost:3100/ready 
+        start_period: 20s
+        interval: 10s
+        timeout: 1s
+        retries: 12
+    restart: unless-stopped
+  grafana:
+    container_name: grafana-development
+    image: grafana/grafana:latest
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    entrypoint: 
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+        - name: Loki
+          type: loki
+          access: proxy
+          orgId: 1
+          url: http://loki:3100
+          basicAuth: false
+          isDefault: true
+          version: 1
+          editable: false
+        EOF
+        /run.sh
+    ports:
+      - '2995:3000'
+    volumes:
+      - grafana_development_data:/var/lib/grafana
+    restart: unless-stopped
+    depends_on:
+      loki:
+        condition: service_healthy
+  mailhog:
+    container_name: mailhog-development
+    image: mailhog/mailhog:latest
+    volumes:
+      - "mailhog_development_data:/home/mailhog"
+    ports:
+      - "2996:1025"
+      - "2997:8025"
+    restart: unless-stopped
+    environment:
+      - MH_STORAGE=maildir
+      - MH_MAILDIR_PATH=/home/mailhog
   mongodb:
     container_name: mongo-development
     image: mongo:latest
@@ -24,6 +79,8 @@ services:
   server:
     depends_on:
       - mongodb
+      - mailhog
+      - grafana
     container_name: server-api-development
     build:
       target: development-stage
@@ -33,7 +90,7 @@ services:
       - './server/Server.API:/app'
       - '~/.aspnet/https:/https/'
     ports:
-      - '3000:3000'
+      - '3002:3002'
     restart: unless-stopped
     env_file:
       - server/server.API/.env
@@ -55,3 +112,5 @@ services:
       - client/.env
 volumes:
   onxgraph_mongodb_development_data:
+  mailhog_development_data:
+  grafana_development_data:

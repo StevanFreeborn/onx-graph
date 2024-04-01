@@ -5,34 +5,6 @@
       "Microsoft.AspNetCore": "Warning"
     }
   },
-  "Serilog": {
-    "Using": [
-      "Serilog.Sinks.Console",
-      "Serilog.Sinks.File"
-    ],
-    "MinimumLevel": "Debug",
-    "WriteTo": [
-      {
-        "Name": "Console"
-      },
-      {
-        "Name": "File",
-        "Args": {
-          "path": "logs/log.json",
-          "formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact",
-          "restrictedToMinimumLevel": "Error"
-        }
-      }
-    ],
-    "Enrich": [
-      "FromLogContext",
-      "WithMachineName",
-      "WithThreadId"
-    ],
-    "Properties": {
-      "Application": "Server.API"
-    }
-  },
   "AllowedHosts": "*",
   "MongoDbOptions": {
     "ConnectionString": "ConnectionString",
@@ -43,5 +15,10 @@
     "Issuer": "TestIssuer",
     "Audience": "TestAudience",
     "ExpiryInMinutes": 5
+  },
+  "CorsOptions": {
+    "AllowedOrigins": [
+      "https://localhost:3001"
+    ]
   }
 }

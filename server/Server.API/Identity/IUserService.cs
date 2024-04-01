@@ -19,4 +19,17 @@ interface IUserService
   /// <param name="user">The user to register.</param>
   /// <returns>A <see cref="Result{T}"/> indicating the outcome of the operation.</returns>
   Task<Result<string>> RegisterUserAsync(User user);
+
+  /// <summary>
+  /// Gets a user by their email.
+  /// </summary>
+  /// <param name="userEmail">The email of the user to get.</param>
+  /// <returns>A <see cref="User"/> instance if found; otherwise a <see cref="UserDoesNotExistError"/> instance.</returns>
+  Task<Result<User>> GetUserByEmailAsync(string userEmail);
+
+  /// <summary>
+  /// Verifies a user.
+  /// </summary>
+  /// <param name="userId">The id of the user to verify.</param>
+  Task<Result> VerifyUserAsync(string userId);
 }

@@ -5,7 +5,6 @@ namespace Server.API.Authentication;
 /// </summary>
 static class AuthController
 {
-  // TODO: Need to implement email verification
   /// <summary>
   /// Registers a new user.
   /// </summary>
@@ -32,6 +31,29 @@ static class AuthController
       );
     }
 
+    var tokenResult = await req.TokenService.GenerateVerificationToken(registrationResult.Value);
+
+    if (tokenResult.IsFailed)
+    {
+      req.Logger.LogError("Failed to generate verification token for user: {UserId}", registrationResult.Value);
+    }
+
+    if (tokenResult.IsSuccess)
+    {
+      var emailMessage = BuildVerificationEmail(
+        req.Dto.Email,
+        tokenResult.Value.Token,
+        req.CorsOptions.Value.AllowedOrigins[0]
+      );
+
+      var emailResult = await req.EmailService.SendEmailAsync(emailMessage);
+
+      if (emailResult.IsFailed)
+      {
+        req.Logger.LogError("Failed to send verification email for user: {UserId}", registrationResult.Value);
+      }
+    }
+
     return Results.Created(
       uri: $"/users/{registrationResult.Value}",
       value: new RegisterUserResponse(registrationResult.Value)
@@ -54,12 +76,25 @@ static class AuthController
 
     var loginResult = await req.UserService.LoginUserAsync(req.Dto.Email, req.Dto.Password);
 
-    if (loginResult.IsFailed)
+    var problemTitle = "Login failed";
+    var problemDetail = "Unable to login user. See errors for details.";
+
+    if (loginResult.IsFailed && loginResult.Errors.Exists(e => e is InvalidLoginError))
     {
       return Results.Problem(
-        title: "Login failed",
-        detail: "Unable to login user. See errors for details.",
+        title: problemTitle,
+        detail: problemDetail,
         statusCode: (int)HttpStatusCode.Unauthorized,
+        extensions: new Dictionary<string, object?> { { "Errors", loginResult.Errors } }
+      );
+    }
+
+    if (loginResult.IsFailed && loginResult.Errors.Exists(e => e is UserNotVerifiedError))
+    {
+      return Results.Problem(
+        title: problemTitle,
+        detail: problemDetail,
+        statusCode: (int)HttpStatusCode.Forbidden,
         extensions: new Dictionary<string, object?> { { "Errors", loginResult.Errors } }
       );
     }
@@ -132,4 +167,167 @@ static class AuthController
 
     return Results.Ok(new LoginUserResponse(refreshTokenResult.Value.AccessToken));
   }
+
+  /// <summary>
+  /// Resends a user's verification email.
+  /// </summary>
+  /// <param name="req">The request as a <see cref="ResendVerificationEmailRequest"/> instance.</param>
+  /// <returns>A <see cref="Task"/> of <see cref="IResult"/>.</returns>
+  internal static async Task<IResult> ResendVerificationEmail([AsParameters] ResendVerificationEmailRequest req)
+  {
+    var validationResult = await req.Validator.ValidateAsync(req.Dto);
+
+    if (validationResult.IsValid == false)
+    {
+      return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
+    var userResult = await req.UserService.GetUserByEmailAsync(req.Dto.Email);
+
+    var problemTitle = "Resend verification email failed";
+    var problemDetail = "Unable to resend verification email. See errors for details.";
+
+    if (userResult.IsFailed)
+    {
+      return Results.Problem(
+        title: problemTitle,
+        detail: problemDetail,
+        statusCode: (int)HttpStatusCode.NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", userResult.Errors } }
+      );
+    }
+
+    if (userResult.Value.IsVerified)
+    {
+      return Results.Problem(
+        title: problemTitle,
+        detail: problemDetail,
+        statusCode: (int)HttpStatusCode.Conflict,
+        extensions: new Dictionary<string, object?> { { "Errors", new[] { new UserAlreadyVerifiedError(userResult.Value.Email) } } }
+      );
+    }
+
+    await req.TokenService.RevokeUserVerificationTokensAsync(userResult.Value.Id);
+
+    var tokenResult = await req.TokenService.GenerateVerificationToken(userResult.Value.Id);
+
+    if (tokenResult.IsFailed)
+    {
+      return Results.Problem(
+        title: problemTitle,
+        detail: problemDetail,
+        statusCode: (int)HttpStatusCode.InternalServerError,
+        extensions: new Dictionary<string, object?> { { "Errors", tokenResult.Errors } }
+      );
+    }
+
+    var emailMessage = BuildVerificationEmail(
+      userResult.Value.Email,
+      tokenResult.Value.Token,
+      req.CorsOptions.Value.AllowedOrigins[0]
+    );
+
+    var emailResult = await req.EmailService.SendEmailAsync(emailMessage);
+
+    if (emailResult.IsFailed)
+    {
+      return Results.Problem(
+        title: "Resend verification email failed",
+        detail: "Unable to resend verification email. See errors for details.",
+        statusCode: (int)HttpStatusCode.InternalServerError,
+        extensions: new Dictionary<string, object?> { { "Errors", emailResult.Errors } }
+      );
+    }
+
+    return Results.NoContent();
+  }
+
+  /// <summary>
+  /// Verifies a user's account.
+  /// </summary>
+  /// <param name="req">The request as a <see cref="VerifyAccountRequest"/> instance.</param>
+  /// <returns>A <see cref="Task"/> of <see cref="IResult"/>.</returns>
+  internal static async Task<IResult> VerifyAccount([AsParameters] VerifyAccountRequest req)
+  {
+    var validationResult = await req.Validator.ValidateAsync(req.Dto);
+
+    if (validationResult.IsValid == false)
+    {
+      return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
+    var verifyTokenResult = await req.TokenService.VerifyVerificationTokenAsync(req.Dto.Token);
+
+    var problemTitle = "Verification failed";
+    var problemDetail = "Unable to verify account. See errors for details.";
+
+    if (
+      verifyTokenResult.IsFailed &&
+      verifyTokenResult.Errors.Exists(e => e is TokenDoesNotExistError)
+    )
+    {
+      return Results.Problem(
+        title: problemTitle,
+        detail: problemDetail,
+        statusCode: (int)HttpStatusCode.NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", verifyTokenResult.Errors } }
+      );
+    }
+
+    if (
+      verifyTokenResult.IsFailed &&
+      verifyTokenResult.Errors.Exists(e => e is ExpiredTokenError or InvalidTokenError)
+    )
+    {
+      await req.TokenService.RevokeVerificationTokenAsync(req.Dto.Token);
+
+      return Results.Problem(
+        title: problemTitle,
+        detail: problemDetail,
+        statusCode: (int)HttpStatusCode.BadRequest,
+        extensions: new Dictionary<string, object?> { { "Errors", verifyTokenResult.Errors } }
+      );
+    }
+
+    var verifyUserResult = await req.UserService.VerifyUserAsync(verifyTokenResult.Value.UserId);
+
+    if (verifyUserResult.IsFailed && verifyUserResult.Errors.Exists(e => e is UserDoesNotExistError))
+    {
+      return Results.Problem(
+        title: problemTitle,
+        detail: problemDetail,
+        statusCode: (int)HttpStatusCode.NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", verifyUserResult.Errors } }
+      );
+    }
+
+    if (verifyUserResult.IsFailed && verifyUserResult.Errors.Exists(e => e is UserAlreadyVerifiedError))
+    {
+      return Results.Problem(
+        title: problemTitle,
+        detail: problemDetail,
+        statusCode: (int)HttpStatusCode.Conflict,
+        extensions: new Dictionary<string, object?> { { "Errors", verifyUserResult.Errors } }
+      );
+    }
+
+    await req.TokenService.RevokeVerificationTokenAsync(req.Dto.Token);
+    await req.TokenService.RemoveAllInvalidVerificationTokensAsync(verifyTokenResult.Value.UserId);
+
+    return Results.NoContent();
+  }
+
+  private static EmailMessage BuildVerificationEmail(string email, string token, string origin) =>
+    new()
+    {
+      To = email,
+      Subject = "Welcome to OnxGraph! Verify your account to get started.",
+      HtmlContent = $"""
+          <h1>Welcome to OnxGraph!</h1>
+          <p>We're excited to welcome you to OnxGraph! Before you begin we need to verify your account. Follow these steps to complete the verification process:</p>
+          <p>Click the link below to verify your account:</p>
+          <a href='{origin}/masses/verify-account?t={token}'>Verify Account</a>
+          <p>If you didn't create an account with OnxGraph, please ignore this email.</p>
+        """
+    };
 }

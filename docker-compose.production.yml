@@ -1,6 +1,49 @@
 version: '3.8'
 name: onxgraph-production
 services:
+  loki:
+    container_name: loki-production
+    image: grafana/loki:main
+    command: -config.file=/etc/loki/local-config.yaml
+    healthcheck:
+        test: wget -q --tries=1 -O- http://localhost:3100/ready 
+        start_period: 20s
+        interval: 10s
+        timeout: 1s
+        retries: 12
+    restart: always
+  grafana:
+    container_name: grafana-production
+    image: grafana/grafana:latest
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    entrypoint: 
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+        - name: Loki
+          type: loki
+          access: proxy
+          orgId: 1
+          url: http://loki:3100
+          basicAuth: false
+          isDefault: true
+          version: 1
+          editable: false
+        EOF
+        /run.sh
+    ports:
+      - '2997:3000'
+    volumes:
+      - grafana_production_data:/var/lib/grafana
+    restart: always
+    depends_on:
+      loki:
+        condition: service_healthy
   mongodb:
     container_name: mongo-production
     image: mongo:latest
@@ -16,12 +59,15 @@ services:
   server:
     depends_on:
       - mongodb
+      - loki
+      - grafana
     container_name: server-api-production
     image: stevanfreeborn/onx-graph-server:${SERVER_VERSION}
     ports:
       - '3000:8080'
     restart: always
     environment:
+      - ASPNETCORE_ENVIRONMENT=Production
       - Logging__LogLevel__Default=${Logging__LogLevel__Default}
       - AllowedHosts=${AllowedHosts}
       - JwtOptions__Secret=${JwtOptions__Secret}
@@ -31,6 +77,11 @@ services:
       - MongoDbOptions__ConnectionString=${MongoDbOptions__ConnectionString}
       - MongoDbOptions__DatabaseName=${MongoDbOptions__DatabaseName}
       - CorsOptions__AllowedOrigins__0=${CorsOptions__AllowedOrigins__0}
+      - SmtpOptions__SmtpAddress=${SmtpOptions__SmtpAddress}
+      - SmtpOptions__SmtpPort=${SmtpOptions__SmtpPort}
+      - SmtpOptions__SenderEmail=${SmtpOptions__SenderEmail}
+      - SmtpOptions__SenderPassword=${SmtpOptions__SenderPassword}
+      - LOKI_URL=${LOKI_URL}
   client:
     container_name: vue-client-production
     image: stevanfreeborn/onx-graph-client:${CLIENT_VERSION}
@@ -39,3 +90,4 @@ services:
     restart: always
 volumes:
   onxgraph_mongodb_production_data:
+  grafana_production_data:

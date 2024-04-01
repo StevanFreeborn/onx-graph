@@ -4,9 +4,10 @@ namespace Server.API.Identity;
 /// A repository for managing users in MongoDB.
 /// </summary>
 /// <inheritdoc cref="IUserRepository"/>
-class MongoUserRepository(MongoDbContext context) : IUserRepository
+class MongoUserRepository(MongoDbContext context, TimeProvider timeProvider) : IUserRepository
 {
   private readonly MongoDbContext _context = context;
+  private readonly TimeProvider _timeProvider = timeProvider;
 
   public async Task<User> CreateUserAsync(User user)
   {
@@ -21,7 +22,7 @@ class MongoUserRepository(MongoDbContext context) : IUserRepository
       .SingleOrDefaultAsync();
   }
 
-  public async Task<User?> GetUserById(string userId)
+  public async Task<User?> GetUserByIdAsync(string userId)
   {
     return await _context.Users
       .Find(u => u.Id == userId)
@@ -33,5 +34,12 @@ class MongoUserRepository(MongoDbContext context) : IUserRepository
     return await _context.Users
       .Find(u => u.Username == username)
       .SingleOrDefaultAsync();
+  }
+
+  public Task UpdateUserAsync(User existingUser)
+  {
+    existingUser.UpdatedAt = _timeProvider.GetUtcNow().DateTime;
+    var filter = Builders<User>.Filter.Eq(u => u.Id, existingUser.Id);
+    return _context.Users.ReplaceOneAsync(filter, existingUser);
   }
 }

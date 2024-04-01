@@ -1,9 +1,20 @@
 namespace Server.API.Tests.Integration;
 
-public class MongoUserRepositoryTests(TestDb testDb) : IClassFixture<TestDb>, IDisposable
+public class MongoUserRepositoryTests : IClassFixture<TestDb>, IDisposable
 {
-  private readonly MongoDbContext _context = testDb.Context;
-  private readonly MongoUserRepository _sut = new(testDb.Context);
+  private readonly Mock<TimeProvider> _timeProvider = new();
+  private readonly MongoDbContext _context;
+  private readonly MongoUserRepository _sut;
+
+  public MongoUserRepositoryTests(TestDb testDb)
+  {
+    _timeProvider
+      .Setup(x => x.GetUtcNow())
+      .Returns(DateTime.UtcNow);
+
+    _context = testDb.Context;
+    _sut = new(testDb.Context, _timeProvider.Object);
+  }
 
   public void Dispose()
   {
@@ -89,5 +100,39 @@ public class MongoUserRepositoryTests(TestDb testDb) : IClassFixture<TestDb>, ID
     result
       .Should()
       .BeNull();
+  }
+
+  [Fact]
+  public async Task UpdateUserAsync_WhenCalled_ItShouldUpdateUser()
+  {
+    var (_, testUser) = FakeDataFactory.TestUser.Generate();
+
+    await _context.Users.InsertOneAsync(testUser);
+
+    testUser.Username = "new-username";
+    testUser.Email = "test@test.com";
+    testUser.IsVerified = true;
+
+    await _sut.UpdateUserAsync(testUser);
+
+    var updatedUser = await _context.Users
+      .Find(u => u.Id == testUser.Id)
+      .SingleOrDefaultAsync();
+
+    updatedUser
+      .Should()
+      .NotBeNull();
+
+    updatedUser.Username
+      .Should()
+      .Be(testUser.Username);
+
+    updatedUser.Email
+      .Should()
+      .Be(testUser.Email);
+
+    updatedUser.IsVerified
+      .Should()
+      .BeTrue();
   }
 }

@@ -27,6 +27,9 @@ static class FakeDataFactory
     .RuleFor(j => j.Issuer, f => f.Internet.DomainName())
     .RuleFor(j => j.Secret, GenerateJwtSecret());
 
+  /// <summary>
+  /// Generates a new <see cref="RefreshToken"/> instance
+  /// </summary>
   internal static readonly Faker<RefreshToken> RefreshToken = new Faker<RefreshToken>()
     .CustomInstantiator(f => new RefreshToken())
     .RuleFor(t => t.Id, f => ObjectId.GenerateNewId().ToString())
@@ -35,6 +38,35 @@ static class FakeDataFactory
     .RuleFor(t => t.ExpiresAt, f => DateTime.UtcNow.AddHours(12))
     .RuleFor(t => t.Revoked, false)
     .RuleFor(t => t.TokenType, TokenType.Refresh);
+
+  /// <summary>
+  /// Generates a new <see cref="SmtpOptions"/> instance
+  /// </summary>
+  internal static readonly Faker<SmtpOptions> SmtpOptions = new Faker<SmtpOptions>()
+    .RuleFor(t => t.SmtpAddress, f => f.Internet.Ip())
+    .RuleFor(t => t.SmtpPort, f => f.Random.Int(1, 65535))
+    .RuleFor(t => t.SenderEmail, f => f.Internet.Email())
+    .RuleFor(t => t.SenderPassword, f => string.Empty);
+
+  /// <summary>
+  /// Generates a new <see cref="EmailMessage"/> instance
+  /// </summary>
+  internal static readonly Faker<EmailMessage> EmailMessage = new Faker<EmailMessage>()
+    .RuleFor(t => t.Subject, f => f.Lorem.Sentence())
+    .RuleFor(t => t.HtmlContent, f => f.Lorem.Paragraphs(3))
+    .RuleFor(t => t.To, f => f.Person.Email);
+
+  /// <summary>
+  /// Generates a new <see cref="VerificationToken"/> instance
+  /// </summary>
+  internal static readonly Faker<VerificationToken> VerificationToken = new Faker<VerificationToken>()
+    .CustomInstantiator(f => new VerificationToken())
+    .RuleFor(t => t.Id, f => ObjectId.GenerateNewId().ToString())
+    .RuleFor(t => t.UserId, f => ObjectId.GenerateNewId().ToString())
+    .RuleFor(t => t.Token, f => f.Random.AlphaNumeric(32))
+    .RuleFor(t => t.ExpiresAt, f => DateTime.UtcNow.AddMinutes(15))
+    .RuleFor(t => t.Revoked, false)
+    .RuleFor(t => t.TokenType, TokenType.Verification);
 }
 
 /// <summary>

@@ -8,7 +8,7 @@ COPY . .
 # development stage
 FROM setup-stage as development-stage
 ENV ASPNETCORE_ENVIRONMENT=Development
-EXPOSE 3000
+EXPOSE 3002
 RUN apt-get update
 RUN apt-get install -y unzip
 RUN curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ~/vsdbg

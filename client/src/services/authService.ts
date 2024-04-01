@@ -21,6 +21,8 @@ export interface IAuthService {
   register: (email: string, password: string) => Promise<Result<RegisterResponse, Error[]>>;
   refreshToken: () => Promise<Result<LoginResponse, Error[]>>;
   logout: () => Promise<Result<boolean, Error[]>>;
+  resendVerificationEmail: (email: string) => Promise<Result<boolean, Error[]>>;
+  verifyAccount: (token: string) => Promise<Result<boolean, Error[]>>;
 }
 
 export class AuthService implements IAuthService {
@@ -31,10 +33,80 @@ export class AuthService implements IAuthService {
     login: `${this.baseURL}/auth/login`,
     refreshToken: `${this.baseURL}/auth/refresh-token`,
     logout: `${this.baseURL}/auth/logout`,
+    resendVerificationEmail: `${this.baseURL}/auth/resend-verification-email`,
+    verifyAccount: `${this.baseURL}/auth/verify-account`,
   };
 
   constructor(client: IClient) {
     this.client = client;
+  }
+
+  async verifyAccount(token: string) {
+    const request = new ClientRequestWithBody(this.endpoints.verifyAccount, undefined, { token });
+
+    try {
+      const res = await this.client.post(request);
+
+      if (res.status === 400) {
+        return Err([new Error('Token is not valid. It is either expired or revoked.')]);
+      }
+
+      if (res.status === 404) {
+        return Err([new Error('Token or account related to token was not found.')]);
+      }
+
+      if (res.status === 409) {
+        return Err([new Error('User is already verified.')]);
+      }
+
+      if (res.ok === false) {
+        return Err([new Error('Verifying account failed')]);
+      }
+
+      return Ok(true);
+    } catch (e) {
+      console.error(e);
+      return Err([new Error('Verifying account failed')]);
+    }
+  }
+
+  async resendVerificationEmail(email: string) {
+    const request = new ClientRequestWithBody(
+      this.endpoints.resendVerificationEmail,
+      undefined,
+      new ResendVerificationEmailRequest(email)
+    );
+
+    try {
+      const res = await this.client.post(request);
+
+      if (res.status === 400) {
+        const body = await res.json();
+        const validationErrors = body.errors as Record<string, string[]>;
+        const errors = Object.values(validationErrors)
+          .flat()
+          .map(e => new Error(e));
+
+        return Err(errors);
+      }
+
+      if (res.status === 404) {
+        return Err([new Error('User not found. You may need to register.')]);
+      }
+
+      if (res.status === 409) {
+        return Err([new Error('User is already verified.')]);
+      }
+
+      if (res.ok === false) {
+        return Err([new Error('Resending verification email failed')]);
+      }
+
+      return Ok(true);
+    } catch (e) {
+      console.error(e);
+      return Err([new Error('Resending verification email failed')]);
+    }
   }
 
   async logout() {
@@ -100,6 +172,10 @@ export class AuthService implements IAuthService {
         return Err([new Error('Email/Password combination is not valid')]);
       }
 
+      if (res.status === 403) {
+        return Err([new UserNotVerifiedError()]);
+      }
+
       if (res.ok === false) {
         return Err([new Error('Login failed. Please try again.')]);
       }
@@ -132,6 +208,10 @@ export class AuthService implements IAuthService {
         return Err(errors);
       }
 
+      if (res.status === 409) {
+        return Err([new Error('Registration failed. User already exists with this email.')]);
+      }
+
       if (res.ok === false) {
         return Err([new Error('Registration failed. Please try again.')]);
       }
@@ -142,6 +222,12 @@ export class AuthService implements IAuthService {
       console.error(e);
       return Err([new Error('Registration failed. Please try again.')]);
     }
+  }
+}
+
+export class UserNotVerifiedError extends Error {
+  constructor() {
+    super('User is not verified. Please verify your account.');
   }
 }
 
@@ -164,6 +250,14 @@ class LoginRequest extends BaseAuthRequest {
 class RegisterRequest extends BaseAuthRequest {
   constructor(email: string, password: string) {
     super(email, password);
+  }
+}
+
+class ResendVerificationEmailRequest {
+  readonly email: string;
+
+  constructor(email: string) {
+    this.email = email;
   }
 }
 

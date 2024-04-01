@@ -2,6 +2,7 @@
   import { useAuthService } from '@/composables/useAuthService';
   import { useMounted } from '@/composables/useMounted';
   import { useSubmitting } from '@/composables/useSubmitting';
+  import { UserNotVerifiedError } from '@/services/authService.js';
   import { useUserStore } from '@/stores/userStore';
   import { toTitleCase } from '@/utils';
   import isEmail from 'validator/es/lib/isEmail';
@@ -69,8 +70,14 @@
     );
 
     if (loginResult.err) {
-      formState.errors.push(...loginResult.val.map(err => err.message));
       setIsSubmitting(false);
+
+      if (loginResult.val.some(err => err instanceof UserNotVerifiedError)) {
+        router.push('/masses/unverified');
+        return;
+      }
+
+      formState.errors.push(...loginResult.val.map(err => err.message));
       return;
     }
 

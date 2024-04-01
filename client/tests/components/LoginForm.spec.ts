@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useRouter } from 'vue-router';
 import LoginForm from '../../src/components/LoginForm.vue';
 import { customRender } from '../testUtils';
-import { AuthServiceFactoryKey } from './../../src/services/authService';
+import { AuthServiceFactoryKey, UserNotVerifiedError } from './../../src/services/authService';
 import { useUserStore } from './../../src/stores/userStore';
 
 vi.mock('vue-router', async importOriginal => {
@@ -270,5 +270,56 @@ describe('LoginForm', () => {
 
     expect(pushMock).toHaveBeenCalledTimes(1);
     expect(pushMock).toHaveBeenCalledWith('/graphs');
+  });
+
+  it('should redirect user to unverified page when form is submitted with valid credentials but user is unverified', async () => {
+    const mockAuthService = {
+      login: vi.fn(),
+    };
+
+    const failureResponse = {
+      err: true,
+      val: [new UserNotVerifiedError()],
+    };
+
+    mockAuthService.login.mockReturnValueOnce(failureResponse);
+
+    const { getByRole, getByLabelText } = await customRender(LoginForm, {
+      global: {
+        provide: {
+          [AuthServiceFactoryKey as symbol]: {
+            create: () => mockAuthService,
+          },
+        },
+      },
+    });
+
+    const userStore = useUserStore();
+
+    const validCredentials = {
+      email: 'test@test.com',
+      password: 'password',
+    };
+
+    const emailInput = getByRole('textbox', { name: /email/i });
+    const passwordInput = getByLabelText(/password/i);
+    const loginButton = getByRole('button', { name: /login/i });
+
+    await fireEvent.update(emailInput, validCredentials.email);
+    await fireEvent.update(passwordInput, validCredentials.password);
+    await fireEvent.click(loginButton);
+
+    expect(mockAuthService.login).toHaveBeenCalledTimes(1);
+    expect(mockAuthService.login).toHaveBeenCalledWith(
+      validCredentials.email,
+      validCredentials.password
+    );
+
+    expect(userStore.logUserIn).toHaveBeenCalledTimes(0);
+
+    const { push: pushMock } = useRouter();
+
+    expect(pushMock).toHaveBeenCalledTimes(1);
+    expect(pushMock).toHaveBeenCalledWith('/masses/unverified');
   });
 });

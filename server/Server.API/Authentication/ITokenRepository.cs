@@ -6,18 +6,19 @@ namespace Server.API.Authentication;
 interface ITokenRepository
 {
   /// <summary>
-  /// Creates a refresh token.
+  /// Creates a token.
   /// </summary>
   /// <param name="token">The token to create.</param>
-  /// <returns>The created token as a <see cref="RefreshToken"/>.</returns>
-  Task<RefreshToken> CreateTokenAsync(RefreshToken token);
+  /// <returns>The created token as a <see cref="BaseToken"/>.</returns>
+  Task<BaseToken> CreateTokenAsync(BaseToken token);
 
   /// <summary>
   /// Gets a token by its token string.
   /// </summary>
   /// <param name="token">The token string.</param>
+  /// <param name="tokenType">The type of token.</param>
   /// <returns>The token as a <see cref="BaseToken"/> instance.</returns>
-  Task<BaseToken?> GetTokenAsync(string token);
+  Task<BaseToken?> GetTokenAsync(string token, TokenType tokenType);
 
   /// <summary>
   /// Removes all the invalid refresh tokens for a user.
@@ -39,4 +40,25 @@ interface ITokenRepository
   /// <param name="updatedToken">The updated token.</param>
   /// <returns>A <see cref="Task"/>.</returns>
   Task UpdateTokenAsync(BaseToken updatedToken);
+
+  /// <summary>
+  /// Revoke all verification tokens for given user.
+  /// </summary>
+  /// <param name="userId">The user id.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task RevokeUserVerificationTokensAsync(string userId);
+
+  /// <summary>
+  /// Revoke a verification token.
+  /// </summary>
+  /// <param name="token">The token to revoke.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task RevokeVerificationTokenAsync(string token);
+
+  /// <summary>
+  /// Removes all the invalid verification tokens for a user.
+  /// </summary>
+  /// <param name="userId">The user id.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task RemoveAllInvalidVerificationTokensAsync(string userId);
 }

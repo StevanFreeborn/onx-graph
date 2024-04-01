@@ -26,9 +26,19 @@ export const routes = [
         component: () => import('../views/LoginView.vue'),
       },
       {
+        path: 'unverified',
+        name: 'unverified',
+        component: () => import('../views/UnverifiedView.vue'),
+      },
+      {
         path: 'register',
         name: 'register',
         component: () => import('../views/RegisterView.vue'),
+      },
+      {
+        path: 'register-confirmation',
+        name: 'register-confirmation',
+        component: () => import('../views/RegisterConfirmationView.vue'),
       },
       {
         path: 'about',
@@ -36,8 +46,13 @@ export const routes = [
         component: () => import('../views/AboutView.vue'),
       },
       {
+        path: 'verify-account',
+        name: 'verify-account',
+        component: () => import('../views/VerifyAccountView.vue'),
+      },
+      {
         path: '/:pathMatch(.*)*',
-        name: 'not-found',
+        // name: 'not-found',
         component: () => import('../views/NotFoundView.vue'),
       },
     ],

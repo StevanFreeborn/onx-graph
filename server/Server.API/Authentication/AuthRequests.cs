@@ -46,8 +46,12 @@ class RegisterDtoValidator : AbstractValidator<RegisterDto>
 /// </summary>
 record RegisterRequest(
   [FromBody] RegisterDto Dto,
+  [FromServices] IOptions<CorsOptions> CorsOptions,
   [FromServices] IValidator<RegisterDto> Validator,
-  [FromServices] IUserService UserService
+  [FromServices] IUserService UserService,
+  [FromServices] IEmailService EmailService,
+  [FromServices] ILogger<RegisterRequest> Logger,
+  [FromServices] ITokenService TokenService
 );
 
 /// <summary>
@@ -97,5 +101,68 @@ record LogoutRequest(
 /// </summary>
 record RefreshTokenRequest(
   HttpContext Context,
+  [FromServices] ITokenService TokenService
+);
+
+/// <summary>
+/// Represents the data needed to resend verification email
+/// </summary>
+record ResendVerificationEmailDto(string Email)
+{
+  internal ResendVerificationEmailDto() : this(string.Empty) { }
+}
+
+/// <summary>
+/// Validator for <see cref="LoginDto"/>
+/// </summary>
+class ResendVerificationEmailDtoValidator : AbstractValidator<ResendVerificationEmailDto>
+{
+  public ResendVerificationEmailDtoValidator()
+  {
+    RuleFor(dto => dto.Email)
+      .NotEmpty()
+      .EmailAddress()
+      .WithMessage("Email must be a valid email address.");
+  }
+}
+
+/// <summary>
+/// Represents a request to resend verification email
+/// </summary>
+record ResendVerificationEmailRequest(
+  [FromBody] ResendVerificationEmailDto Dto,
+  [FromServices] IValidator<ResendVerificationEmailDto> Validator,
+  [FromServices] IUserService UserService,
+  [FromServices] IEmailService EmailService,
+  [FromServices] ITokenService TokenService,
+  [FromServices] IOptions<CorsOptions> CorsOptions
+);
+
+/// <summary>
+/// Represents the data needed to verify an account
+/// </summary>
+record VerifyAccountDto(string Token)
+{
+  internal VerifyAccountDto() : this(string.Empty) { }
+}
+
+/// <summary>
+/// Validator for <see cref="VerifyAccountDto"/>
+/// </summary>
+class VerifyAccountDtoValidator : AbstractValidator<VerifyAccountDto>
+{
+  public VerifyAccountDtoValidator()
+  {
+    RuleFor(dto => dto.Token).NotEmpty();
+  }
+}
+
+/// <summary>
+/// Represents a request to verify an account
+/// </summary>
+record VerifyAccountRequest(
+  [FromBody] VerifyAccountDto Dto,
+  [FromServices] IValidator<VerifyAccountDto> Validator,
+  [FromServices] IUserService UserService,
   [FromServices] ITokenService TokenService
 );

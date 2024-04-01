@@ -245,7 +245,7 @@ describe('RegisterForm', () => {
 
     const fakeRequest = new Promise(resolve =>
       setTimeout(() => {
-        resolve({ err: false, val: ['User already exists'] });
+        resolve({ err: true, val: ['User already exists'] });
       }, 100)
     );
 
@@ -280,7 +280,7 @@ describe('RegisterForm', () => {
     });
   });
 
-  it('should redirect to /login if form is submitted with valid credentials', async () => {
+  it('should redirect to /masses/register-confirmation if form is submitted with valid credentials', async () => {
     const mockAuthService = {
       register: vi.fn(),
     };
@@ -325,6 +325,6 @@ describe('RegisterForm', () => {
     const { push: pushMock } = useRouter();
 
     expect(pushMock).toHaveBeenCalledTimes(1);
-    expect(pushMock).toHaveBeenCalledWith('/login');
+    expect(pushMock).toHaveBeenCalledWith('/masses/register-confirmation');
   });
 });
