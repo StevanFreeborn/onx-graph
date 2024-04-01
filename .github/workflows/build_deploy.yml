@@ -19,7 +19,8 @@ jobs:
     name: Version client
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get-current-version.outputs.version }}
+      current_version: ${{ steps.get-current-version.outputs.version }}
+      updated_version: ${{ steps.get-updated-version.outputs.version }}
       commit: ${{ steps.get-latest-commit.outputs.commit }}
     permissions:
       contents: write
@@ -55,6 +56,10 @@ jobs:
           git commit -m "chore: update client version"
           git push
         continue-on-error: true
+      - name: Get updated version
+        id: get-updated-version
+        working-directory: client
+        run: echo "version=$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT
       - name: Get latest commit
         id: get-latest-commit
         run: echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
@@ -63,7 +68,8 @@ jobs:
     needs: version_client
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get-version.outputs.version }}
+      current_version: ${{ steps.get-current-version.outputs.version }}
+      updated_version: ${{ steps.get-updated-version.outputs.version }}
       commit: ${{ steps.get-latest-commit.outputs.commit }}
     steps:
       - name: Checkout repository
@@ -79,10 +85,10 @@ jobs:
         run: dotnet tool install --global Versionize
       - name: Get current version
         working-directory: server/Server.API
-        id: get-version
+        id: get-current-version
         run: echo "version=$(versionize inspect)" >> $GITHUB_OUTPUT
       - name: Print current version
-        run: echo "${{ steps.get-version.outputs.version }}"
+        run: echo "${{ steps.get-current-version.outputs.version }}"
       - name: Configure git
         run: |
           git config --global user.name "GitHub Actions"
@@ -97,6 +103,10 @@ jobs:
           git commit -m "chore: update server version"
           git push
         continue-on-error: true
+      - name: Get updated version
+        working-directory: server/Server.API
+        id: get-updated-version
+        run: echo "version=$(versionize inspect)" >> $GITHUB_OUTPUT
       - name: Get latest commit
         id: get-latest-commit
         run: echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
@@ -117,14 +127,14 @@ jobs:
       - name: Build and push server image
         working-directory: server/Server.API
         env:
-          VERSION: ${{ needs.version_server.outputs.version }}
+          VERSION: ${{ needs.version_server.outputs.updated_version }}
         run: |
           docker compose build
           docker compose push
       - name: Build and push client image
         working-directory: client
         env:
-          VERSION: ${{ needs.version_client.outputs.version }}
+          VERSION: ${{ needs.version_client.outputs.updated_version }}
           VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
           VITE_SENDING_EMAIL: ${{ secrets.SMTPOPTIONS__SENDEREMAIL }}
           CI: true
@@ -142,8 +152,8 @@ jobs:
           ref: ${{ needs.version_server.outputs.commit }}
       - name: Generate .env file
         run: |
-          echo "SERVER_VERSION=${{ needs.version_server.outputs.version }}" >> .env
-          echo "CLIENT_VERSION=${{ needs.version_client.outputs.version }}" >> .env
+          echo "SERVER_VERSION=${{ needs.version_server.outputs.updated_version }}" >> .env
+          echo "CLIENT_VERSION=${{ needs.version_client.outputs.updated_version }}" >> .env
           echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
           echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
           echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
