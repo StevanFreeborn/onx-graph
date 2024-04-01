@@ -86,7 +86,7 @@ jobs:
       - name: Configure git
         run: |
           git config --global user.name "GitHub Actions"
-          git config --global user.email "65925598+StevanFreeborn@users.noreply.github.com"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
       - name: Run versionize to update version
         working-directory: server/Server.API
         run: versionize -i --exit-insignificant-commits --commit-suffix "[skip ci]"
@@ -94,8 +94,9 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.ACTIONS_PAT }}
           branch: ${{ github.ref }}
+          tags: true
       - name: Get updated version
         working-directory: server/Server.API
         id: get-updated-version
