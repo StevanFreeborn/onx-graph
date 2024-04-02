@@ -71,6 +71,7 @@
       align-items: center;
       width: var(--button-size);
       height: var(--button-size);
+      color: var(--color-text);
       background-color: var(--color-background-mute);
       border-radius: 50%;
       border: none;
