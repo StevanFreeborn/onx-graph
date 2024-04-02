@@ -61,6 +61,7 @@ export const routes = [
     path: '/',
     name: 'root',
     redirect: { name: 'graphs' },
+    component: () => import('../components/AuthenticatedLayout.vue'),
     beforeEnter: async () => {
       const userStore = useUserStore();
 
