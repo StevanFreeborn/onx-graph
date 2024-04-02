@@ -3,14 +3,9 @@
 #app {
   display: flex;
   flex-direction: column;
-  align-items: center;
   min-height: 100%;
   width: 100%;
-  gap: 2rem;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+  overflow-x: hidden;
 }
 
 a,
@@ -24,17 +19,5 @@ a,
 @media (hover: hover) {
   a:hover {
     background-color: hwb(33 11% 3% / 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    flex-direction: row;
-    padding: 0 2rem;
   }
 }
