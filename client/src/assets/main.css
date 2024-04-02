@@ -13,11 +13,26 @@ a,
   text-decoration: none;
   color: hsla(33, 94%, 54%, 1);
   transition: 0.4s;
-  padding: 3px;
+  font-weight: 600;
+  transition-property: background-color;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
 }
 
 @media (hover: hover) {
   a:hover {
     background-color: hwb(33 11% 3% / 0.2);
   }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
