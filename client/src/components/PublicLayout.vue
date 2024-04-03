@@ -26,6 +26,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     min-height: 100%;
     width: 100%;
     gap: 2rem;
