@@ -11,7 +11,6 @@ export const routes = [
     component: () => import('../components/PublicLayout.vue'),
     beforeEnter: () => {
       const { user } = useUserStore();
-      console.log('here');
       return user ? { name: 'graphs' } : true;
     },
     children: [

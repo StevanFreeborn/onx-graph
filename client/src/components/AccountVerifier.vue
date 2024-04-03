@@ -39,7 +39,6 @@
         setTimeout(() => {
           verificationStatus.value = 'Unverified';
           errorMessages.value = response.val.map(err => err.message);
-          console.log('here');
         }, WAIT_TIME);
         return;
       }
