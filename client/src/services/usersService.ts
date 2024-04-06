@@ -29,7 +29,7 @@ export class UsersService implements IUsersService {
   }
 
   private readonly endpoints = {
-    getUser: this.createGetUserEndpoint,
+    getUser: (userId: string) => this.createGetUserEndpoint(userId),
   };
 
   constructor(client: IClient) {
