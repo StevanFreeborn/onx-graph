@@ -33,18 +33,93 @@ public class UsersControllerTests
   [Fact]
   public async Task GetUser_WhenCalledByDifferentUser_ItShouldReturn403StatusCodeWithProblemDetails()
   {
-    throw new NotImplementedException();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    _context
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal(new ClaimsIdentity(
+      [
+        new Claim(ClaimTypes.NameIdentifier, "different-user-id")
+      ])));
+
+    _userService
+      .Setup(s => s.GetUserByIdAsync(user.Id))
+      .ReturnsAsync(Result.Ok(user));
+
+    var request = CreateGetUserRequest(user.Id);
+
+    var result = await UsersController.GetUser(request);
+
+    result.Should()
+      .BeOfType<ForbidHttpResult>();
   }
 
   [Fact]
   public async Task GetUser_WhenCalledAndUserDoesNotExist_ItShouldReturn404StatusCodeWithProblemDetails()
   {
-    throw new NotImplementedException();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    var request = CreateGetUserRequest(user.Id);
+
+    _context
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal(new ClaimsIdentity(
+      [
+        new Claim(ClaimTypes.NameIdentifier, user.Id)
+      ])));
+
+    _userService
+      .Setup(s => s.GetUserByIdAsync(user.Id))
+      .ReturnsAsync(Result.Fail<User>(new UserDoesNotExistError(user.Id)));
+
+    var result = await UsersController.GetUser(request);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be(StatusCodes.Status404NotFound);
+
+    result.As<ProblemHttpResult>()
+      .ProblemDetails
+      .Extensions
+      .Should()
+      .ContainKey("Errors");
   }
 
   [Fact]
   public async Task GetUser_WhenCalledAndUserExists_ItShouldReturn200StatusCodeWithUser()
   {
-    throw new NotImplementedException();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    var request = CreateGetUserRequest(user.Id);
+
+    _context
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal(new ClaimsIdentity(
+      [
+        new Claim(ClaimTypes.NameIdentifier, user.Id)
+      ])));
+
+    _userService
+      .Setup(s => s.GetUserByIdAsync(user.Id))
+      .ReturnsAsync(Result.Ok(user));
+
+    var result = await UsersController.GetUser(request);
+
+    result.Should()
+      .BeOfType<Ok<UserResponse>>();
+
+    var okResult = result.As<Ok<UserResponse>>();
+
+    okResult.StatusCode
+      .Should()
+      .Be(StatusCodes.Status200OK);
+
+    okResult.Value
+      .Should()
+      .BeEquivalentTo(new UserResponse(user));
   }
 }

@@ -26,6 +26,18 @@ class UserService(
     return Result.Ok(existingUser);
   }
 
+  public async Task<Result<User>> GetUserByIdAsync(string userId)
+  {
+    var existingUser = await _userRepository.GetUserByIdAsync(userId);
+
+    if (existingUser is null)
+    {
+      return Result.Fail(new UserDoesNotExistError(userId));
+    }
+
+    return Result.Ok(existingUser);
+  }
+
   public async Task<Result<(string AccessToken, RefreshToken RefreshToken)>> LoginUserAsync(string email, string password)
   {
     var existingUser = await _userRepository.GetUserByEmailAsync(email);

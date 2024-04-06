@@ -10,6 +10,7 @@ static class UsersRoutes
       .MapGet("{userId}", UsersController.GetUser)
       .RequireAuthorization()
       .Produces<UserResponse>((int)HttpStatusCode.OK)
+      .ProducesValidationProblem()
       .Produces<ProblemDetails>((int)HttpStatusCode.Unauthorized)
       .Produces<ProblemDetails>((int)HttpStatusCode.Forbidden)
       .Produces<ProblemDetails>((int)HttpStatusCode.NotFound)

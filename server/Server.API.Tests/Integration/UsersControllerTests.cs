@@ -22,7 +22,7 @@ public class UsersControllerTests(TestServerFactory serverFactory) : Integration
   }
 
   [Fact]
-  public async Task GetUser_WhenCalledAndNotGivenValidUserId_ItShouldReturnBadRequest()
+  public async Task GetUser_WhenCalledAndNotGivenInvalidUserId_ItShouldReturnBadRequest()
   {
     var response = await _client.GetAsync("/users/invalid-user-id");
 
