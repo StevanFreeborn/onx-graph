@@ -236,6 +236,11 @@ try
     .WithApiVersionSet(versionSet)
     .MapToApiVersion(versionOne);
 
+  app
+    .MapVersionOneUsersEndpoints()
+    .WithApiVersionSet(versionSet)
+    .MapToApiVersion(versionOne);
+
 
   // use cors
   app.UseCors("CORSpolicy");

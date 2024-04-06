@@ -9,48 +9,56 @@ public class UsersControllerTests(TestServerFactory serverFactory) : Integration
   }
 
   [Fact]
-  public async Task GetUser_WhenCalledByUnauthenticatedUser_ReturnsUnauthorized()
+  public async Task GetUser_WhenCalledByUnauthenticatedUser_ItShouldReturnUnauthorized()
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
     user.IsVerified = true;
 
     await Context.Users.InsertOneAsync(user);
 
-    var response = await _client.GetAsync($"/api/users/{user.Id}");
+    var response = await _client.GetAsync($"/users/{user.Id}");
 
     response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
   }
 
   [Fact]
-  public async Task GetUser_WhenCalledByDifferentUser_ReturnsForbidden()
+  public async Task GetUser_WhenCalledAndNotGivenValidUserId_ItShouldReturnBadRequest()
+  {
+    var response = await _client.GetAsync("/users/invalid-user-id");
+
+    response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+  }
+
+  [Fact]
+  public async Task GetUser_WhenCalledByDifferentUser_ItShouldReturnForbidden()
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
     user.IsVerified = true;
 
     await Context.Users.InsertOneAsync(user);
 
-    var response = await _client.GetAsync($"/api/users/{user.Id}");
+    var response = await _client.GetAsync($"/users/{user.Id}");
 
     response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
   }
 
   [Fact]
-  public async Task GetUser_WhenCalledAndUserDoesNotExist_ReturnsNotFound()
+  public async Task GetUser_WhenCalledAndUserDoesNotExist_ItShouldReturnNotFound()
   {
-    var response = await _client.GetAsync($"/api/users/{ObjectId.GenerateNewId()}");
+    var response = await _client.GetAsync($"/users/{ObjectId.GenerateNewId()}");
 
     response.StatusCode.Should().Be(HttpStatusCode.NotFound);
   }
 
   [Fact]
-  public async Task GetUser_WhenCalledAndUserExists_ReturnsUser()
+  public async Task GetUser_WhenCalledAndUserExists_ItShouldReturnUser()
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
     user.IsVerified = true;
 
     await Context.Users.InsertOneAsync(user);
 
-    var response = await _client.GetAsync($"/api/users/{user.Id}");
+    var response = await _client.GetAsync($"/users/{user.Id}");
 
     response.StatusCode.Should().Be(HttpStatusCode.OK);
   }
