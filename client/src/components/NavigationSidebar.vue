@@ -7,41 +7,36 @@
   import { useRouter } from 'vue-router';
 
   const isSidebarOpen = ref(true);
+  const isMounted = useMounted();
+  const router = useRouter();
+  const userStore = useUserStore();
+  const authService = useAuthService(userStore);
+  const usersService = useUsersService(userStore);
+  const userIdentifier = ref<string>(userStore.user?.id ?? '');
+  const username = computed(() => (isMounted ? userIdentifier.value : 'Loading...'));
 
-  var sidebarContainerClasses = computed(() => ({
+  const sidebarContainerClasses = computed(() => ({
     'sidebar-container': true,
     collapsed: !isSidebarOpen.value,
   }));
-
-  function toggleSidebar() {
-    isSidebarOpen.value = !isSidebarOpen.value;
-  }
 
   const navLinks = [
     {
       name: 'Graphs',
       path: '/graphs',
     },
-    {
-      name: 'Settings',
-      path: '/settings',
-    },
   ];
 
-  const isMounted = useMounted();
-  const router = useRouter();
-  const userStore = useUserStore();
-  const authService = useAuthService(userStore);
-  const userService = useUsersService(userStore);
-  const userIdentifier = ref<string>(userStore.user?.id ?? '');
-  const username = computed(() => (isMounted ? userIdentifier.value : 'Loading...'));
+  onMounted(getUsersUsername);
 
-  onMounted(async () => {
+  async function getUsersUsername() {
     if (userStore.user === null || userStore.user.id === undefined) {
+      userStore.logUserOut();
+      router.push({ name: 'login' });
       return;
     }
 
-    const user = await userService.getUser(userStore.user?.id);
+    const user = await usersService.getUser(userStore.user.id);
 
     if (user.err) {
       for (const error of user.val) {
@@ -51,7 +46,11 @@
     }
 
     userIdentifier.value = user.val.username;
-  });
+  }
+
+  function toggleSidebar() {
+    isSidebarOpen.value = !isSidebarOpen.value;
+  }
 
   async function handleLogout() {
     const logoutResult = await authService.logout();
@@ -70,12 +69,11 @@
 </script>
 
 <template>
-  <div :class="sidebarContainerClasses">
+  <div :class="sidebarContainerClasses" data-testid="sidebar">
     <button
       class="toggle-button"
       @click="toggleSidebar"
       type="button"
-      :aria-label="isSidebarOpen ? 'collapse' : 'expand'"
       :disabled="isMounted === false"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
@@ -100,7 +98,12 @@
     <div class="user-container">
       <div class="user-info-container">
         <div class="user-icon-container">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 448 512"
+            fill="currentColor"
+            data-testid="user-icon"
+          >
             <path
               d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"
             />
@@ -207,6 +210,10 @@
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
+        }
+
+        & li {
+          margin: 0.25rem;
         }
 
         & .nav-link {

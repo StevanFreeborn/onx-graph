@@ -5,6 +5,7 @@ import { createApp } from 'vue';
 import { AuthServiceFactoryKey, IAuthService } from '../../src/services/authService';
 import { ClientFactoryKey, IClient } from '../../src/services/client';
 import { USER_KEY, useUserStore } from '../../src/stores/userStore';
+import { localStorageMock } from '../testUtils';
 
 vi.mock('jwt-decode', async importOriginal => {
   const actual = await importOriginal<object>();
@@ -27,14 +28,7 @@ vi.mock('jwtDecode', () => {
 });
 
 describe('userStore', () => {
-  const localStorageMock = {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    clear: vi.fn(),
-    removeItem: vi.fn(),
-    key: vi.fn(),
-    length: 0,
-  };
+  const originalStorage = global.localStorage;
 
   const clientMock: IClient = {
     get: vi.fn(),
@@ -48,6 +42,8 @@ describe('userStore', () => {
     logout: vi.fn(),
     refreshToken: vi.fn(),
     register: vi.fn(),
+    verifyAccount: vi.fn(),
+    resendVerificationEmail: vi.fn(),
   };
 
   beforeEach(() => {
@@ -69,6 +65,7 @@ describe('userStore', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    global.localStorage = originalStorage;
   });
 
   it('should return null if user is not stored in local storage', () => {

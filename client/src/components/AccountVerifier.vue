@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { useAuthService } from '@/composables/useAuthService';
-  import { defineProps, ref } from 'vue';
+  import { ref } from 'vue';
   import { useRouter, type LocationQueryValue } from 'vue-router';
   import ResendVerifyEmailForm from './ResendVerifyEmailForm.vue';
 
