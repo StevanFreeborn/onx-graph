@@ -213,6 +213,17 @@ describe('AuthService', () => {
       expect(console.error).toHaveBeenCalled();
     });
 
+    for (const status of [409]) {
+      it(`should return error if registering fails with status ${status}`, async () => {
+        mockClient.post.mockReturnValue({ status });
+
+        const result = await authService.register('email', 'password');
+
+        expect(result.err).toBe(true);
+        expect(result.val).toEqual([expect.any(Error)]);
+      });
+    }
+
     it('should return error if register fails', async () => {
       mockClient.post.mockReturnValue({ ok: false });
 
@@ -254,6 +265,33 @@ describe('AuthService', () => {
       expect(result.val).toEqual([expect.any(Error)]);
     });
 
+    it('should return error if validation fails while resending verification email', async () => {
+      const body = {
+        errors: { Email: ['Email is not valid'] },
+      };
+
+      mockClient.post.mockReturnValue({
+        status: 400,
+        json: () => body,
+      });
+
+      const result = await authService.resendVerificationEmail('email');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Email is not valid')]);
+    });
+
+    for (const status of [404, 409]) {
+      it(`should return error if resending verification email fails with status ${status}`, async () => {
+        mockClient.post.mockReturnValue({ status });
+
+        const result = await authService.resendVerificationEmail('email');
+
+        expect(result.err).toBe(true);
+        expect(result.val).toEqual([expect.any(Error)]);
+      });
+    }
+
     it('should return true if resending verification email is successful', async () => {
       mockClient.post.mockReturnValue({ ok: true });
 
@@ -284,6 +322,17 @@ describe('AuthService', () => {
       expect(result.err).toBe(true);
       expect(result.val).toEqual([expect.any(Error)]);
     });
+
+    for (const status of [400, 404, 409]) {
+      it(`should return error if verifying account fails with status ${status}`, async () => {
+        mockClient.post.mockReturnValue({ status });
+
+        const result = await authService.verifyAccount('token');
+
+        expect(result.err).toBe(true);
+        expect(result.val).toEqual([expect.any(Error)]);
+      });
+    }
 
     it('should return true if verifying account is successful', async () => {
       mockClient.post.mockReturnValue({ ok: true });

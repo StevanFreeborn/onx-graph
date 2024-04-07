@@ -23,6 +23,7 @@ module.exports = {
       rules: {
         'playwright/missing-playwright-await': 'off',
         'playwright/no-standalone-expect': 'off',
+        'no-console': 'off',
       },
     },
   ],
