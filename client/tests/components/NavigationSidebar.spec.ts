@@ -44,7 +44,7 @@ describe('NavigationSidebar', () => {
     localStorageMock.getItem.mockReturnValue(
       JSON.stringify({
         id: 'test-id',
-        expiresAtInSeconds: 123,
+        expiresAtInSeconds: Date.now() / 1000 + 15 * 60 * 60,
         token: 'token',
       })
     );

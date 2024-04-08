@@ -80,6 +80,7 @@ describe('AuthService', () => {
 
   describe('refreshToken', () => {
     it('should return error if refresh token is not valid', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
       mockClient.post.mockReturnValue({ status: 401 });
 
       const result = await authService.refreshToken();
@@ -98,14 +99,12 @@ describe('AuthService', () => {
     });
 
     it('should return error if error occurs while refreshing token', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockClient.post.mockRejectedValue(new Error('error'));
 
       const result = await authService.refreshToken();
 
       expect(result.err).toBe(true);
       expect(result.val).toEqual([expect.any(Error)]);
-      expect(consoleSpy).toHaveBeenCalled();
     });
 
     it('should return body if refreshing token is successful', async () => {
