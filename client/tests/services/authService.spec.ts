@@ -92,14 +92,14 @@ describe('AuthService', () => {
     });
 
     it('should return error if error occurs while refreshing token', async () => {
-      console.error = vi.fn();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockClient.post.mockRejectedValue(new Error('error'));
 
       const result = await authService.refreshToken();
 
       expect(result.err).toBe(true);
       expect(result.val).toEqual([expect.any(Error)]);
-      expect(console.error).toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalled();
     });
 
     it('should return body if refreshing token is successful', async () => {

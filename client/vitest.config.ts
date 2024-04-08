@@ -6,6 +6,13 @@ export default mergeConfig(
   viteConfig,
   defineConfig({
     test: {
+      poolOptions: {
+        vmThreads: {
+          minThreads: process.env.CI ? 4 : undefined,
+          maxThreads: process.env.CI ? 4 : undefined,
+          memoryLimit: process.env.CI ? 0.5 : undefined,
+        },
+      },
       environment: 'jsdom',
       exclude: [...configDefaults.exclude, 'e2e/**/*'],
       root: fileURLToPath(new URL('./', import.meta.url)),
