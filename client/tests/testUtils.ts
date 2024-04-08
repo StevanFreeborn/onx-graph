@@ -80,19 +80,3 @@ function mockMatchMediaOnWindow() {
     })),
   });
 }
-
-export const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  clear: vi.fn(),
-  removeItem: vi.fn(),
-  key: vi.fn(),
-  length: 0,
-};
-
-export const mockClient = {
-  post: vi.fn(),
-  get: vi.fn(),
-  put: vi.fn(),
-  delete: vi.fn(),
-};

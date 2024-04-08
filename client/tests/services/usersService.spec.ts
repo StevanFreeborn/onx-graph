@@ -1,9 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockClient } from '../testUtils';
 import { UsersService } from './../../src/services/usersService';
 
 describe('UsersService', () => {
   let usersService: UsersService;
+
+  const mockClient = {
+    post: vi.fn(),
+    get: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+  };
 
   beforeEach(() => {
     usersService = new UsersService(mockClient);

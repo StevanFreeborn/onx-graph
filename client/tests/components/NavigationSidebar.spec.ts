@@ -6,7 +6,7 @@ import NavigationSidebar from '../../src/components/NavigationSidebar.vue';
 import { AuthServiceFactoryKey } from '../../src/services/authService';
 import { UsersServiceFactoryKey } from '../../src/services/usersService';
 import { useUserStore } from '../../src/stores/userStore';
-import { customRender, localStorageMock } from '../testUtils';
+import { customRender } from '../testUtils';
 
 vi.mock('vue-router', async importOriginal => {
   const actual = await importOriginal<typeof import('vue-router')>();
@@ -18,6 +18,15 @@ vi.mock('vue-router', async importOriginal => {
 });
 
 describe('NavigationSidebar', () => {
+  const localStorageMock = {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    clear: vi.fn(),
+    removeItem: vi.fn(),
+    key: vi.fn(),
+    length: 0,
+  };
+
   const originalStorage = global.localStorage;
 
   const mockUsersService = {
