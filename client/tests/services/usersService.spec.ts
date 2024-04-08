@@ -45,7 +45,6 @@ describe('UsersService', () => {
 
     it('should return an error if the request throws an error', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
       mockClient.get.mockRejectedValue(new Error('Failed to get user.'));
 
       const result = await usersService.getUser('1');
