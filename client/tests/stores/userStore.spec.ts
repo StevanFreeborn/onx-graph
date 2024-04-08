@@ -36,6 +36,8 @@ describe('userStore', () => {
     length: 0,
   };
 
+  const originalStorage = global.localStorage;
+
   const clientMock: IClient = {
     get: vi.fn(),
     post: vi.fn(),
@@ -48,6 +50,8 @@ describe('userStore', () => {
     logout: vi.fn(),
     refreshToken: vi.fn(),
     register: vi.fn(),
+    verifyAccount: vi.fn(),
+    resendVerificationEmail: vi.fn(),
   };
 
   beforeEach(() => {
@@ -69,6 +73,7 @@ describe('userStore', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    global.localStorage = originalStorage;
   });
 
   it('should return null if user is not stored in local storage', () => {

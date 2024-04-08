@@ -11,7 +11,6 @@ export const routes = [
     component: () => import('../components/PublicLayout.vue'),
     beforeEnter: () => {
       const { user } = useUserStore();
-
       return user ? { name: 'graphs' } : true;
     },
     children: [
@@ -51,8 +50,7 @@ export const routes = [
         component: () => import('../views/VerifyAccountView.vue'),
       },
       {
-        path: '/:pathMatch(.*)*',
-        // name: 'not-found',
+        path: ':pathMatch(.*)*',
         component: () => import('../views/NotFoundView.vue'),
       },
     ],
@@ -61,6 +59,7 @@ export const routes = [
     path: '/',
     name: 'root',
     redirect: { name: 'graphs' },
+    component: () => import('../components/AuthenticatedLayout.vue'),
     beforeEnter: async () => {
       const userStore = useUserStore();
 
@@ -104,8 +103,7 @@ export const routes = [
         component: () => import('../views/GraphsView.vue'),
       },
       {
-        path: '/:pathMatch(.*)*',
-        name: 'not-found',
+        path: ':pathMatch(.*)*',
         component: () => import('../views/NotFoundView.vue'),
       },
     ],

@@ -10,11 +10,13 @@ import router from './router';
 
 import { AuthServiceFactory, AuthServiceFactoryKey } from './services/authService';
 import { ClientFactory, ClientFactoryKey } from './services/client';
+import { UsersServiceFactory, UsersServiceFactoryKey } from './services/usersService';
 
 const app = createApp(App);
 
 app.provide(ClientFactoryKey, new ClientFactory());
 app.provide(AuthServiceFactoryKey, new AuthServiceFactory());
+app.provide(UsersServiceFactoryKey, new UsersServiceFactory());
 
 app.use(createPinia());
 

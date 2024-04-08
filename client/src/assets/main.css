@@ -3,14 +3,9 @@
 #app {
   display: flex;
   flex-direction: column;
-  align-items: center;
   min-height: 100%;
   width: 100%;
-  gap: 2rem;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+  overflow-x: hidden;
 }
 
 a,
@@ -18,7 +13,10 @@ a,
   text-decoration: none;
   color: hsla(33, 94%, 54%, 1);
   transition: 0.4s;
-  padding: 3px;
+  font-weight: 600;
+  transition-property: background-color;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
 }
 
 @media (hover: hover) {
@@ -27,14 +25,14 @@ a,
   }
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    flex-direction: row;
-    padding: 0 2rem;
-  }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

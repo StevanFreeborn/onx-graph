@@ -7,6 +7,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { routes } from '../src/router';
 import { AuthServiceFactoryKey } from './../src/services/authService';
 import { ClientFactoryKey } from './../src/services/client';
+import { UsersServiceFactoryKey } from './../src/services/usersService';
 
 /**
  * Custom render function that provides some app level dependencies
@@ -29,6 +30,9 @@ export async function customRender(component: Component, options: RenderOptions 
       create: vi.fn(),
     },
     [ClientFactoryKey as symbol]: {
+      create: vi.fn(),
+    },
+    [UsersServiceFactoryKey as symbol]: {
       create: vi.fn(),
     },
   };

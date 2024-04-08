@@ -303,4 +303,42 @@ public class UserServiceTests
         Times.Once
       );
   }
+
+  [Fact]
+  public async Task GetUserByIdAsync_WhenUserDoesNotExist_ItShouldReturnUserDoesNotExistError()
+  {
+    _userRepositoryMock
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
+      .ReturnsAsync(null as User);
+
+    var result = await _sut.GetUserByIdAsync("123");
+
+    result.IsFailed
+      .Should()
+      .BeTrue();
+
+    result.Errors
+      .Should()
+      .Contain(e => e is UserDoesNotExistError);
+  }
+
+  [Fact]
+  public async Task GetUserByIdAsync_WhenUserExists_ItShouldReturnUser()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    _userRepositoryMock
+      .Setup(u => u.GetUserByIdAsync(It.IsAny<string>()))
+      .ReturnsAsync(user);
+
+    var result = await _sut.GetUserByIdAsync(user.Id);
+
+    result.IsSuccess
+      .Should()
+      .BeTrue();
+
+    result.Value
+      .Should()
+      .Be(user);
+  }
 }

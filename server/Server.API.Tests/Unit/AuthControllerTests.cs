@@ -15,7 +15,6 @@ public class AuthControllerTests
   private readonly Mock<IValidator<LoginDto>> _loginDtoValidatorMock = new();
   private readonly Mock<IValidator<ResendVerificationEmailDto>> _resendVerificationEmailDtoValidatorMock = new();
   private readonly Mock<IValidator<VerifyAccountDto>> _verifyAccountDtoValidatorMock = new();
-
   private RegisterRequest CreateRegisterRequest(RegisterDto dto) =>
     new(
       dto,

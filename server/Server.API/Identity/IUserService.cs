@@ -32,4 +32,10 @@ interface IUserService
   /// </summary>
   /// <param name="userId">The id of the user to verify.</param>
   Task<Result> VerifyUserAsync(string userId);
+
+  /// <summary>
+  /// Gets a user by their id.
+  /// </summary>
+  /// <param name="userId">The id of the user to get.</param>
+  Task<Result<User>> GetUserByIdAsync(string userId);
 }

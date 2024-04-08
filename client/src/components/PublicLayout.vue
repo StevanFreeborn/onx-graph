@@ -4,23 +4,45 @@
 </script>
 
 <template>
-  <header>
-    <img alt="OnxGraph logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <div class="container">
+    <header>
+      <img alt="OnxGraph logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
-    <div class="wrapper">
-      <HeroGreeting />
+      <div class="wrapper">
+        <HeroGreeting />
 
-      <nav>
-        <RouterLink to="/masses/login">Login</RouterLink>
-        <RouterLink to="/masses/register">Register</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+        <nav>
+          <RouterLink to="/masses/login">Login</RouterLink>
+          <RouterLink to="/masses/register">Register</RouterLink>
+        </nav>
+      </div>
+    </header>
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    width: 100%;
+    gap: 2rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-weight: normal;
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      flex-direction: row;
+      padding: 0 2rem;
+    }
+  }
+
   header {
     line-height: 1.5;
     max-height: 100vh;

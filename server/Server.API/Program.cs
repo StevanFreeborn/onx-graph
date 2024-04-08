@@ -20,7 +20,6 @@ try
       .Enrich.FromLogContext()
       .Enrich.WithMachineName()
       .Enrich.WithThreadId()
-      .WriteTo.Console(theme: AnsiConsoleTheme.Code)
       .WriteTo.File(
         new CompactJsonFormatter(),
         "logs/logs.json",
@@ -39,7 +38,7 @@ try
           propertiesAsLabels: ["app"]
         );
     }
-  });
+  }, preserveStaticLogger: true);
 
 
   // add problem details service
@@ -233,6 +232,11 @@ try
   // map endpoints
   app
     .MapVersionOneAuthEndpoints()
+    .WithApiVersionSet(versionSet)
+    .MapToApiVersion(versionOne);
+
+  app
+    .MapVersionOneUsersEndpoints()
     .WithApiVersionSet(versionSet)
     .MapToApiVersion(versionOne);
 

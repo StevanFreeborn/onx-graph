@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { useAuthService } from '@/composables/useAuthService';
-  import { defineProps, ref } from 'vue';
+  import { ref } from 'vue';
   import { useRouter, type LocationQueryValue } from 'vue-router';
   import ResendVerifyEmailForm from './ResendVerifyEmailForm.vue';
 
@@ -39,7 +39,6 @@
         setTimeout(() => {
           verificationStatus.value = 'Unverified';
           errorMessages.value = response.val.map(err => err.message);
-          console.log('here');
         }, WAIT_TIME);
         return;
       }

@@ -11,6 +11,9 @@ module.exports = {
     '@vue/eslint-config-prettier/skip-formatting',
     'plugin:playwright/recommended',
   ],
+  rules: {
+    'no-console': 'warn',
+  },
   parserOptions: {
     ecmaVersion: 'latest',
   },
@@ -20,6 +23,7 @@ module.exports = {
       rules: {
         'playwright/missing-playwright-await': 'off',
         'playwright/no-standalone-expect': 'off',
+        'no-console': 'off',
       },
     },
   ],

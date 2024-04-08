@@ -26,6 +26,7 @@ static class AuthRoutes
       .Produces<LoginUserResponse>((int)HttpStatusCode.OK)
       .ProducesValidationProblem()
       .Produces<ProblemDetails>((int)HttpStatusCode.Unauthorized)
+      .Produces<ProblemDetails>((int)HttpStatusCode.Forbidden)
       .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("LoginUser")
       .WithDescription("Login a user");
