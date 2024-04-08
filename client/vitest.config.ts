@@ -14,7 +14,7 @@ export default mergeConfig(
         reportsDirectory: './tests/coverage',
         include: ['**/src/**'],
         exclude: ['**/views/**', '**/src/App.vue', '**/src/main.ts', '**/router/index.ts'],
-        reporter: ['text', 'html'],
+        reporter: ['text'],
       },
     },
   })
