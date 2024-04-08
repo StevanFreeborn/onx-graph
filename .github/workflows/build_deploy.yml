@@ -46,7 +46,7 @@ jobs:
         run: npx semantic-release
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ACTIONS_PAT }}
       - name: Commit version changes
         run: |
           git config --global user.name "GitHub Actions"
