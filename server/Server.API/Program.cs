@@ -20,7 +20,6 @@ try
       .Enrich.FromLogContext()
       .Enrich.WithMachineName()
       .Enrich.WithThreadId()
-      .WriteTo.Console(theme: AnsiConsoleTheme.Code)
       .WriteTo.File(
         new CompactJsonFormatter(),
         "logs/logs.json",

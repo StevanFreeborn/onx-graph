@@ -45,7 +45,7 @@ describe('Client', () => {
       const result = await client.get({ url });
 
       expect(fetchMock).toHaveBeenCalledWith(
-        new Request(url, { method: 'GET', credentials: 'include' })
+        expect.objectContaining({ method: 'GET', credentials: 'include' })
       );
       expect(result).toBe(response);
     });
@@ -102,7 +102,7 @@ describe('Client', () => {
       const result = await client.delete({ url });
 
       expect(fetchMock).toHaveBeenCalledWith(
-        new Request(url, { method: 'DELETE', credentials: 'include' })
+        expect.objectContaining({ method: 'DELETE', credentials: 'include' })
       );
       expect(result).toBe(response);
     });

@@ -31,7 +31,6 @@ global using MongoDB.Driver;
 global using Serilog;
 global using Serilog.Formatting.Compact;
 global using Serilog.Sinks.Grafana.Loki;
-global using Serilog.Sinks.SystemConsole.Themes;
 
 global using Server.API.Authentication;
 global using Server.API.Configuration;
