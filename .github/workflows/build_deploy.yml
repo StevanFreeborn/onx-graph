@@ -47,14 +47,6 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.ACTIONS_PAT }}
-      - name: Commit version changes
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "<>"
-          git add .
-          git commit -m "chore: update client version [SKIP CI]"
-          git push
-        continue-on-error: true
       - name: Get updated version
         id: get-updated-version
         working-directory: client
