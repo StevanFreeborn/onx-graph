@@ -11,6 +11,7 @@
     "Hmac",
     "Instantiator",
     "mailhog",
+    "onxgraph",
     "Pinia",
     "Resends",
     "rushstack",

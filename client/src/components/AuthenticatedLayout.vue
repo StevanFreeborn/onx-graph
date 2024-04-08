@@ -26,4 +26,8 @@
     flex: 1;
     padding: 1rem;
   }
+
+  aside {
+    position: relative;
+  }
 </style>
