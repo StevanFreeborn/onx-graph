@@ -89,3 +89,10 @@ export const localStorageMock = {
   key: vi.fn(),
   length: 0,
 };
+
+export const mockClient = {
+  post: vi.fn(),
+  get: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
+};

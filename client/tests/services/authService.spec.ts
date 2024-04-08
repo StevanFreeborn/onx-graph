@@ -1,15 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthService, UserNotVerifiedError } from '../../src/services/authService';
+import { mockClient } from '../testUtils';
 
 describe('AuthService', () => {
   let authService: AuthService;
-
-  const mockClient = {
-    post: vi.fn(),
-    get: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-  };
 
   beforeEach(() => {
     authService = new AuthService(mockClient);
