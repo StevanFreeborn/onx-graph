@@ -26,5 +26,8 @@ class AddGraphDtoValidator : AbstractValidator<AddGraphDto>
 record AddGraphRequest(
   HttpContext HttpContext,
   [FromBody] AddGraphDto Dto,
-  [FromServices] IValidator<AddGraphDto> Validator
+  [FromServices] IValidator<AddGraphDto> Validator,
+  [FromServices] IGraphService GraphService,
+  [FromServices] IUserService UserService,
+  [FromServices] IEncryptionService EncryptionService
 );

@@ -11,6 +11,9 @@ static class GraphsRoutes
       .RequireAuthorization()
       .Produces((int)HttpStatusCode.Created)
       .Produces((int)HttpStatusCode.Unauthorized)
+      .ProducesValidationProblem()
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
       .WithName("AddGraph")
       .WithDescription("Adds a graph");
 

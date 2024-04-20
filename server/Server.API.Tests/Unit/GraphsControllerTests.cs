@@ -5,19 +5,25 @@ namespace Server.API.Tests.Unit;
 
 public class GraphsControllerTests
 {
-  private readonly Mock<HttpContext> _context = new();
-  private readonly Mock<IValidator<AddGraphDto>> _addGraphDtoValidator = new();
+  private readonly Mock<HttpContext> _contextMock = new();
+  private readonly Mock<IValidator<AddGraphDto>> _addGraphDtoValidatorMock = new();
+  private readonly Mock<IGraphService> _graphServiceMock = new();
+  private readonly Mock<IUserService> _userServiceMock = new();
+  private readonly Mock<IEncryptionService> _encryptionServiceMock = new();
 
   private AddGraphRequest CreateAddGraphRequest(AddGraphDto dto) => new(
-    _context.Object,
+    _contextMock.Object,
     dto,
-    _addGraphDtoValidator.Object
+    _addGraphDtoValidatorMock.Object,
+    _graphServiceMock.Object,
+    _userServiceMock.Object,
+    _encryptionServiceMock.Object
   );
 
   [Fact]
   public async Task AddGraph_WhenCalledByUnauthenticatedUser_ItShouldReturn401StatusCodeWithProblemDetails()
   {
-    _context
+    _contextMock
       .Setup(c => c.User)
       .Returns(new ClaimsPrincipal());
 
@@ -43,7 +49,7 @@ public class GraphsControllerTests
 
     var (_, user) = FakeDataFactory.TestUser.Generate();
 
-    _context
+    _contextMock
       .Setup(c => c.User)
       .Returns(new ClaimsPrincipal(new ClaimsIdentity(
       [
@@ -58,7 +64,7 @@ public class GraphsControllerTests
       }
     );
 
-    _addGraphDtoValidator
+    _addGraphDtoValidatorMock
       .Setup(v => v.ValidateAsync(It.IsAny<AddGraphDto>(), default))
       .ReturnsAsync(validationResult);
 
@@ -94,7 +100,7 @@ public class GraphsControllerTests
 
     var (_, user) = FakeDataFactory.TestUser.Generate();
 
-    _context
+    _contextMock
       .Setup(c => c.User)
       .Returns(new ClaimsPrincipal(new ClaimsIdentity(
       [
@@ -111,7 +117,7 @@ public class GraphsControllerTests
       }
     );
 
-    _addGraphDtoValidator
+    _addGraphDtoValidatorMock
       .Setup(v => v.ValidateAsync(It.IsAny<AddGraphDto>(), default))
       .ReturnsAsync(validationResult);
 
@@ -137,5 +143,120 @@ public class GraphsControllerTests
     validationProblemDetails?.Errors[expectedApiKeyKey]
       .Should()
       .Contain(expectedApiKeyErrorMessage);
+  }
+
+  [Fact]
+  public async Task AddGraph_WhenCalledWithNameAndApiKeyButUserNotFound_ItShouldReturn404StatusCodeWithProblemDetails()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    _contextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal(new ClaimsIdentity(
+      [
+        new Claim(ClaimTypes.NameIdentifier, user.Id)
+      ])));
+
+    var dto = new AddGraphDto("Test Graph", "Test Api Key");
+
+    _addGraphDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<AddGraphDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    var getUserResult = Result.Fail<User>(new UserDoesNotExistError(user.Id));
+
+    _userServiceMock
+      .Setup(s => s.GetUserByIdAsync(user.Id))
+      .ReturnsAsync(getUserResult);
+
+    var request = CreateAddGraphRequest(dto);
+
+    var result = await GraphsController.AddGraph(request);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be(StatusCodes.Status404NotFound);
+
+    var problemDetails = result.As<ProblemHttpResult>().ProblemDetails;
+
+    problemDetails?.Extensions
+      .Should()
+      .ContainKey("Errors");
+
+    problemDetails?.Extensions["Errors"]
+      .Should()
+      .BeEquivalentTo(getUserResult.Errors);
+  }
+
+  [Fact]
+  public async Task AddGraph_WhenCalledWithNameAndApiKey_ItShouldReturn201StatusCodeWithGraphDto()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    _contextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal(new ClaimsIdentity(
+      [
+        new Claim(ClaimTypes.NameIdentifier, user.Id)
+      ])));
+
+    var apiKey = "Test Api Key";
+    var encryptedApiKey = "Encrypted Test Api Key";
+
+    var dto = new AddGraphDto("Test Graph", apiKey);
+
+    var validationResult = new ValidationResult();
+
+    _addGraphDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<AddGraphDto>(), default))
+      .ReturnsAsync(validationResult);
+
+    var createdGraph = new Graph(dto) { Id = Guid.NewGuid().ToString() };
+
+    _userServiceMock
+      .Setup(s => s.GetUserByIdAsync(user.Id))
+      .ReturnsAsync(Result.Ok(user));
+
+    _encryptionServiceMock
+      .Setup(s => s.EncryptForUser(apiKey, user))
+      .ReturnsAsync(encryptedApiKey);
+
+    _graphServiceMock
+      .Setup(s => s.AddGraph(It.IsAny<Graph>()))
+      .ReturnsAsync(Result.Ok(createdGraph));
+
+    var request = CreateAddGraphRequest(dto);
+
+    var result = await GraphsController.AddGraph(request);
+
+    result.Should()
+      .BeOfType<Created<AddGraphResponse>>();
+
+    result.As<Created<AddGraphResponse>>()
+      .StatusCode
+      .Should()
+      .Be(StatusCodes.Status201Created);
+
+    result.As<Created<AddGraphResponse>>()
+      .Value
+      .Should()
+      .BeEquivalentTo(new AddGraphResponse(createdGraph.Id));
+
+    _graphServiceMock
+      .Verify(
+        s =>
+          s.AddGraph(
+            It.Is<Graph>(
+              g =>
+                g.Name == dto.Name &&
+                g.ApiKey == encryptedApiKey
+            )
+          ),
+        Times.Once
+      );
   }
 }
