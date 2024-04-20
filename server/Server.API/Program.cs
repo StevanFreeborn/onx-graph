@@ -166,6 +166,10 @@ try
   builder.Services.AddScoped<IEmailService, DotNetEmailService>();
 
 
+  // add encryption service
+  builder.Services.ConfigureOptions<EncryptionOptionsSetup>();
+  builder.Services.AddScoped<IEncryptionService, EncryptionService>();
+
   // add rate limiting and whitelist client origin
   builder.Services.AddRateLimiter(options =>
   {
@@ -258,6 +262,7 @@ try
   // run the app
   Log.Information("Running the application");
 
+  await app.RunMigrations();
   app.Run();
 
   Log.Information("Shutting down the application");

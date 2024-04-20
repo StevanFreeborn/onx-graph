@@ -82,6 +82,7 @@ services:
       - SmtpOptions__SenderEmail=${SmtpOptions__SenderEmail}
       - SmtpOptions__SenderPassword=${SmtpOptions__SenderPassword}
       - LOKI_URL=${LOKI_URL}
+      - EncryptionOptions__Key=${EncryptionOptions__Key}
   client:
     container_name: vue-client-production
     image: stevanfreeborn/onx-graph-client:${CLIENT_VERSION}

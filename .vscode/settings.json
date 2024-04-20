@@ -8,6 +8,8 @@
     "composables",
     "Dapws",
     "dbcontext",
+    "decryptor",
+    "Encryptor",
     "Hmac",
     "Instantiator",
     "mailhog",

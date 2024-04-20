@@ -35,9 +35,11 @@ global using Serilog.Sinks.Grafana.Loki;
 global using Server.API.Authentication;
 global using Server.API.Configuration;
 global using Server.API.Email;
+global using Server.API.Encryption;
 global using Server.API.Graphs;
 global using Server.API.Identity;
 global using Server.API.Middleware;
+global using Server.API.Migrations;
 global using Server.API.Persistence.Mongo;
 global using Server.API.Swagger;
 
