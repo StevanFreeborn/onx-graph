@@ -6,6 +6,7 @@ public class GraphsControllerTests
 
   private AddGraphRequest CreateAddGraphRequest() => new(_context.Object);
 
+  [Fact]
   public async Task AddGraph_WhenCalledByUnauthenticatedUser_ItShouldReturn401StatusCodeWithProblemDetails()
   {
     var request = CreateAddGraphRequest();
