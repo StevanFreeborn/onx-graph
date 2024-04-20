@@ -1,7 +1,15 @@
 namespace Server.API.Identity;
 
+/// <summary>
+/// Controller for handling user requests.
+/// </summary>
 static class UsersController
 {
+  /// <summary>
+  /// Get the current user.
+  /// </summary>
+  /// <param name="req">The request as a <see cref="GetUserRequest"/>.</param>
+  /// <returns>A <see cref="Task"/> of <see cref="IResult"/>.</returns>
   public static async Task<IResult> GetUser([AsParameters] GetUserRequest req)
   {
     var userId = req.Context.GetUserId();
