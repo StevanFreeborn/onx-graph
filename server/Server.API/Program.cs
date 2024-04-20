@@ -170,6 +170,10 @@ try
   builder.Services.ConfigureOptions<EncryptionOptionsSetup>();
   builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 
+
+  // add graph service
+  builder.Services.AddScoped<IValidator<AddGraphDto>, AddGraphDtoValidator>();
+
   // add rate limiting and whitelist client origin
   builder.Services.AddRateLimiter(options =>
   {

@@ -2,15 +2,22 @@ namespace Server.API.Graphs;
 
 static class GraphsController
 {
-  public static Task<IResult> AddGraph(AddGraphRequest request)
+  public static async Task<IResult> AddGraph([AsParameters] AddGraphRequest request)
   {
     var userId = request.HttpContext.GetUserId();
 
     if (userId is null)
     {
-      return Task.FromResult(Results.Unauthorized());
+      return Results.Unauthorized();
     }
 
-    return Task.FromResult(Results.Created());
+    var validationResult = await request.Validator.ValidateAsync(request.Dto);
+
+    if (validationResult.IsValid is false)
+    {
+      return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
+    return Results.Created();
   }
 }

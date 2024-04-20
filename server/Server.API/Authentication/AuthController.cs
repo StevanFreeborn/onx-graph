@@ -14,7 +14,7 @@ static class AuthController
   {
     var validationResult = await req.Validator.ValidateAsync(req.Dto);
 
-    if (validationResult.IsValid == false)
+    if (validationResult.IsValid is false)
     {
       return Results.ValidationProblem(validationResult.ToDictionary());
     }
@@ -69,7 +69,7 @@ static class AuthController
   {
     var validationResult = await req.Validator.ValidateAsync(req.Dto);
 
-    if (validationResult.IsValid == false)
+    if (validationResult.IsValid is false)
     {
       return Results.ValidationProblem(validationResult.ToDictionary());
     }
@@ -127,7 +127,7 @@ static class AuthController
 
     var refreshToken = req.Context.Request.GetRefreshTokenCookie();
 
-    if (string.IsNullOrWhiteSpace(refreshToken) == false)
+    if (string.IsNullOrWhiteSpace(refreshToken) is false)
     {
       await req.TokenService.RevokeRefreshTokenAsync(userId, refreshToken);
       await req.TokenService.RemoveAllInvalidRefreshTokensAsync(userId);
@@ -177,7 +177,7 @@ static class AuthController
   {
     var validationResult = await req.Validator.ValidateAsync(req.Dto);
 
-    if (validationResult.IsValid == false)
+    if (validationResult.IsValid is false)
     {
       return Results.ValidationProblem(validationResult.ToDictionary());
     }
@@ -251,7 +251,7 @@ static class AuthController
   {
     var validationResult = await req.Validator.ValidateAsync(req.Dto);
 
-    if (validationResult.IsValid == false)
+    if (validationResult.IsValid is false)
     {
       return Results.ValidationProblem(validationResult.ToDictionary());
     }
