@@ -9,6 +9,10 @@ public class GraphsControllerTests
   [Fact]
   public async Task AddGraph_WhenCalledByUnauthenticatedUser_ItShouldReturn401StatusCodeWithProblemDetails()
   {
+    _context
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal());
+
     var request = CreateAddGraphRequest();
 
     var result = await GraphsController.AddGraph(request);
