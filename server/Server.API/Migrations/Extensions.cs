@@ -1,5 +1,6 @@
 namespace Server.API.Migrations;
 
+[ExcludeFromCodeCoverage]
 static class WebApplicationExtensions
 {
   internal static async Task RunMigrations(this WebApplication app)
