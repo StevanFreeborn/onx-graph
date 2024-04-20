@@ -37,6 +37,7 @@ static class GraphsController
     var encryptedApiKey = await request.EncryptionService.EncryptForUser(graph.ApiKey, getUserResult.Value);
     graph.ApiKey = encryptedApiKey;
 
+    // TODO: Persist graph to database
     var addGraphResult = await request.GraphService.AddGraph(graph);
 
     if (addGraphResult.IsFailed)
