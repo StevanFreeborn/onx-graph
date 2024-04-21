@@ -193,6 +193,57 @@ public class GraphsControllerTests
   }
 
   [Fact]
+  public async Task AddGraph_WhenCalledWithNameAndApiKeyButAddGraphFailsBecauseNameAlreadyExists_ItShouldReturn409StatusCodeWithProblemDetails()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+
+    _contextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal(new ClaimsIdentity(
+      [
+        new Claim(ClaimTypes.NameIdentifier, user.Id)
+      ])));
+
+    var dto = new AddGraphDto("Test Graph", "Test Api Key");
+
+    _addGraphDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<AddGraphDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    _userServiceMock
+      .Setup(s => s.GetUserByIdAsync(user.Id))
+      .ReturnsAsync(Result.Ok(user));
+
+    var addGraphResult = Result.Fail<Graph>(new GraphAlreadyExistsError(dto.Name));
+
+    _graphServiceMock
+      .Setup(s => s.AddGraph(It.IsAny<Graph>()))
+      .ReturnsAsync(addGraphResult);
+
+    var request = CreateAddGraphRequest(dto);
+
+    var result = await GraphsController.AddGraph(request);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be(StatusCodes.Status409Conflict);
+
+    var problemDetails = result.As<ProblemHttpResult>().ProblemDetails;
+
+    problemDetails?.Extensions
+      .Should()
+      .ContainKey("Errors");
+
+    problemDetails?.Extensions["Errors"]
+      .Should()
+      .BeEquivalentTo(addGraphResult.Errors);
+  }
+
+  [Fact]
   public async Task AddGraph_WhenCalledWithNameAndApiKey_ItShouldReturn201StatusCodeWithGraphDto()
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
@@ -215,14 +266,14 @@ public class GraphsControllerTests
       .Setup(v => v.ValidateAsync(It.IsAny<AddGraphDto>(), default))
       .ReturnsAsync(validationResult);
 
-    var createdGraph = new Graph(dto) { Id = Guid.NewGuid().ToString() };
+    var createdGraph = new Graph(dto, user) { Id = Guid.NewGuid().ToString() };
 
     _userServiceMock
       .Setup(s => s.GetUserByIdAsync(user.Id))
       .ReturnsAsync(Result.Ok(user));
 
     _encryptionServiceMock
-      .Setup(s => s.EncryptForUser(apiKey, user))
+      .Setup(s => s.EncryptForUserAsync(apiKey, user))
       .ReturnsAsync(encryptedApiKey);
 
     _graphServiceMock

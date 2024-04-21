@@ -28,9 +28,17 @@ public partial class AuthControllerTests(TestServerFactory serverFactory) : Inte
       .Should()
       .NotBeNull();
 
-    registerResponseBody?.Id
+    registerResponseBody!.Id
       .Should()
       .NotBeNullOrEmpty();
+
+    var createdUser = await Context.Users
+      .Find(u => u.Id == registerResponseBody.Id)
+      .SingleOrDefaultAsync();
+
+    createdUser.Should().NotBeNull();
+    createdUser.Password.Should().NotBe(password);
+    createdUser.EncryptionKey.Should().NotBeNullOrEmpty();
   }
 
   [GeneratedRegex(@"\/masses\/verify-account\?t=[a-zA-Z0-9]+")]

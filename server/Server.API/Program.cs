@@ -168,11 +168,13 @@ try
 
   // add encryption service
   builder.Services.ConfigureOptions<EncryptionOptionsSetup>();
-  builder.Services.AddScoped<IEncryptionService, EncryptionService>();
+  builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
 
 
   // add graph service
   builder.Services.AddScoped<IValidator<AddGraphDto>, AddGraphDtoValidator>();
+  builder.Services.AddScoped<IGraphRepository, MongoGraphRepository>();
+  builder.Services.AddScoped<IGraphService, GraphService>();
 
   // add rate limiting and whitelist client origin
   builder.Services.AddRateLimiter(options =>

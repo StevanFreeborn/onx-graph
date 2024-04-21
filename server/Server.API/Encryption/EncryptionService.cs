@@ -39,19 +39,19 @@ class EncryptionService(IOptions<EncryptionOptions> options) : IEncryptionServic
     return await streamReader.ReadToEndAsync();
   }
 
-  public async Task<string> Encrypt(string plainText) =>
+  public async Task<string> EncryptAsync(string plainText) =>
     await EncryptCore(plainText, _options.Value.Key);
 
-  public async Task<string> Decrypt(string cipherText) =>
+  public async Task<string> DecryptAsync(string cipherText) =>
     await DecryptCore(cipherText, _options.Value.Key);
 
-  public async Task<string> EncryptForUser(string plainText, User user)
+  public async Task<string> EncryptForUserAsync(string plainText, User user)
   {
     var decryptedUserKey = await DecryptCore(user.EncryptionKey, _options.Value.Key);
     return await EncryptCore(plainText, decryptedUserKey);
   }
 
-  public async Task<string> DecryptForUser(string cipherText, User user)
+  public async Task<string> DecryptForUserAsync(string cipherText, User user)
   {
     var decryptedUserKey = await DecryptCore(user.EncryptionKey, _options.Value.Key);
     return await DecryptCore(cipherText, decryptedUserKey);

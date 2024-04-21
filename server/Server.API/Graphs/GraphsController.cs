@@ -33,18 +33,17 @@ static class GraphsController
       );
     }
 
-    var graph = new Graph(request.Dto);
-    var encryptedApiKey = await request.EncryptionService.EncryptForUser(graph.ApiKey, getUserResult.Value);
+    var graph = new Graph(request.Dto, getUserResult.Value);
+    var encryptedApiKey = await request.EncryptionService.EncryptForUserAsync(graph.ApiKey, getUserResult.Value);
     graph.ApiKey = encryptedApiKey;
 
-    // TODO: Persist graph to database
     var addGraphResult = await request.GraphService.AddGraph(graph);
 
-    if (addGraphResult.IsFailed)
+    if (addGraphResult.IsFailed && addGraphResult.Errors.Any(e => e is GraphAlreadyExistsError))
     {
       return Results.Problem(
         title: problemTitle,
-        statusCode: StatusCodes.Status500InternalServerError,
+        statusCode: StatusCodes.Status409Conflict,
         detail: problemDetail,
         extensions: new Dictionary<string, object?> { { "Errors", addGraphResult.Errors } }
       );

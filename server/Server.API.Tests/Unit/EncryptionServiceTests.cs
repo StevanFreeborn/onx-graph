@@ -21,7 +21,7 @@ public class EncryptionServiceTests
   {
     var data = "Hello, World!";
 
-    var encryptedData = await _encryptionService.Encrypt(data);
+    var encryptedData = await _encryptionService.EncryptAsync(data);
 
     encryptedData.Should().NotBeNullOrEmpty();
     encryptedData.Should().NotBe(data);
@@ -31,9 +31,9 @@ public class EncryptionServiceTests
   public async Task Decrypt_WhenCalledWithEncryptedData_ReturnsDecryptedData()
   {
     var data = "Hello, World!";
-    var encryptedData = await _encryptionService.Encrypt(data);
+    var encryptedData = await _encryptionService.EncryptAsync(data);
 
-    var decryptedData = await _encryptionService.Decrypt(encryptedData);
+    var decryptedData = await _encryptionService.DecryptAsync(encryptedData);
 
     data.Should().Be(decryptedData);
   }
@@ -42,10 +42,10 @@ public class EncryptionServiceTests
   public async Task EncryptForUser_WhenCalledWithPlainTextAndUser_ReturnsEncryptedData()
   {
     var userEncryptionKey = Encoding.UTF8.GetString(new byte[16]);
-    var encryptedUserKey = await _encryptionService.Encrypt(userEncryptionKey);
+    var encryptedUserKey = await _encryptionService.EncryptAsync(userEncryptionKey);
     var user = new User { EncryptionKey = encryptedUserKey };
     var data = "Hello, World!";
-    var encryptedData = await _encryptionService.EncryptForUser(data, user);
+    var encryptedData = await _encryptionService.EncryptForUserAsync(data, user);
 
     encryptedData.Should().NotBeNullOrEmpty();
     encryptedData.Should().NotBe(data);
@@ -55,12 +55,12 @@ public class EncryptionServiceTests
   public async Task DecryptForUser_WhenCalledWithEncryptedDataAndUser_ReturnsDecryptedData()
   {
     var userEncryptionKey = Encoding.UTF8.GetString(new byte[16]);
-    var encryptedUserKey = await _encryptionService.Encrypt(userEncryptionKey);
+    var encryptedUserKey = await _encryptionService.EncryptAsync(userEncryptionKey);
     var user = new User { EncryptionKey = encryptedUserKey };
     var data = "Hello, World!";
-    var encryptedDataForUser = await _encryptionService.EncryptForUser(data, user);
+    var encryptedDataForUser = await _encryptionService.EncryptForUserAsync(data, user);
 
-    var decryptedData = await _encryptionService.DecryptForUser(encryptedDataForUser, user);
+    var decryptedData = await _encryptionService.DecryptForUserAsync(encryptedDataForUser, user);
 
     decryptedData.Should().Be(data);
   }

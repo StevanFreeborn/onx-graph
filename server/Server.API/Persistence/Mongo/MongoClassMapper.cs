@@ -39,5 +39,17 @@ public static class MongoClassMapper
         cm.MapProperty(rt => rt.UpdatedAt).SetElementName("updatedAt");
       }
     );
+
+    BsonClassMap.TryRegisterClassMap<Graph>(
+      cm =>
+      {
+        cm.AutoMap();
+        cm.MapIdProperty(g => g.Id).SetIdGenerator(StringObjectIdGenerator.Instance);
+        cm.MapProperty(g => g.Name).SetElementName("name");
+        cm.MapProperty(g => g.ApiKey).SetElementName("apiKey");
+        cm.MapProperty(g => g.CreatedAt).SetElementName("createdAt");
+        cm.MapProperty(g => g.UpdatedAt).SetElementName("updatedAt");
+      }
+    );
   }
 }

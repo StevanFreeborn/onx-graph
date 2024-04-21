@@ -1,10 +1,22 @@
 namespace Server.API.Graphs;
 
-class Graph(string name, string apiKey)
+class Graph(string name, string apiKey, User user)
 {
   public string Id { get; set; } = string.Empty;
+  public string UserId { get; set; } = user.Id;
   public string Name { get; set; } = name;
   public string ApiKey { get; set; } = apiKey;
+  public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+  public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+  public GraphStatus Status { get; set; } = GraphStatus.NotBuilt;
 
-  public Graph(AddGraphDto dto) : this(dto.Name, dto.ApiKey) { }
+  public Graph(AddGraphDto dto, User user) : this(dto.Name, dto.ApiKey, user) { }
+  internal Graph() : this(string.Empty, string.Empty, new User()) { }
+}
+
+enum GraphStatus
+{
+  NotBuilt,
+  Building,
+  Built,
 }

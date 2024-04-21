@@ -34,7 +34,7 @@ static class WebApplicationExtensions
       foreach (var user in usersWithoutEncryptionKey)
       {
         var encryptionKey = encryptionService.GenerateKey();
-        var encryptedKey = await encryptionService.Encrypt(encryptionKey);
+        var encryptedKey = await encryptionService.EncryptAsync(encryptionKey);
         user.EncryptionKey = encryptedKey;
 
         await context.Users.ReplaceOneAsync(u => u.Id == user.Id, user);

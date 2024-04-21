@@ -89,7 +89,7 @@ class UserService(
     user.Password = passwordHash;
 
     var encryptionKey = _encryptionService.GenerateKey();
-    var encryptedKey = await _encryptionService.Encrypt(encryptionKey);
+    var encryptedKey = await _encryptionService.EncryptAsync(encryptionKey);
     user.EncryptionKey = encryptedKey;
 
     var createdUser = await _userRepository.CreateUserAsync(user);

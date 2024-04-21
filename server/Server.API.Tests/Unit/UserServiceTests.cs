@@ -64,7 +64,7 @@ public class UserServiceTests
       .Returns(plainTextKey);
 
     _encryptionServiceMock
-      .Setup(e => e.Encrypt(plainTextKey))
+      .Setup(e => e.EncryptAsync(plainTextKey))
       .ReturnsAsync(encryptedKey);
 
     _userRepositoryMock
