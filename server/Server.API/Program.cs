@@ -166,6 +166,16 @@ try
   builder.Services.AddScoped<IEmailService, DotNetEmailService>();
 
 
+  // add encryption service
+  builder.Services.ConfigureOptions<EncryptionOptionsSetup>();
+  builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
+
+
+  // add graph service
+  builder.Services.AddScoped<IValidator<AddGraphDto>, AddGraphDtoValidator>();
+  builder.Services.AddScoped<IGraphRepository, MongoGraphRepository>();
+  builder.Services.AddScoped<IGraphService, GraphService>();
+
   // add rate limiting and whitelist client origin
   builder.Services.AddRateLimiter(options =>
   {
@@ -240,6 +250,11 @@ try
     .WithApiVersionSet(versionSet)
     .MapToApiVersion(versionOne);
 
+  app
+    .MapVersionOneGraphsEndpoints()
+    .WithApiVersionSet(versionSet)
+    .MapToApiVersion(versionOne);
+
 
   // use cors
   app.UseCors("CORSpolicy");
@@ -253,6 +268,7 @@ try
   // run the app
   Log.Information("Running the application");
 
+  await app.RunMigrations();
   app.Run();
 
   Log.Information("Shutting down the application");

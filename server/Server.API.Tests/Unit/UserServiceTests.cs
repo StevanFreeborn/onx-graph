@@ -5,6 +5,7 @@ public class UserServiceTests
   private readonly Mock<ITokenService> _tokenServiceMock = new();
   private readonly Mock<IUserRepository> _userRepositoryMock = new();
   private readonly Mock<ILogger<UserService>> _loggerMock = new();
+  private readonly Mock<IEncryptionService> _encryptionServiceMock = new();
   private readonly UserService _sut;
 
   public UserServiceTests()
@@ -12,7 +13,8 @@ public class UserServiceTests
     _sut = new UserService(
       _tokenServiceMock.Object,
       _userRepositoryMock.Object,
-      _loggerMock.Object
+      _loggerMock.Object,
+      _encryptionServiceMock.Object
     );
   }
 
@@ -31,20 +33,22 @@ public class UserServiceTests
   }
 
   [Fact]
-  public async Task RegisterUserAsync_WhenUserDoesNotExist_ItShouldCreateNewUserWithUsernameAndHashedPasswordReturnUserId()
+  public async Task RegisterUserAsync_WhenUserDoesNotExist_ItShouldCreateNewUserWithUsernameHashedPasswordAndEncryptionKeyThenReturnUserId()
   {
+    var plainTextKey = "test123";
+    var encryptedKey = "EncryptedKey";
+    var unHashedPassword = "@Password1234";
+
     var newUser = new User
     {
       Email = "test@test.com",
-      Password = "@Password1234",
+      Password = unHashedPassword,
     };
 
     var createdUser = new User
     {
       Id = ObjectId.GenerateNewId().ToString(),
       Email = newUser.Email,
-      Username = "test123",
-      Password = "HashedPassword",
     };
 
     _userRepositoryMock
@@ -55,6 +59,14 @@ public class UserServiceTests
       .Setup(u => u.GetUserByUsernameAsync(It.IsAny<string>()))
       .ReturnsAsync(null as User);
 
+    _encryptionServiceMock
+      .Setup(e => e.GenerateKey())
+      .Returns(plainTextKey);
+
+    _encryptionServiceMock
+      .Setup(e => e.EncryptAsync(plainTextKey))
+      .ReturnsAsync(encryptedKey);
+
     _userRepositoryMock
       .Setup(u => u.CreateUserAsync(It.IsAny<User>()))
       .ReturnsAsync(createdUser);
@@ -64,6 +76,19 @@ public class UserServiceTests
     result.IsSuccess.Should().BeTrue();
     result.Value.Should().NotBeEmpty();
     result.Value.Should().Be(createdUser.Id);
+
+    _userRepositoryMock
+      .Verify(
+        u => u.CreateUserAsync(
+          It.Is<User>(
+            u =>
+              string.IsNullOrWhiteSpace(u.Username) == false &&
+              u.EncryptionKey == encryptedKey &&
+              u.Password != unHashedPassword
+          )
+        ),
+        Times.Once
+      );
   }
 
   [Fact]

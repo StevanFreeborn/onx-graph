@@ -1,4 +1,4 @@
-namespace Server.API.Tests.Unit;
+namespace Server.API.Tests.Integration;
 
 public class MongoTokenRepositoryTests : IClassFixture<TestDb>, IDisposable
 {

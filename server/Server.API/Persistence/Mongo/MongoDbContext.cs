@@ -7,6 +7,7 @@ class MongoDbContext
 {
   private const string UsersCollectionName = "users";
   private const string TokensCollectionName = "tokens";
+  private const string GraphsCollectionName = "graphs";
   private readonly MongoDbOptions _options;
 
   /// <summary>
@@ -18,6 +19,11 @@ class MongoDbContext
   /// The tokens collection
   /// </summary>
   public IMongoCollection<BaseToken> Tokens { get; init; }
+
+  /// <summary>
+  /// The graphs collection
+  /// </summary>
+  public IMongoCollection<Graph> Graphs { get; init; }
 
   /// <summary>
   /// Creates a new <see cref="MongoDbContext"/> instance
@@ -32,5 +38,6 @@ class MongoDbContext
     var database = client.GetDatabase(_options.DatabaseName);
     Users = database.GetCollection<User>(UsersCollectionName);
     Tokens = database.GetCollection<BaseToken>(TokensCollectionName);
+    Graphs = database.GetCollection<Graph>(GraphsCollectionName);
   }
 }

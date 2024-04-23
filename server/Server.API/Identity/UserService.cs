@@ -7,12 +7,14 @@ namespace Server.API.Identity;
 class UserService(
   ITokenService tokenService,
   IUserRepository userRepository,
-  ILogger<UserService> logger
+  ILogger<UserService> logger,
+  IEncryptionService encryptionService
 ) : IUserService
 {
   private readonly ITokenService _tokenService = tokenService;
   private readonly IUserRepository _userRepository = userRepository;
   private readonly ILogger<UserService> _logger = logger;
+  private readonly IEncryptionService _encryptionService = encryptionService;
 
   public async Task<Result<User>> GetUserByEmailAsync(string userEmail)
   {
@@ -86,7 +88,11 @@ class UserService(
     user.Username = username;
     user.Password = passwordHash;
 
-    User createdUser = await _userRepository.CreateUserAsync(user);
+    var encryptionKey = _encryptionService.GenerateKey();
+    var encryptedKey = await _encryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedKey;
+
+    var createdUser = await _userRepository.CreateUserAsync(user);
 
     return Result.Ok(createdUser.Id);
   }

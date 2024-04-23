@@ -104,7 +104,7 @@ public class AuthControllerTests
       .Be((int)HttpStatusCode.BadRequest);
 
     var validationProblemDetails = result.As<ProblemHttpResult>()
-      .ProblemDetails as ValidationProblemDetails;
+      .ProblemDetails as HttpValidationProblemDetails;
 
     validationProblemDetails?.Errors
       .Should()
@@ -146,7 +146,7 @@ public class AuthControllerTests
       .Be((int)HttpStatusCode.BadRequest);
 
     var validationProblemDetails = result.As<ProblemHttpResult>()
-      .ProblemDetails as ValidationProblemDetails;
+      .ProblemDetails as HttpValidationProblemDetails;
 
     validationProblemDetails?.Errors
       .Should()
@@ -369,7 +369,7 @@ public class AuthControllerTests
       .Be((int)HttpStatusCode.BadRequest);
 
     var validationProblemDetails = result.As<ProblemHttpResult>()
-      .ProblemDetails as ValidationProblemDetails;
+      .ProblemDetails as HttpValidationProblemDetails;
 
     validationProblemDetails?.Errors
       .Should()
@@ -411,7 +411,7 @@ public class AuthControllerTests
       .Be((int)HttpStatusCode.BadRequest);
 
     var validationProblemDetails = result.As<ProblemHttpResult>()
-      .ProblemDetails as ValidationProblemDetails;
+      .ProblemDetails as HttpValidationProblemDetails;
 
     validationProblemDetails?.Errors
       .Should()
@@ -453,7 +453,7 @@ public class AuthControllerTests
       .Be((int)HttpStatusCode.BadRequest);
 
     var validationProblemDetails = result.As<ProblemHttpResult>()
-      .ProblemDetails as ValidationProblemDetails;
+      .ProblemDetails as HttpValidationProblemDetails;
 
     validationProblemDetails?.Errors
       .Should()
@@ -901,7 +901,7 @@ public class AuthControllerTests
 
     var validationProblemDetails = result
       .As<ProblemHttpResult>()
-      .ProblemDetails as ValidationProblemDetails;
+      .ProblemDetails as HttpValidationProblemDetails;
 
     validationProblemDetails?.Errors
       .Should()
@@ -1145,7 +1145,7 @@ public class AuthControllerTests
 
     var validationProblemDetails = result
       .As<ProblemHttpResult>()
-      .ProblemDetails as ValidationProblemDetails;
+      .ProblemDetails as HttpValidationProblemDetails;
 
     validationProblemDetails?.Errors
       .Should()

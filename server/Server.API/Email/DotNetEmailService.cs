@@ -1,5 +1,9 @@
 namespace Server.API.Email;
 
+/// <summary>
+/// A service for sending emails using the .NET email client
+/// </summary>
+/// <inheritdoc cref="IEmailService"/>
 class DotNetEmailService(
   IOptions<SmtpOptions> smtpOptions,
   ILogger<DotNetEmailService> logger,

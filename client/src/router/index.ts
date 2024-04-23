@@ -86,7 +86,10 @@ export const routes = [
           // because at this point both the
           // refresh token and the access token
           // are not valid
-          console.error(refreshResult.err);
+          for (const error of refreshResult.val) {
+            console.error(error);
+          }
+
           userStore.logUserOut();
           return { name: 'login' };
         }
@@ -101,6 +104,11 @@ export const routes = [
         path: 'graphs',
         name: 'graphs',
         component: () => import('../views/GraphsView.vue'),
+      },
+      {
+        path: 'graphs/add',
+        name: 'add-graph',
+        component: () => import('../views/AddGraphView.vue'),
       },
       {
         path: ':pathMatch(.*)*',

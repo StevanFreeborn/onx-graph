@@ -67,6 +67,18 @@ static class FakeDataFactory
     .RuleFor(t => t.ExpiresAt, f => DateTime.UtcNow.AddMinutes(15))
     .RuleFor(t => t.Revoked, false)
     .RuleFor(t => t.TokenType, TokenType.Verification);
+
+  /// <summary>
+  /// Generates a new <see cref="Graph"/> instance
+  /// </summary>
+  internal static readonly Faker<Graph> Graph = new Faker<Graph>()
+    .CustomInstantiator(f => new Graph())
+    .RuleFor(g => g.Id, f => ObjectId.GenerateNewId().ToString())
+    .RuleFor(g => g.UserId, f => ObjectId.GenerateNewId().ToString())
+    .RuleFor(g => g.Name, f => f.Lorem.Word())
+    .RuleFor(g => g.ApiKey, f => f.Random.AlphaNumeric(32))
+    .RuleFor(g => g.CreatedAt, f => DateTime.UtcNow)
+    .RuleFor(g => g.UpdatedAt, f => DateTime.UtcNow);
 }
 
 /// <summary>
