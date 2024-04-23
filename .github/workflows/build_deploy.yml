@@ -64,6 +64,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.ACTIONS_PAT }}
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
@@ -84,6 +85,9 @@ jobs:
         working-directory: server/Server.API
         run: versionize -i --exit-insignificant-commits --commit-suffix "[skip ci]"
         continue-on-error: true
+      - name: Commit changes
+        run: |
+          git commit -a -m "chore: update version [skip ci]"
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
