@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 import { Component } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { routes } from '../src/router';
+import { GraphsServiceFactoryKey } from '../src/services/graphsService';
 import { AuthServiceFactoryKey } from './../src/services/authService';
 import { ClientFactoryKey } from './../src/services/client';
 import { UsersServiceFactoryKey } from './../src/services/usersService';
@@ -33,6 +34,9 @@ export async function customRender(component: Component, options: RenderOptions 
       create: vi.fn(),
     },
     [UsersServiceFactoryKey as symbol]: {
+      create: vi.fn(),
+    },
+    [GraphsServiceFactoryKey as symbol]: {
       create: vi.fn(),
     },
   };
