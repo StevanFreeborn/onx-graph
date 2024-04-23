@@ -4,6 +4,7 @@
   import { useMounted } from '@/composables/useMounted.js';
   import { useSubmitting } from '@/composables/useSubmitting';
   import { useUserStore } from '@/stores/userStore.js';
+  import { toTitleCase } from '@/utils';
   import { reactive } from 'vue';
   import { useRouter } from 'vue-router';
 
@@ -42,7 +43,7 @@
       const field = formState.fields[key];
 
       if (!field.value) {
-        field.errorMessage = `${key} is required.`;
+        field.errorMessage = `${toTitleCase(key)} is required.`;
         continue;
       }
 
@@ -66,7 +67,7 @@
       formState.errors.push(...addGraphResult.val.map(err => err.message));
       return;
     }
-    console.log(addGraphResult.val);
+
     setIsSubmitting(false);
     router.push(`/graphs/${addGraphResult.val.id}`);
   }

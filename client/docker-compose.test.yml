@@ -46,6 +46,7 @@ services:
       - SmtpOptions__SmtpPort=1025
       - SmtpOptions__SenderEmail=onxgraph@test.com
       - SmtpOptions__SenderPassword=
+      - EncryptionOptions__Key=CGsi1iKOFk2A4oBKVQSZJTnmKQ9xzJCA
   client:
     container_name: client-test
     build:

@@ -61,6 +61,8 @@ describe('GraphsService', () => {
     });
 
     it('should return an error if the response status is not ok', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
       mockClient.post.mockReturnValueOnce({ status: 500 });
 
       const result = await graphsService.addGraph('graph', 'key');

@@ -89,7 +89,7 @@ describe('AddGraphForm', () => {
 
     await fireEvent.click(addButton);
 
-    const errorMessage = getByText(/apikey is required/i);
+    const errorMessage = getByText(/api key is required/i);
     expect(errorMessage).toBeInTheDocument();
   });
 
@@ -114,11 +114,11 @@ describe('AddGraphForm', () => {
 
     await fireEvent.click(addButton);
 
-    expect(getByText(/apikey is required/i)).toBeInTheDocument();
+    expect(getByText(/api key is required/i)).toBeInTheDocument();
 
     await fireEvent.update(apiKeyInput, 'test');
 
-    expect(queryByText(/apikey is required/i)).not.toBeInTheDocument();
+    expect(queryByText(/api key is required/i)).not.toBeInTheDocument();
   });
 
   it('should disable the add button when the form is submitting', async () => {
