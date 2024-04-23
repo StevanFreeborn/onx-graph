@@ -14,6 +14,7 @@ on:
       - '**/*/Dockerfile'
       - '.vscode/**'
       - '.github/**'
+      - '**/*/.env.vault'
 jobs:
   version_client:
     name: Version client
