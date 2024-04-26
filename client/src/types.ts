@@ -8,7 +8,14 @@ export type Graph = {
   name: string;
   createdAt: string;
   updatedAt: string;
+  status: number;
 };
+
+export const GraphStatus = {
+  NotBuilt: 0,
+  Building: 1,
+  Built: 2,
+} as const;
 
 export type Page = {
   pageCount: number;
