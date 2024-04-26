@@ -1,5 +1,9 @@
 namespace Server.API.Graphs;
 
+/// <summary>
+/// A service for managing graphs.
+/// </summary>
+/// <inheritdoc cref="IGraphService"/>
 class GraphService(IGraphRepository graphRepository) : IGraphService
 {
   private readonly IGraphRepository _graphRepository = graphRepository;
@@ -15,5 +19,11 @@ class GraphService(IGraphRepository graphRepository) : IGraphService
 
     var createdGraph = await _graphRepository.CreateGraphAsync(graph);
     return Result.Ok(createdGraph);
+  }
+
+  public async Task<Result<Page<Graph>>> GetGraphs(int pageNumber, int pageSize, string userId)
+  {
+    var graphs = await _graphRepository.GetGraphsAsync(pageNumber, pageSize, userId);
+    return Result.Ok(graphs);
   }
 }

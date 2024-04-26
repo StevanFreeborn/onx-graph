@@ -1,7 +1,15 @@
 namespace Server.API.Graphs;
 
+/// <summary>
+/// Controller for handling graph requests
+/// </summary>
 static class GraphsController
 {
+  /// <summary>
+  /// Adds a graph
+  /// </summary>
+  /// <param name="request">The request as an <see cref="AddGraphRequest"/> instance</param>
+  /// <returns>An <see cref="Task"/> of <see cref="IResult"/></returns>
   public static async Task<IResult> AddGraph([AsParameters] AddGraphRequest request)
   {
     var userId = request.HttpContext.GetUserId();
@@ -53,5 +61,20 @@ static class GraphsController
       uri: $"/graphs/{addGraphResult.Value.Id}",
       value: new AddGraphResponse(addGraphResult.Value.Id)
     );
+  }
+
+  public static async Task<IResult> GetGraphs([AsParameters] GetGraphsRequest request)
+  {
+    var userId = request.HttpContext.GetUserId();
+
+    if (userId is null)
+    {
+      return Results.Unauthorized();
+    }
+
+    var getGraphsResult = await request.GraphService.GetGraphs(request.PageNumber, request.PageSize, userId);
+    var getGraphsResponse = new GetGraphsResponse(getGraphsResult.Value);
+
+    return Results.Ok(getGraphsResponse);
   }
 }

@@ -19,4 +19,13 @@ interface IGraphRepository
   /// <param name="userId">The id of the user who owns the graph.</param>
   /// <returns>The graph as a <see cref="Graph"/> instance.</returns>
   Task<Graph?> GetGraphByNameAsync(string name, string userId);
+
+  /// <summary>
+  /// Gets a page of graphs.
+  /// </summary>
+  /// <param name="pageNumber">The page number to get.</param>
+  /// <param name="pageSize">The number of items per page.</param>
+  /// <param name="userId">The id of the user who owns the graphs.</param>
+  /// <returns>A page of graphs as a <see cref="Page{Graph}"/> instance.</returns>
+  Task<Page<Graph>> GetGraphsAsync(int pageNumber, int pageSize, string userId);
 }

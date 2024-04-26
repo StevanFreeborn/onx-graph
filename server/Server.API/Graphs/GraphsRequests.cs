@@ -31,3 +31,13 @@ record AddGraphRequest(
   [FromServices] IUserService UserService,
   [FromServices] IEncryptionService EncryptionService
 );
+
+/// <summary>
+/// Represents a request to get graphs
+/// </summary>
+record GetGraphsRequest(
+  HttpContext HttpContext,
+  [FromQuery] int PageNumber,
+  [FromQuery] int PageSize,
+  [FromServices] IGraphService GraphService
+);
