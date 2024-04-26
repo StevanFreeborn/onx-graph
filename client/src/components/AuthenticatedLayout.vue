@@ -25,6 +25,15 @@
     flex-direction: column;
     flex: 1;
     padding: 1rem;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-background-mute) var(--color-background);
+  }
+
+  @media screen and (max-width: 768px) {
+    main {
+      padding-right: 2rem;
+    }
   }
 
   aside {
