@@ -6,7 +6,7 @@
   import isEmail from 'validator/es/lib/isEmail';
   import { reactive } from 'vue';
   import { useRouter } from 'vue-router';
-  import { type FormFieldState } from './types';
+  import { type FormFieldState } from '../types';
 
   type RegisterFormState = {
     fields: Record<'email' | 'password' | 'confirmPassword', FormFieldState>;

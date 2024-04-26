@@ -1,11 +1,11 @@
 <script setup lang="ts">
-  import { useAuthService } from '@/composables/useAuthService.js';
-  import { useMounted } from '@/composables/useMounted.js';
-  import { useSubmitting } from '@/composables/useSubmitting.js';
-  import { toTitleCase } from '@/utils/index.js';
+  import { useAuthService } from '@/composables/useAuthService';
+  import { useMounted } from '@/composables/useMounted';
+  import { useSubmitting } from '@/composables/useSubmitting';
+  import { toTitleCase } from '@/utils/index';
   import { isEmail } from 'validator';
   import { reactive, ref } from 'vue';
-  import type { FormFieldState } from './types.js';
+  import type { FormFieldState } from '../types';
 
   type RegisterFormState = {
     fields: Record<'email', FormFieldState>;

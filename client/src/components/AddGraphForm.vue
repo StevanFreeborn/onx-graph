@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type { FormFieldState } from '@/components/types';
+  import type { FormFieldState } from '@/types';
   import { useGraphsService } from '@/composables/useGraphsService.js';
   import { useMounted } from '@/composables/useMounted.js';
   import { useSubmitting } from '@/composables/useSubmitting';
