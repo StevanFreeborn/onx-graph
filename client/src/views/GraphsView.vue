@@ -1,23 +1,80 @@
 <script setup lang="ts">
-  const graphs = [] as { id: number; name: string }[];
+  import DataPager from '@/components/DataPager.vue';
+  import GraphCard from '@/components/GraphCard.vue';
+  import { useGraphsService } from '@/composables/useGraphsService';
+  import { useUserStore } from '@/stores/userStore';
+  import type { Graph, PageWithData } from '@/types';
+  import { onMounted, ref } from 'vue';
+
+  const graphsPage = ref<PageWithData<Graph> | null>(null);
+
+  const userStore = useUserStore();
+  const graphService = useGraphsService(userStore);
+
+  async function getGraphs(pageNumber = 1) {
+    const graphsResult = await graphService.getGraphs(pageNumber);
+
+    if (graphsResult.err) {
+      for (const error of graphsResult.val) {
+        console.error(error);
+      }
+      return;
+    }
+
+    graphsPage.value = graphsResult.val;
+  }
+
+  onMounted(async () => await getGraphs());
+
+  async function handlePreviousPage() {
+    console.log('Previous page');
+    if (graphsPage.value === null || graphsPage.value.pageNumber === 1) {
+      return;
+    }
+
+    await getGraphs(graphsPage.value.pageNumber - 1);
+  }
+
+  async function handleNextPage() {
+    console.log('Next page');
+
+    if (graphsPage.value === null || graphsPage.value.pageNumber === graphsPage.value.totalPages) {
+      return;
+    }
+
+    await getGraphs(graphsPage.value.pageNumber + 1);
+  }
 </script>
 
 <template>
   <h2>Graphs</h2>
-  <div v-if="graphs.length === 0" class="placeholder-container">
+  <div v-if="graphsPage === null">
+    <p>Loading...</p>
+  </div>
+  <div v-else-if="graphsPage.pageCount === 0" class="placeholder-container">
     <p>You don't have any graphs yet. Click the button below to add a graph.</p>
     <RouterLink to="/graphs/add" class="button">Add Graph</RouterLink>
   </div>
-  <div v-else>
+  <div v-else class="graphs-container">
     <ul>
-      <li v-for="graph in graphs" :key="graph.id">
-        <RouterLink :to="`/graphs/${graph.id}`">{{ graph.name }}</RouterLink>
+      <li v-for="graph in graphsPage.data" :key="graph.id">
+        <GraphCard :graph="graph" />
       </li>
     </ul>
   </div>
+  <DataPager
+    v-if="graphsPage !== null && graphsPage.pageCount !== 0"
+    @previous="handlePreviousPage"
+    @next="handleNextPage"
+    :page="graphsPage"
+  />
 </template>
 
 <style scoped>
+  h2 {
+    margin-bottom: 1rem;
+  }
+
   .placeholder-container {
     display: flex;
     flex-direction: column;
@@ -43,6 +100,21 @@
 
     & .button:hover {
       color: var(--orange);
+    }
+  }
+
+  .graphs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+    margin-bottom: 1rem;
+
+    & ul {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
     }
   }
 </style>
