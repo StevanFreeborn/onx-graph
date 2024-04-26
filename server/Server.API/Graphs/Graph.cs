@@ -1,5 +1,8 @@
 namespace Server.API.Graphs;
 
+/// <summary>
+/// Represents a graph.
+/// </summary>
 class Graph(string name, string apiKey, User user)
 {
   public string Id { get; set; } = string.Empty;
@@ -14,6 +17,9 @@ class Graph(string name, string apiKey, User user)
   internal Graph() : this(string.Empty, string.Empty, new User()) { }
 }
 
+/// <summary>
+/// Represents the status of a graph.
+/// </summary>
 enum GraphStatus
 {
   NotBuilt,
