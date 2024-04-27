@@ -45,6 +45,7 @@ public static class MongoClassMapper
       {
         cm.AutoMap();
         cm.MapIdProperty(g => g.Id).SetIdGenerator(StringObjectIdGenerator.Instance);
+        cm.MapProperty(g => g.UserId).SetElementName("userId");
         cm.MapProperty(g => g.Name).SetElementName("name");
         cm.MapProperty(g => g.ApiKey).SetElementName("apiKey");
         cm.MapProperty(g => g.CreatedAt).SetElementName("createdAt");
