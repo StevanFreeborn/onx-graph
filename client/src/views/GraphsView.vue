@@ -23,9 +23,7 @@
       return;
     }
 
-    setTimeout(() => {
-      graphsPage.value = graphsResult.val;
-    }, 500);
+    graphsPage.value = graphsResult.val;
   }
 
   onMounted(async () => await getGraphs());
@@ -75,7 +73,7 @@
 
   .v-enter-active,
   .v-leave-active {
-    transition: opacity 0.25s ease-out;
+    transition: opacity 0.5s ease-out;
   }
 
   .v-enter-from {
