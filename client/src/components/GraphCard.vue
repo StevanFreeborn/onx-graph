@@ -38,7 +38,7 @@
     background-color: var(--color-background-mute);
     padding: 1rem;
     border-radius: 0.5rem;
-    box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 
     & a {
       display: block;
