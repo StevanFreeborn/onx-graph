@@ -5,6 +5,7 @@
   "dotnet.defaultSolution": "server/Server.sln",
   "cSpell.words": [
     "Bson",
+    "buttonborder",
     "composables",
     "Dapws",
     "dbcontext",
