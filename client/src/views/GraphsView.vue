@@ -20,6 +20,7 @@
         // eslint-disable-next-line no-console
         console.error(error);
       }
+      // TODO: need to have an error ui to show the user
       return;
     }
 
@@ -87,6 +88,8 @@
   .loader-container {
     display: flex;
     justify-content: center;
+    align-items: center;
+    height: 100%;
   }
 
   .placeholder-container {
