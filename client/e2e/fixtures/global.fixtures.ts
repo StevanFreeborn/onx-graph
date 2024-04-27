@@ -12,7 +12,7 @@ type TestUser = {
   username: string;
 };
 
-type VerifiedUser = TestUser;
+type VerifiedUser = TestUser & { id: string };
 
 type UnverifiedUser = TestUser & { verificationToken: string };
 
@@ -29,12 +29,20 @@ type GlobalFixtures = {
   mailhog: mailhog.API;
   dbcontext: Db;
   authenticatedUserPage: AuthenticatedUserPage;
+  insertGraphForUser: (userId: string) => Promise<{
+    _id: string;
+    userId: string;
+    name: string;
+    apiKey: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
 };
 
 const testPassword = '@Password1';
 const testPasswordHash = '$2a$11$Xs1mALyCfYD7Er2542tlVupp7GnXIwj5kA/0e6d1Dapws80QwuWoq';
 const testUserEncryptionKey = 'jm4FmaUQy6siVjtKrui4mgP6VqD9ITqhW27hiMg2hDw=';
-// const testEncryptedApiKey = '6iOGOCLgeHeuANqNBFqCsg==';
+const testEncryptedApiKey = '6iOGOCLgeHeuANqNBFqCsg==';
 
 export const test = base.extend<GlobalFixtures>({
   page: async ({ browser }, use) => {
@@ -79,7 +87,7 @@ export const test = base.extend<GlobalFixtures>({
 
     await dbcontext.collection('users').insertOne(user as any);
 
-    await use({ email: user.email, password: testPassword, username: user.username });
+    await use({ email: user.email, password: testPassword, username: user.username, id: user._id });
 
     await cleanupUser(dbcontext, user);
   },
@@ -132,7 +140,25 @@ export const test = base.extend<GlobalFixtures>({
 
     await use(page);
   },
+  insertGraphForUser: async ({ dbcontext }, use) => {
+    await use(async (userId: string) => await insertGraph(dbcontext, userId));
+  },
 });
+
+async function insertGraph(dbcontext: Db, userId: string) {
+  const graph = {
+    _id: faker.database.mongodbObjectId(),
+    userId,
+    name: faker.lorem.words(),
+    apiKey: testEncryptedApiKey,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  await dbcontext.collection('graphs').insertOne(graph as any);
+
+  return graph;
+}
 
 async function cleanupUser(dbcontext: Db, user: { email: string; _id: string }) {
   await dbcontext.collection('users').deleteOne({ email: user.email });
