@@ -56,6 +56,7 @@ export class GraphsService implements IGraphsService {
       const body = await res.json();
       return Ok(body as PageWithData<Graph>);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
       return Err([new Error('Failed to get graphs.')]);
     }
@@ -92,6 +93,7 @@ export class GraphsService implements IGraphsService {
       const body = await res.json();
       return Ok(body as AddGraphResponse);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
       return Err([new Error('Failed to add graph.')]);
     }
