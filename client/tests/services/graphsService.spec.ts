@@ -27,6 +27,10 @@ describe('GraphsService', () => {
     expect(graphsService.addGraph).toBeInstanceOf(Function);
   });
 
+  it('should have a getGraphs method', () => {
+    expect(graphsService.getGraphs).toBeInstanceOf(Function);
+  });
+
   describe('addGraph', () => {
     it('should return an error if the response status is 400', async () => {
       mockClient.post.mockReturnValueOnce({
@@ -63,7 +67,7 @@ describe('GraphsService', () => {
     it('should return an error if the response status is not ok', async () => {
       vi.spyOn(console, 'error').mockImplementationOnce(() => {});
 
-      mockClient.post.mockReturnValueOnce({ status: 500 });
+      mockClient.post.mockReturnValueOnce({ ok: false });
 
       const result = await graphsService.addGraph('graph', 'key');
 
@@ -91,6 +95,42 @@ describe('GraphsService', () => {
 
       expect(result.err).toBe(false);
       expect(result.val).toEqual({ id: '123' });
+    });
+  });
+
+  describe('getGraphs', () => {
+    it('should return an error if the response status is not ok', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+      mockClient.get.mockReturnValueOnce({ ok: false });
+
+      const result = await graphsService.getGraphs(1, 10);
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to get graphs.')]);
+    });
+
+    it('should return an error if the request fails', async () => {
+      mockClient.get.mockRejectedValueOnce(new Error('Failed to get graphs.'));
+
+      const result = await graphsService.getGraphs(1, 10);
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to get graphs.')]);
+    });
+
+    it('should return the response body if the request is successful', async () => {
+      const page = { pageCount: 0, pageNumber: 1, totalCount: 0, totalPages: 0, data: [] };
+
+      mockClient.get.mockReturnValueOnce({
+        ok: true,
+        json: async () => page,
+      });
+
+      const result = await graphsService.getGraphs(1, 10);
+
+      expect(result.err).toBe(false);
+      expect(result.val).toEqual(page);
     });
   });
 });
