@@ -7,12 +7,30 @@
   import type { Graph, PageWithData } from '@/types';
   import { onMounted, ref } from 'vue';
 
-  const graphsPage = ref<PageWithData<Graph> | null>(null);
+  type GraphData =
+    | {
+        status: 'loaded';
+        data: PageWithData<Graph>;
+      }
+    | {
+        status: 'loading';
+        data: null;
+      }
+    | {
+        status: 'error';
+        data: null;
+      };
+
+  const graphs = ref<GraphData>({ status: 'loading', data: null });
 
   const userStore = useUserStore();
   const graphService = useGraphsService(userStore);
 
   async function getGraphs(pageNumber = 1) {
+    if (graphs.value.status === 'error') {
+      graphs.value = { status: 'loading', data: null };
+    }
+
     const graphsResult = await graphService.getGraphs(pageNumber);
 
     if (graphsResult.err) {
@@ -20,49 +38,57 @@
         // eslint-disable-next-line no-console
         console.error(error);
       }
-      // TODO: need to have an error ui to show the user
+
+      graphs.value = { status: 'error', data: null };
       return;
     }
 
-    graphsPage.value = graphsResult.val;
+    graphs.value = { status: 'loaded', data: graphsResult.val };
   }
 
   onMounted(async () => await getGraphs());
 
   async function handlePreviousPage() {
-    if (graphsPage.value === null || graphsPage.value.pageNumber === 1) {
+    if (graphs.value.status !== 'loaded') {
       return;
     }
 
-    await getGraphs(graphsPage.value.pageNumber - 1);
+    await getGraphs(graphs.value.data.pageNumber - 1);
   }
 
   async function handleNextPage() {
-    if (graphsPage.value === null || graphsPage.value.pageNumber === graphsPage.value.totalPages) {
+    if (graphs.value.status !== 'loaded') {
       return;
     }
 
-    await getGraphs(graphsPage.value.pageNumber + 1);
+    await getGraphs(graphs.value.data.pageNumber + 1);
   }
 </script>
 
 <template>
   <h2>Graphs</h2>
   <Transition mode="out-in">
-    <div v-if="graphsPage === null" class="loader-container">
+    <div v-if="graphs.status === 'loading'" class="loader-container">
       <SpinningLoader height="3rem" width="3rem" />
     </div>
-    <div v-else-if="graphsPage.pageCount === 0" class="placeholder-container">
+    <div v-else-if="graphs.status === 'error'" class="placeholder-container">
+      <p>There was an error loading your graphs. Please try again later.</p>
+      <button @click="() => getGraphs()" class="button" type="button">Try Again</button>
+    </div>
+    <div
+      v-else-if="graphs.status === 'loaded' && graphs.data.pageCount === 0"
+      class="placeholder-container"
+    >
       <p>You don't have any graphs yet. Click the button below to add a graph.</p>
       <RouterLink to="/graphs/add" class="button">Add Graph</RouterLink>
     </div>
     <div v-else class="graphs-container">
       <ul>
-        <li v-for="graph in graphsPage.data" :key="graph.id">
+        <li v-for="graph in graphs.data.data" :key="graph.id">
           <GraphCard :graph="graph" />
         </li>
       </ul>
-      <DataPager @previous="handlePreviousPage" @next="handleNextPage" :page="graphsPage" />
+      <DataPager @previous="handlePreviousPage" @next="handleNextPage" :page="graphs.data" />
     </div>
   </Transition>
 </template>
@@ -109,6 +135,7 @@
       border-color: buttonborder;
       border-image: initial;
       color: var(--color-text);
+      cursor: pointer;
     }
 
     & .button:active {
