@@ -108,8 +108,8 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
     var encryptionKey = EncryptionService.GenerateKey();
-    var encryptedApiKey = await EncryptionService.EncryptAsync(encryptionKey);
-    user.EncryptionKey = encryptedApiKey;
+    var encryptedKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedKey;
 
     var userJwtToken = TestJwtTokenBuilder
       .Create()
@@ -140,5 +140,95 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
     var decryptedApiKey = await EncryptionService.DecryptForUserAsync(createdGraph.ApiKey, user);
 
     decryptedApiKey.Should().Be(requestBody.apiKey);
+  }
+
+  [Fact]
+  public async Task GetGraphs_WhenCalledByUnauthenticatedUser_ItShouldReturnUnauthorized()
+  {
+    var response = await _client.GetAsync("/graphs");
+
+    response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+  }
+
+  [Fact]
+  public async Task GetGraphs_WhenCalledAndUserExists_ItShouldReturnGraphs()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedApiKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedApiKey;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Users.InsertOneAsync(user);
+
+    var graphs = FakeDataFactory.Graph
+      .Generate(5)
+      .Select(g =>
+      {
+        g.UserId = user.Id;
+        return g;
+      })
+      .ToList();
+
+    await Context.Graphs.InsertManyAsync(graphs);
+
+    var response = await _client.GetAsync("/graphs");
+
+    response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+    var responseBody = await response.Content.ReadFromJsonAsync<GetGraphsResponse>();
+
+    responseBody!.Data.Should().HaveCount(5);
+    responseBody!.PageNumber.Should().Be(1);
+    responseBody!.PageCount.Should().Be(1);
+    responseBody!.TotalPages.Should().Be(1);
+    responseBody!.TotalCount.Should().Be(5);
+  }
+
+  [Fact]
+  public async Task GetGraphs_WhenCalledWithPageParameters_ItShouldReturnGraphs()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedApiKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedApiKey;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Users.InsertOneAsync(user);
+
+    var graphs = FakeDataFactory.Graph
+      .Generate(10)
+      .Select(g =>
+      {
+        g.UserId = user.Id;
+        return g;
+      })
+      .ToList();
+
+    await Context.Graphs.InsertManyAsync(graphs);
+
+    var response = await _client.GetAsync("/graphs?pageNumber=2&pageSize=5");
+
+    response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+    var responseBody = await response.Content.ReadFromJsonAsync<GetGraphsResponse>();
+
+    responseBody!.Data.Should().HaveCount(5);
+    responseBody!.PageNumber.Should().Be(2);
+    responseBody!.PageCount.Should().Be(5);
+    responseBody!.TotalPages.Should().Be(2);
+    responseBody!.TotalCount.Should().Be(10);
   }
 }

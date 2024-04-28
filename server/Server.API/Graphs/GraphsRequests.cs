@@ -37,7 +37,7 @@ record AddGraphRequest(
 /// </summary>
 record GetGraphsRequest(
   HttpContext HttpContext,
-  [FromQuery] int PageNumber,
-  [FromQuery] int PageSize,
-  [FromServices] IGraphService GraphService
+  [FromServices] IGraphService GraphService,
+  [FromQuery] int PageNumber = 1,
+  [FromQuery] int PageSize = 10
 );

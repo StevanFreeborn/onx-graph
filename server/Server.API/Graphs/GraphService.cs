@@ -8,7 +8,7 @@ class GraphService(IGraphRepository graphRepository) : IGraphService
 {
   private readonly IGraphRepository _graphRepository = graphRepository;
 
-  public async Task<Result<Graph>> AddGraph(Graph graph)
+  public async Task<Result<Graph>> AddGraphAsync(Graph graph)
   {
     var existingGraph = await _graphRepository.GetGraphByNameAsync(graph.Name, graph.UserId);
 
@@ -21,7 +21,7 @@ class GraphService(IGraphRepository graphRepository) : IGraphService
     return Result.Ok(createdGraph);
   }
 
-  public async Task<Result<Page<Graph>>> GetGraphs(int pageNumber, int pageSize, string userId)
+  public async Task<Result<Page<Graph>>> GetGraphsAsync(int pageNumber, int pageSize, string userId)
   {
     var graphs = await _graphRepository.GetGraphsAsync(pageNumber, pageSize, userId);
     return Result.Ok(graphs);

@@ -10,7 +10,7 @@ interface IGraphService
   /// </summary>
   /// <param name="graph">The <see cref="Graph"/> to add.</param>
   /// <returns>The added graph as a <see cref="Graph"/> instance.</returns>
-  Task<Result<Graph>> AddGraph(Graph graph);
+  Task<Result<Graph>> AddGraphAsync(Graph graph);
 
   /// <summary>
   /// Gets a page of graphs.
@@ -19,5 +19,5 @@ interface IGraphService
   /// <param name="pageSize">The number of items per page.</param>
   /// <param name="userId">The id of the user who owns the graphs.</param>
   /// <returns>A page of graphs as a <see cref="Page{Graph}"/> instance.</returns>
-  Task<Result<Page<Graph>>> GetGraphs(int pageNumber, int pageSize, string userId);
+  Task<Result<Page<Graph>>> GetGraphsAsync(int pageNumber, int pageSize, string userId);
 }

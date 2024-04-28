@@ -21,7 +21,7 @@ public class GraphsControllerTests
   );
 
   [Fact]
-  public async Task AddGraph_WhenCalledByUnauthenticatedUser_ItShouldReturn401StatusCodeWithProblemDetails()
+  public async Task AddGraphAsync_WhenCalledByUnauthenticatedUser_ItShouldReturn401StatusCodeWithProblemDetails()
   {
     _contextMock
       .Setup(c => c.User)
@@ -42,7 +42,7 @@ public class GraphsControllerTests
   }
 
   [Fact]
-  public async Task AddGraph_WhenCalledWithoutName_ItShouldReturnValidationProblemDetailsWith400StatusCode()
+  public async Task AddGraphAsync_WhenCalledWithoutName_ItShouldReturnValidationProblemDetailsWith400StatusCode()
   {
     var expectedNameKey = "Name";
     var expectedNameErrorMessage = "The Name field is required.";
@@ -93,7 +93,7 @@ public class GraphsControllerTests
   }
 
   [Fact]
-  public async Task AddGraph_WhenCalledWithoutApiKey_ItShouldReturnValidationProblemDetailsWith400StatusCode()
+  public async Task AddGraphAsync_WhenCalledWithoutApiKey_ItShouldReturnValidationProblemDetailsWith400StatusCode()
   {
     var expectedApiKeyKey = "ApiKey";
     var expectedApiKeyErrorMessage = "The ApiKey field is required.";
@@ -146,7 +146,7 @@ public class GraphsControllerTests
   }
 
   [Fact]
-  public async Task AddGraph_WhenCalledWithNameAndApiKeyButUserNotFound_ItShouldReturn404StatusCodeWithProblemDetails()
+  public async Task AddGraphAsync_WhenCalledWithNameAndApiKeyButUserNotFound_ItShouldReturn404StatusCodeWithProblemDetails()
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
 
@@ -193,7 +193,7 @@ public class GraphsControllerTests
   }
 
   [Fact]
-  public async Task AddGraph_WhenCalledWithNameAndApiKeyButAddGraphFailsBecauseNameAlreadyExists_ItShouldReturn409StatusCodeWithProblemDetails()
+  public async Task AddGraphAsync_WhenCalledWithNameAndApiKeyButAddGraphFailsBecauseNameAlreadyExists_ItShouldReturn409StatusCodeWithProblemDetails()
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
 
@@ -217,7 +217,7 @@ public class GraphsControllerTests
     var addGraphResult = Result.Fail<Graph>(new GraphAlreadyExistsError(dto.Name));
 
     _graphServiceMock
-      .Setup(s => s.AddGraph(It.IsAny<Graph>()))
+      .Setup(s => s.AddGraphAsync(It.IsAny<Graph>()))
       .ReturnsAsync(addGraphResult);
 
     var request = CreateAddGraphRequest(dto);
@@ -244,7 +244,7 @@ public class GraphsControllerTests
   }
 
   [Fact]
-  public async Task AddGraph_WhenCalledWithNameAndApiKey_ItShouldReturn201StatusCodeWithGraphDto()
+  public async Task AddGraphAsync_WhenCalledWithNameAndApiKey_ItShouldReturn201StatusCodeWithGraphDto()
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
 
@@ -277,7 +277,7 @@ public class GraphsControllerTests
       .ReturnsAsync(encryptedApiKey);
 
     _graphServiceMock
-      .Setup(s => s.AddGraph(It.IsAny<Graph>()))
+      .Setup(s => s.AddGraphAsync(It.IsAny<Graph>()))
       .ReturnsAsync(Result.Ok(createdGraph));
 
     var request = CreateAddGraphRequest(dto);
@@ -300,12 +300,93 @@ public class GraphsControllerTests
     _graphServiceMock
       .Verify(
         s =>
-          s.AddGraph(
+          s.AddGraphAsync(
             It.Is<Graph>(
               g =>
                 g.Name == dto.Name &&
                 g.ApiKey == encryptedApiKey
             )
+          ),
+        Times.Once
+      );
+  }
+
+  private GetGraphsRequest CreateGetGraphsRequest(int pageNumber, int pageSize) => new(
+    _contextMock.Object,
+    _graphServiceMock.Object,
+    pageNumber,
+    pageSize
+  );
+
+  [Fact]
+  public async Task GetGraphsAsync_WhenCalledByUnauthenticatedUser_ItShouldReturn401StatusCode()
+  {
+    _contextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal());
+
+    var request = CreateGetGraphsRequest(1, 10);
+
+    var result = await GraphsController.GetGraphs(request);
+
+    result.Should()
+      .BeOfType<UnauthorizedHttpResult>();
+
+    result.As<UnauthorizedHttpResult>()
+      .StatusCode
+      .Should()
+      .Be(StatusCodes.Status401Unauthorized);
+  }
+
+  [Fact]
+  public async Task GetGraphsAsync_WhenCalled_ItShouldReturnPageOfGraphs()
+  {
+    var pageNumber = 1;
+    var pageSize = 10;
+    var userId = "userId";
+
+    var graphs = FakeDataFactory.Graph
+      .Generate(10)
+      .Select(g =>
+      {
+        g.UserId = userId;
+        return g;
+      })
+      .ToList();
+
+    var page = new Page<Graph>(pageNumber, pageSize, 10, graphs);
+    var getGraphsResponse = new GetGraphsResponse(page);
+
+    _contextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal(new ClaimsIdentity(
+      [
+        new Claim(ClaimTypes.NameIdentifier, userId)
+      ])));
+
+    _graphServiceMock
+      .Setup(s => s.GetGraphsAsync(pageNumber, pageSize, userId))
+      .ReturnsAsync(page);
+
+    var request = CreateGetGraphsRequest(pageNumber, pageSize);
+
+    var result = await GraphsController.GetGraphs(request);
+
+    result.Should()
+      .BeOfType<Ok<GetGraphsResponse>>();
+
+    result.As<Ok<GetGraphsResponse>>()
+      .Value
+      .Should()
+      .BeEquivalentTo(getGraphsResponse);
+
+    _graphServiceMock
+      .Verify(
+        s =>
+          s.GetGraphsAsync(
+            It.Is<int>(p => p == pageNumber),
+            It.Is<int>(s => s == pageSize),
+            It.Is<string>(u => u == userId)
           ),
         Times.Once
       );

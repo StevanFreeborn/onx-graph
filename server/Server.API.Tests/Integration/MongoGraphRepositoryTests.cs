@@ -66,4 +66,69 @@ public class MongoGraphRepositoryTests : IClassFixture<TestDb>, IDisposable
       .Should()
       .BeNull();
   }
+
+  [Fact]
+  public async Task GetGraphsAsync_WhenNoGraphsExist_ItShouldReturnEmptyPage()
+  {
+    var pageNumber = 1;
+    var pageSize = 10;
+
+    var result = await _sut.GetGraphsAsync(pageNumber, pageSize, "userId");
+
+    result
+      .Should()
+      .NotBeNull();
+
+    result.Should().BeEquivalentTo(new Page<Graph>(
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+      totalCount: 0,
+      data: []
+    ));
+  }
+
+  [Fact]
+  public async Task GetGraphsAsync_WhenGraphsExist_ItShouldReturnPageOfGraphs()
+  {
+    var userId = "userId";
+    var pageNumber = 1;
+    var pageSize = 5;
+
+    var testGraphs = FakeDataFactory.Graph
+      .Generate(10)
+      .Select(g =>
+      {
+        g.UserId = userId;
+        return g;
+      })
+      .ToList();
+
+    await _context.Graphs.InsertManyAsync(testGraphs);
+
+    var result = await _sut.GetGraphsAsync(pageNumber, pageSize, userId);
+
+    result
+      .Should()
+      .NotBeNull();
+
+    result.TotalCount
+      .Should()
+      .Be(testGraphs.Count);
+
+    result.TotalPages
+      .Should()
+      .Be(2);
+
+    result.PageCount
+      .Should()
+      .Be(testGraphs.Count / 2);
+
+    result.PageNumber
+      .Should()
+      .Be(pageNumber);
+
+    result.Data
+      .Should()
+      .HaveCount(testGraphs.Count / 2);
+  }
 }

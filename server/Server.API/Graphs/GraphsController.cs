@@ -45,7 +45,7 @@ static class GraphsController
     var encryptedApiKey = await request.EncryptionService.EncryptForUserAsync(graph.ApiKey, getUserResult.Value);
     graph.ApiKey = encryptedApiKey;
 
-    var addGraphResult = await request.GraphService.AddGraph(graph);
+    var addGraphResult = await request.GraphService.AddGraphAsync(graph);
 
     if (addGraphResult.IsFailed && addGraphResult.Errors.Any(e => e is GraphAlreadyExistsError))
     {
@@ -63,6 +63,11 @@ static class GraphsController
     );
   }
 
+  /// <summary>
+  /// Gets graphs
+  /// </summary>
+  /// <param name="request">The request as a <see cref="GetGraphsRequest"/> instance</param>
+  /// <returns>An <see cref="Task"/> of <see cref="IResult"/></returns>
   public static async Task<IResult> GetGraphs([AsParameters] GetGraphsRequest request)
   {
     var userId = request.HttpContext.GetUserId();
@@ -72,7 +77,7 @@ static class GraphsController
       return Results.Unauthorized();
     }
 
-    var getGraphsResult = await request.GraphService.GetGraphs(request.PageNumber, request.PageSize, userId);
+    var getGraphsResult = await request.GraphService.GetGraphsAsync(request.PageNumber, request.PageSize, userId);
     var getGraphsResponse = new GetGraphsResponse(getGraphsResult.Value);
 
     return Results.Ok(getGraphsResponse);

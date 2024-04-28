@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Server.API.Graphs;
 
 /// <summary>
@@ -7,11 +9,16 @@ record AddGraphResponse(string Id);
 
 record GraphDto
 {
-  public string Id { get; init; }
-  public string Name { get; init; }
-  public DateTime CreatedAt { get; init; }
-  public DateTime UpdatedAt { get; init; }
-  public GraphStatus Status { get; init; }
+  public string Id { get; init; } = string.Empty;
+  public string Name { get; init; } = string.Empty;
+  public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+  public DateTime UpdatedAt { get; init; } = DateTime.UtcNow;
+  public GraphStatus Status { get; init; } = GraphStatus.NotBuilt;
+
+  [JsonConstructor]
+  internal GraphDto()
+  {
+  }
 
   public GraphDto(Graph graph)
   {
@@ -29,7 +36,12 @@ record GetGraphsResponse
   public int PageNumber { get; init; }
   public int TotalPages { get; init; }
   public long TotalCount { get; init; }
-  public List<GraphDto> Data { get; init; }
+  public List<GraphDto> Data { get; init; } = [];
+
+  [JsonConstructor]
+  internal GetGraphsResponse()
+  {
+  }
 
   public GetGraphsResponse(Page<Graph> page)
   {
