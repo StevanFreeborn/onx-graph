@@ -147,8 +147,7 @@ try
   // add as singleton as client should be reused
   builder.Services.ConfigureOptions<MongoDbOptionsSetup>();
   builder.Services.AddSingleton<MongoDbContext>();
-  await builder.Services.AddIndexes();
-
+  builder.Services.AddHostedService<MongoIndexService>();
 
   // add identity to dependency injection
   // add as scoped as we want a new instance per request
