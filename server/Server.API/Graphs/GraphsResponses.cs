@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Server.API.Graphs;
 
 /// <summary>
@@ -7,6 +5,9 @@ namespace Server.API.Graphs;
 /// </summary>
 record AddGraphResponse(string Id);
 
+/// <summary>
+/// Represents a response to getting a graph
+/// </summary>
 record GraphDto
 {
   public string Id { get; init; } = string.Empty;
@@ -30,6 +31,9 @@ record GraphDto
   }
 }
 
+/// <summary>
+/// Represents a response to getting graphs
+/// </summary>
 record GetGraphsResponse
 {
   public int PageCount { get; init; }

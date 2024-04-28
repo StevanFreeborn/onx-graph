@@ -82,4 +82,35 @@ static class GraphsController
 
     return Results.Ok(getGraphsResponse);
   }
+
+  /// <summary>
+  /// Gets a graph
+  /// </summary>
+  /// <param name="request">The request as a <see cref="GetGraphRequest"/> instance</param>
+  /// <returns>An <see cref="Task"/> of <see cref="IResult"/></returns>
+  public static async Task<IResult> GetGraph([AsParameters] GetGraphRequest request)
+  {
+    var userId = request.HttpContext.GetUserId();
+
+    if (userId is null)
+    {
+      return Results.Unauthorized();
+    }
+
+    var getGraphResult = await request.GraphService.GetGraphAsync(request.Id, userId);
+
+    if (getGraphResult.IsFailed && getGraphResult.Errors.Exists(e => e is GraphNotFoundError))
+    {
+      return Results.Problem(
+        title: "Failed to get graph",
+        detail: "Unable to retrieve graph. See errors for details.",
+        statusCode: StatusCodes.Status404NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", getGraphResult.Errors } }
+      );
+    }
+
+    var getGraphResponse = new GraphDto(getGraphResult.Value);
+
+    return Results.Ok(getGraphResponse);
+  }
 }

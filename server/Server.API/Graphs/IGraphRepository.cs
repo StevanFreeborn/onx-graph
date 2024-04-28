@@ -13,6 +13,14 @@ interface IGraphRepository
   Task<Graph> CreateGraphAsync(Graph graph);
 
   /// <summary>
+  /// Gets a graph by its id.
+  /// </summary>
+  /// <param name="id">The id of the graph to get.</param>
+  /// <param name="userId">The id of the user who owns the graph.</param>
+  /// <returns>The graph as a <see cref="Graph"/> instance.</returns>
+  Task<Graph?> GetGraphAsync(string id, string userId);
+
+  /// <summary>
   /// Gets a graph by its name.
   /// </summary>
   /// <param name="name">The name of the graph to get.</param>

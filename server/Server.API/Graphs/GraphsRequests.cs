@@ -41,3 +41,12 @@ record GetGraphsRequest(
   [FromQuery] int PageNumber = 1,
   [FromQuery] int PageSize = 10
 );
+
+/// <summary>
+/// Represents a request to get a graph
+/// </summary>
+record GetGraphRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromServices] IGraphService GraphService
+);

@@ -26,6 +26,16 @@ static class GraphsRoutes
       .WithName("GetGraphs")
       .WithDescription("Gets a page of graphs");
 
+    group
+      .MapGet("{id}", GraphsController.GetGraph)
+      .RequireAuthorization()
+      .Produces<Graph>((int)HttpStatusCode.OK)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("GetGraph")
+      .WithDescription("Gets a graph by id");
+
     return group;
   }
 }

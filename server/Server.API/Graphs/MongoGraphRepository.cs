@@ -16,6 +16,13 @@ class MongoGraphRepository(MongoDbContext context) : IGraphRepository
     return graph;
   }
 
+  public async Task<Graph?> GetGraphAsync(string id, string userId)
+  {
+    return await _context.Graphs
+      .Find(g => g.Id == id && g.UserId == userId)
+      .FirstOrDefaultAsync();
+  }
+
   public async Task<Graph?> GetGraphByNameAsync(string name, string userId)
   {
     return await _context.Graphs

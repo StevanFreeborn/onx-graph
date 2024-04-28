@@ -21,6 +21,18 @@ class GraphService(IGraphRepository graphRepository) : IGraphService
     return Result.Ok(createdGraph);
   }
 
+  public async Task<Result<Graph>> GetGraphAsync(string id, string userId)
+  {
+    var graph = await _graphRepository.GetGraphAsync(id, userId);
+
+    if (graph is null)
+    {
+      return Result.Fail(new GraphNotFoundError(id));
+    }
+
+    return Result.Ok(graph);
+  }
+
   public async Task<Result<Page<Graph>>> GetGraphsAsync(int pageNumber, int pageSize, string userId)
   {
     var graphs = await _graphRepository.GetGraphsAsync(pageNumber, pageSize, userId);

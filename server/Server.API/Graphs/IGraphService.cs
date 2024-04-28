@@ -13,6 +13,14 @@ interface IGraphService
   Task<Result<Graph>> AddGraphAsync(Graph graph);
 
   /// <summary>
+  /// Gets a graph by id.
+  /// </summary>
+  /// <param name="id">The id of the graph to get.</param>
+  /// <param name="userId">The id of the user who owns the graph.</param>
+  /// <returns>The graph as a <see cref="Graph"/> instance.</returns>
+  Task<Result<Graph>> GetGraphAsync(string id, string userId);
+
+  /// <summary>
   /// Gets a page of graphs.
   /// </summary>
   /// <param name="pageNumber">The page number to get.</param>
