@@ -3,6 +3,7 @@
   import GraphCard from '@/components/GraphCard.vue';
   import SpinningLoader from '@/components/SpinningLoader.vue';
   import { useGraphsService } from '@/composables/useGraphsService';
+  import { useMounted } from '@/composables/useMounted.js';
   import { useUserStore } from '@/stores/userStore';
   import type { Graph, PageWithData } from '@/types';
   import { onMounted, ref } from 'vue';
@@ -25,6 +26,7 @@
 
   const userStore = useUserStore();
   const graphService = useGraphsService(userStore);
+  const isMounted = useMounted();
 
   async function getGraphs(pageNumber = 1) {
     if (graphs.value.status === 'error') {
@@ -85,7 +87,14 @@
     </div>
     <div v-else-if="graphs.status === 'error'" class="placeholder-container">
       <p>There was an error loading your graphs. Please try again later.</p>
-      <button @click="() => getGraphs()" class="button" type="button">Try Again</button>
+      <button
+        :disabled="isMounted === false"
+        @click="() => getGraphs()"
+        class="button"
+        type="button"
+      >
+        Try Again
+      </button>
     </div>
     <div
       v-else-if="graphs.status === 'loaded' && graphs.data.pageCount === 0"
@@ -121,7 +130,7 @@
 
   .heading-container {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
     align-items: center;
     margin-bottom: 1rem;
 
