@@ -66,7 +66,19 @@
 </script>
 
 <template>
-  <h2>Graphs</h2>
+  <div class="heading-container">
+    <h2>Graphs</h2>
+    <Transition mode="out-in">
+      <RouterLink
+        v-if="graphs.status === 'loaded' && graphs.data.pageCount > 0"
+        to="/graphs/add"
+        class="button"
+      >
+        Add Graph
+      </RouterLink>
+      <div v-else></div>
+    </Transition>
+  </div>
   <Transition mode="out-in">
     <div v-if="graphs.status === 'loading'" class="loader-container">
       <SpinningLoader height="3rem" width="3rem" />
@@ -94,10 +106,6 @@
 </template>
 
 <style scoped>
-  h2 {
-    margin-bottom: 1rem;
-  }
-
   .v-enter-active,
   .v-leave-active {
     transition: opacity 0.5s ease-out;
@@ -109,6 +117,36 @@
 
   .v-leave-to {
     opacity: 0;
+  }
+
+  .heading-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    & .button {
+      background-color: var(--color-background-mute);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      border-width: 2px;
+      border-style: outset;
+      border-color: buttonborder;
+      border-image: initial;
+      color: var(--color-text);
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+
+    & .button:active {
+      border-style: inset;
+    }
+
+    @media (hover: hover) {
+      & .button:hover {
+        color: var(--orange);
+      }
+    }
   }
 
   .loader-container {
@@ -142,8 +180,10 @@
       border-style: inset;
     }
 
-    & .button:hover {
-      color: var(--orange);
+    @media (hover: hover) {
+      & .button:hover {
+        color: var(--orange);
+      }
     }
   }
 
