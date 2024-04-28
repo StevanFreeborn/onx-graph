@@ -50,6 +50,7 @@ public static class MongoClassMapper
         cm.MapProperty(g => g.ApiKey).SetElementName("apiKey");
         cm.MapProperty(g => g.CreatedAt).SetElementName("createdAt");
         cm.MapProperty(g => g.UpdatedAt).SetElementName("updatedAt");
+        cm.MapProperty(g => g.Status).SetElementName("status");
       }
     );
   }
