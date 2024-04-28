@@ -15,14 +15,12 @@
       }
     | {
         status: 'loading';
-        data: null;
       }
     | {
         status: 'error';
-        data: null;
       };
 
-  const graphs = ref<GraphData>({ status: 'loading', data: null });
+  const graphs = ref<GraphData>({ status: 'loading' });
 
   const userStore = useUserStore();
   const graphService = useGraphsService(userStore);
@@ -30,7 +28,7 @@
 
   async function getGraphs(pageNumber = 1) {
     if (graphs.value.status === 'error') {
-      graphs.value = { status: 'loading', data: null };
+      graphs.value = { status: 'loading' };
     }
 
     const graphsResult = await graphService.getGraphs(pageNumber);
@@ -41,7 +39,7 @@
         console.error(error);
       }
 
-      graphs.value = { status: 'error', data: null };
+      graphs.value = { status: 'error' };
       return;
     }
 

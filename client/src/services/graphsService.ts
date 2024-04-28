@@ -23,6 +23,7 @@ export interface IGraphsService {
     pageNumber?: number,
     pageSize?: number
   ) => Promise<Result<PageWithData<Graph>, Error[]>>;
+  getGraph: (id: string) => Promise<Result<Graph, Error[]>>;
 }
 
 export class GraphsService implements IGraphsService {
@@ -33,14 +34,38 @@ export class GraphsService implements IGraphsService {
     return `${this.baseURL}/graphs?pageNumber=${pageNumber}&pageSize=${pageSize}`;
   }
 
+  private createGetGraphEndpoint(id: string) {
+    return `${this.baseURL}/graphs/${id}`;
+  }
+
   private readonly endpoints = {
     addGraph: `${this.baseURL}/graphs/add`,
     getGraphs: (pageNumber: number, pageSize: number) =>
       this.createGetGraphsEndpoint(pageNumber, pageSize),
+    getGraph: (id: string) => this.createGetGraphEndpoint(id),
   };
 
   constructor(client: IClient) {
     this.client = client;
+  }
+
+  async getGraph(id: string) {
+    const request = new ClientRequest(this.endpoints.getGraph(id));
+
+    try {
+      const res = await this.client.get(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Failed to get graph.')]);
+      }
+
+      const body = await res.json();
+      return Ok(body as Graph);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return Err([new Error('Failed to get graph.')]);
+    }
   }
 
   async getGraphs(pageNumber: number = 1, pageSize: number = 10) {
