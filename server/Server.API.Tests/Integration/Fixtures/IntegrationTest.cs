@@ -18,4 +18,19 @@ public class IntegrationTest : IClassFixture<TestServerFactory>
     CorsOptions = _factory.Services.GetRequiredService<IOptions<CorsOptions>>().Value;
     Context = _factory.Services.GetRequiredService<MongoDbContext>();
   }
+
+  protected async Task<HubConnection> GetGraphsHubConnectionAsync(string? accessToken)
+  {
+    var connection = new HubConnectionBuilder()
+      .WithUrl($"http://localhost/graphs/hub", options =>
+      {
+        options.HttpMessageHandlerFactory = _ => _factory.Server.CreateHandler();
+        options.AccessTokenProvider = () => Task.FromResult(accessToken);
+      })
+      .Build();
+
+    await connection.StartAsync();
+
+    return connection;
+  }
 }

@@ -4,6 +4,8 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
 {
   public void Dispose()
   {
+    Context.Users.DeleteMany(_ => true);
+    Context.Graphs.DeleteMany(_ => true);
     GC.SuppressFinalize(this);
   }
 

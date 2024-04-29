@@ -36,6 +36,8 @@ static class GraphsRoutes
       .WithName("GetGraph")
       .WithDescription("Gets a graph by id");
 
+    group.MapHub<GraphsHub>("/hub");
+
     return group;
   }
 }

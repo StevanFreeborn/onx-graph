@@ -86,8 +86,9 @@ try
 
   builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(
-      o => o.TokenValidationParameters = new TokenValidationParameters
+    .AddJwtBearer(o =>
+    {
+      o.TokenValidationParameters = new TokenValidationParameters
       {
         ValidIssuer = jwtOptions.Issuer,
         ValidAudience = jwtOptions.Audience,
@@ -99,8 +100,25 @@ try
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ClockSkew = TimeSpan.FromSeconds(0),
-      }
-    )
+      };
+
+      o.Events = new JwtBearerEvents()
+      {
+        OnMessageReceived = context =>
+        {
+          var accessToken = context.Request.Query["access_token"];
+
+          var path = context.HttpContext.Request.Path;
+
+          if (string.IsNullOrEmpty(accessToken) is false && path.StartsWithSegments("/graphs/hub"))
+          {
+            context.Token = accessToken;
+          }
+
+          return Task.CompletedTask;
+        }
+      };
+    })
     .AddJwtBearer(
       "AllowExpiredToken",
       o => o.TokenValidationParameters = new TokenValidationParameters
@@ -175,6 +193,7 @@ try
   builder.Services.AddScoped<IValidator<AddGraphDto>, AddGraphDtoValidator>();
   builder.Services.AddScoped<IGraphRepository, MongoGraphRepository>();
   builder.Services.AddScoped<IGraphService, GraphService>();
+  builder.Services.AddSignalR();
 
   // add rate limiting and whitelist client origin
   builder.Services.AddRateLimiter(options =>
@@ -254,7 +273,6 @@ try
     .MapVersionOneGraphsEndpoints()
     .WithApiVersionSet(versionSet)
     .MapToApiVersion(versionOne);
-
 
   // use cors
   app.UseCors("CORSpolicy");
