@@ -97,6 +97,14 @@ static class GraphsController
       return Results.Unauthorized();
     }
 
+    if (ObjectId.TryParse(request.Id, out var _) is false)
+    {
+      return Results.ValidationProblem(new Dictionary<string, string[]>()
+      {
+        { nameof(request.Id), [ "Invalid graph id"] }
+      });
+    }
+
     var getGraphResult = await request.GraphService.GetGraphAsync(request.Id, userId);
 
     if (getGraphResult.IsFailed && getGraphResult.Errors.Exists(e => e is GraphNotFoundError))

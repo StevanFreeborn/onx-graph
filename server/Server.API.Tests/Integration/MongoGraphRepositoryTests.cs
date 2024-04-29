@@ -131,4 +131,34 @@ public class MongoGraphRepositoryTests : IClassFixture<TestDb>, IDisposable
       .Should()
       .HaveCount(testGraphs.Count / 2);
   }
+
+  [Fact]
+  public async Task GetGraphAsync_WhenGraphExists_ItShouldReturnGraph()
+  {
+    var testGraph = FakeDataFactory.Graph.Generate();
+
+    await _context.Graphs.InsertOneAsync(testGraph);
+
+    var result = await _sut.GetGraphAsync(testGraph.Id, testGraph.UserId);
+
+    result
+      .Should()
+      .NotBeNull();
+
+    result?.Id
+      .Should()
+      .Be(testGraph.Id);
+  }
+
+  [Fact]
+  public async Task GetGraphAsync_WhenGraphDoesNotExist_ItShouldReturnNull()
+  {
+    var testGraph = FakeDataFactory.Graph.Generate();
+
+    var result = await _sut.GetGraphAsync(testGraph.Id, testGraph.UserId);
+
+    result
+      .Should()
+      .BeNull();
+  }
 }

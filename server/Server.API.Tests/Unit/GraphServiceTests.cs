@@ -11,7 +11,7 @@ public class GraphServiceTests
   }
 
   [Fact]
-  public async Task AddGraph_WhenCalledWithExistingGraph_ItShouldReturnGraphAlreadyExistsError()
+  public async Task AddGraphAsync_WhenCalledWithExistingGraph_ItShouldReturnGraphAlreadyExistsError()
   {
     var graph = FakeDataFactory.Graph.Generate();
 
@@ -25,7 +25,7 @@ public class GraphServiceTests
   }
 
   [Fact]
-  public async Task AddGraph_WhenCalled_ItShouldCallRepositoryAndReturnCreatedGraph()
+  public async Task AddGraphAsync_WhenCalled_ItShouldCallRepositoryAndReturnCreatedGraph()
   {
     var graph = FakeDataFactory.Graph.Generate();
 
@@ -45,7 +45,7 @@ public class GraphServiceTests
   }
 
   [Fact]
-  public async Task GetGraphs_WhenCalled_ItShouldCallRepositoryAndReturnGraphs()
+  public async Task GetGraphsAsync_WhenCalled_ItShouldCallRepositoryAndReturnGraphs()
   {
     var pageNumber = 1;
     var pageSize = 10;
@@ -62,5 +62,33 @@ public class GraphServiceTests
     result.Value.Should().BeEquivalentTo(page);
 
     _graphRepositoryMock.Verify(x => x.GetGraphsAsync(pageNumber, pageSize, userId), Times.Once);
+  }
+
+  [Fact]
+  public async Task GetGraphAsync_WhenGraphDoesNotExist_ItShouldReturnGraphNotFoundError()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+
+    _graphRepositoryMock
+      .Setup(x => x.GetGraphAsync(graph.Id, graph.UserId))
+      .ReturnsAsync(null as Graph);
+
+    var result = await _sut.GetGraphAsync(graph.Id, graph.UserId);
+
+    result.Errors.Should().ContainSingle(e => e is GraphNotFoundError);
+  }
+
+  [Fact]
+  public async Task GetGraphAsync_WhenGraphExists_ItShouldReturnGraph()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+
+    _graphRepositoryMock
+      .Setup(x => x.GetGraphAsync(graph.Id, graph.UserId))
+      .ReturnsAsync(graph);
+
+    var result = await _sut.GetGraphAsync(graph.Id, graph.UserId);
+
+    result.Value.Should().BeEquivalentTo(graph);
   }
 }
