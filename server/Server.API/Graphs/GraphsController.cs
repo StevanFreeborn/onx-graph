@@ -57,6 +57,8 @@ static class GraphsController
       );
     }
 
+    await request.GraphQueue.EnqueueAsync(new GraphQueueItem(graph));
+
     return Results.Created(
       uri: $"/graphs/{addGraphResult.Value.Id}",
       value: new AddGraphResponse(addGraphResult.Value.Id)

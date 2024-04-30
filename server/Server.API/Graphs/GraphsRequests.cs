@@ -29,7 +29,8 @@ record AddGraphRequest(
   [FromServices] IValidator<AddGraphDto> Validator,
   [FromServices] IGraphService GraphService,
   [FromServices] IUserService UserService,
-  [FromServices] IEncryptionService EncryptionService
+  [FromServices] IEncryptionService EncryptionService,
+  [FromServices] IGraphQueue GraphQueue
 );
 
 /// <summary>

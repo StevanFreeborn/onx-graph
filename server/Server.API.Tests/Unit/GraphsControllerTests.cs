@@ -10,6 +10,7 @@ public class GraphsControllerTests
   private readonly Mock<IGraphService> _graphServiceMock = new();
   private readonly Mock<IUserService> _userServiceMock = new();
   private readonly Mock<IEncryptionService> _encryptionServiceMock = new();
+  private readonly Mock<IGraphQueue> _graphQueueMock = new();
 
   private AddGraphRequest CreateAddGraphRequest(AddGraphDto dto) => new(
     _contextMock.Object,
@@ -17,7 +18,8 @@ public class GraphsControllerTests
     _addGraphDtoValidatorMock.Object,
     _graphServiceMock.Object,
     _userServiceMock.Object,
-    _encryptionServiceMock.Object
+    _encryptionServiceMock.Object,
+    _graphQueueMock.Object
   );
 
   [Fact]

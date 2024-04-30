@@ -193,6 +193,9 @@ try
   builder.Services.AddScoped<IValidator<AddGraphDto>, AddGraphDtoValidator>();
   builder.Services.AddScoped<IGraphRepository, MongoGraphRepository>();
   builder.Services.AddScoped<IGraphService, GraphService>();
+  builder.Services.AddSingleton<IGraphQueue, ChannelGraphQueue>();
+  builder.Services.AddSingleton<IGraphProcessor, GraphProcessor>();
+  builder.Services.AddHostedService<GraphQueueService>();
   builder.Services.AddSignalR();
 
   // add rate limiting and whitelist client origin
