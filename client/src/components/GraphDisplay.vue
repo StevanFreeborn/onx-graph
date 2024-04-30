@@ -93,7 +93,7 @@
     </div>
     <div v-else-if="graphData.status === 'building'">
       <GraphHeading :name="graphData.data.name" />
-      <GraphMonitor />
+      <GraphMonitor :graph-id="graphData.data.id" />
     </div>
     <div v-else-if="graphData.status === 'not-built'">
       <GraphHeading :name="graphData.data.name" />

@@ -33,6 +33,7 @@
     "cleanup": "rimraf ./test-results/ ./coverage/ ./dist/ ./tests/coverage/ ./playwright-report/"
   },
   "dependencies": {
+    "@microsoft/signalr": "^8.0.0",
     "jwt-decode": "^4.0.0",
     "pinia": "^2.1.7",
     "rimraf": "^5.0.5",
