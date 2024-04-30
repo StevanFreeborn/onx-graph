@@ -1,5 +1,6 @@
 <script setup lang="ts">
   const props = defineProps<{
+    msg?: string;
     height: string;
     width: string;
   }>();
@@ -20,7 +21,7 @@
         />
       </svg>
     </div>
-    <div>Loading...</div>
+    <div>{{ props.msg ?? 'Loading...' }}</div>
   </div>
 </template>
 

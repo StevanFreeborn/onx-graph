@@ -20,4 +20,14 @@ describe('SpinningLoader', () => {
     expect(loader).toBeInTheDocument();
     expect(message).toBeInTheDocument();
   });
+
+  it('should allow display of custom message', () => {
+    const { getByText } = render(SpinningLoader, {
+      props: { height: '100px', width: '100px', msg: 'Please wait...' },
+    });
+
+    const message = getByText(/please wait/i);
+
+    expect(message).toBeInTheDocument();
+  });
 });
