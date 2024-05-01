@@ -68,7 +68,7 @@ export class GraphsService implements IGraphsService {
     }
   }
 
-  async getGraphs(pageNumber: number = 1, pageSize: number = 10) {
+  async getGraphs(pageNumber: number = 1, pageSize: number = 30) {
     const request = new ClientRequest(this.endpoints.getGraphs(pageNumber, pageSize));
 
     try {
