@@ -68,6 +68,7 @@ export const useUserStore = defineStore('userStore', () => {
 
     logUserIn(refreshResult.val.accessToken);
 
+    // TODO: Fix this. Can't reuse original request.
     originalRequest.headers.set('Authorization', `Bearer ${refreshResult.val.accessToken}`);
 
     return await fetch(originalRequest);
