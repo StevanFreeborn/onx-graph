@@ -6,14 +6,14 @@
     status: 'success' | 'error' | 'pending';
   }>();
 
-  const checkmark = computed(() => {
+  const checkmarkClasses = computed(() => {
     return {
       checkmark: true,
       visible: props.status === 'success',
     };
   });
 
-  const x = computed(() => {
+  const xClasses = computed(() => {
     return {
       x: true,
       visible: props.status === 'error',
@@ -23,8 +23,8 @@
 
 <template>
   <div class="container">
-    <div :class="checkmark"></div>
-    <div :class="x"></div>
+    <div :class="checkmarkClasses"></div>
+    <div :class="xClasses"></div>
     <div class="circle">
       <div class="checkmark-icon"></div>
       <div class="x-icon"></div>
