@@ -9,7 +9,7 @@
     graphId: string;
   }>();
 
-  const message = ref<string>('Connecting to server...');
+  const message = ref<string>('Connecting to graph for updates...');
   const userStore = useUserStore();
   const authService = useAuthService(userStore);
 

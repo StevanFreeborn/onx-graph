@@ -8,7 +8,7 @@ export type Graph = {
   name: string;
   createdAt: string;
   updatedAt: string;
-  status: number;
+  status: GraphStatus;
 };
 
 export const GraphStatus = {
@@ -16,6 +16,8 @@ export const GraphStatus = {
   Building: 1,
   Built: 2,
 } as const;
+
+export type GraphStatus = (typeof GraphStatus)[keyof typeof GraphStatus];
 
 export type Page = {
   pageCount: number;

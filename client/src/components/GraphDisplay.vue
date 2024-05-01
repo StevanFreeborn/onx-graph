@@ -7,28 +7,6 @@
   import { onMounted, ref } from 'vue';
   import GraphHeading from './GraphHeading.vue';
 
-  // Overall Idea:
-  // 1.  When the component is mounted we need to fetch the graph.
-  // 2.  If the graph is successfully fetched, we need to check it's status.
-  // 3.  If the graph's status is built, then we can display the graph.
-  // 4.  If the graph's status is not build, then we should display a UI
-  //     that indicates that the graph has not been built and provide a
-  //     way for the user to initiate the build process.
-  // 5.  When the user initiates the build process, we should make a request
-  //     to the server to build the graph.
-  // 6.  We should establish a websocket connection to listen for updates
-  //     on the graph build process and update the UI accordingly.
-  // 7.  When we receive a message from the websocket that the graph has been
-  //     built, we should make a request to fetch the graph and update the UI
-  //     to display the graph.
-  // 8.  If the graph build fails, we should display an error message to the user.
-  // 9.  If the user navigates away from the page, we should close the websocket
-  //     connection.
-  // 10. If the user navigates back to the page, we should re-establish the
-  //     websocket connection and update the UI accordingly.
-  // 11. If the graph status is building we should establish a websocket connection
-  //     to listen for updates on the graph build process and update the UI accordingly.
-
   const props = defineProps<{
     graphId: string;
   }>();
@@ -92,18 +70,20 @@
       </div>
     </div>
     <div v-else-if="graphData.status === 'building'">
-      <GraphHeading :name="graphData.data.name" />
+      <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
       <GraphMonitor :graph-id="graphData.data.id" />
     </div>
     <div v-else-if="graphData.status === 'not-built'">
-      <GraphHeading :name="graphData.data.name" />
+      <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
+
       <div>
         <p>The graph has not been built yet.</p>
         <button type="button">Build Graph</button>
       </div>
     </div>
     <div v-else :data-testid="`graph-${graphData.data.id}`">
-      <GraphHeading :name="graphData.data.name" />
+      <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
+
       <pre>{{ graphData.data }}</pre>
     </div>
   </Transition>
@@ -124,7 +104,7 @@
   }
 
   .graph-container,
-  .graph-container > div:not(:first-child) {
+  .graph-container > div:not(.heading-container) {
     display: flex;
     flex-direction: column;
     gap: 1rem;
