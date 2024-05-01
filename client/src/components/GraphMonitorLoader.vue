@@ -36,6 +36,8 @@
 <style scoped>
   .container {
     --circle-size: 3.5rem;
+    --success-color: green;
+    --error-color: red;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -69,8 +71,8 @@
         content: '';
         height: 1.75rem;
         width: 1rem;
-        border-top: 4px solid #5cb85c;
-        border-right: 4px solid #5cb85c;
+        border-top: 4px solid var(--success-color);
+        border-right: 4px solid var(--success-color);
         left: 0.75rem;
         top: 50%;
         transform: scaleX(-1) rotate(135deg);
@@ -78,34 +80,30 @@
         animation: checkmark-icon 0.8s ease;
       }
 
-      .x-icon::after {
-        position: absolute;
-        content: '';
-        height: 2rem;
-        border-top: 4px solid #d9534f;
-        border-right: 4px solid #d9534f;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) rotate(45deg);
-        animation: x-icon 0.8s ease;
-      }
-
+      .x-icon::after,
       .x-icon::before {
         position: absolute;
         content: '';
         height: 2rem;
-        border-top: 4px solid #d9534f;
-        border-right: 4px solid #d9534f;
+        border-top: 4px solid var(--error-color);
+        border-right: 4px solid var(--error-color);
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%) rotate(-45deg);
         animation: x-icon 0.8s ease;
+      }
+
+      .x-icon::after {
+        transform: translate(-50%, -50%) rotate(45deg);
+      }
+
+      .x-icon::before {
+        transform: translate(-50%, -50%) rotate(-45deg);
       }
     }
 
     & .checkmark.visible ~ .circle {
       animation: none;
-      border-color: #5cb85c;
+      border-color: var(--success-color);
       transition: border 0.5s ease-out;
     }
 
@@ -115,10 +113,7 @@
       transition: border 0.5s ease-out;
     }
 
-    & .checkmark.visible ~ .circle .checkmark-icon {
-      display: block;
-    }
-
+    & .checkmark.visible ~ .circle .checkmark-icon,
     & .x.visible ~ .circle .x-icon {
       display: block;
     }
