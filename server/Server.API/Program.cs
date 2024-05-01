@@ -197,6 +197,13 @@ try
   builder.Services.AddSingleton<IGraphProcessor, GraphProcessor>();
   builder.Services.AddHostedService<GraphQueueService>();
   builder.Services.AddSignalR();
+  builder.Services
+    .AddHttpClient(
+      OnspringClientFactory.HttpClientName,
+      client => client.BaseAddress = new Uri("https://api.onspring.com")
+    )
+    .AddStandardResilienceHandler();
+  builder.Services.AddSingleton<IOnspringClientFactory, OnspringClientFactory>();
 
   // add rate limiting and whitelist client origin
   builder.Services.AddRateLimiter(options =>

@@ -1,6 +1,10 @@
 namespace Server.API.Graphs;
 
-class GraphQueueService(ILogger<GraphQueueService> logger, IGraphQueue queue, IGraphProcessor processor) : BackgroundService
+class GraphQueueService(
+  ILogger<GraphQueueService> logger,
+  IGraphQueue queue,
+  IGraphProcessor processor
+) : BackgroundService
 {
   private readonly ILogger<GraphQueueService> _logger = logger;
   private readonly IGraphQueue _queue = queue;

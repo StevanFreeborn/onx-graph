@@ -12,6 +12,8 @@ class Graph(string name, string apiKey, User user)
   public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
   public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
   public GraphStatus Status { get; set; } = GraphStatus.Building;
+  public List<App> Nodes { get; set; } = [];
+  public Dictionary<string, List<Field>> EdgesMap { get; set; } = [];
 
   public Graph(AddGraphDto dto, User user) : this(dto.Name, dto.ApiKey, user) { }
   internal Graph() : this(string.Empty, string.Empty, new User()) { }

@@ -109,7 +109,7 @@
 
     & .x.visible ~ .circle {
       animation: none;
-      border-color: #d9534f;
+      border-color: var(--error-color);
       transition: border 0.5s ease-out;
     }
 

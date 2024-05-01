@@ -70,7 +70,6 @@
     <div v-else-if="graphData.status === 'error'">
       <div>
         <p>There was an error loading the graph.</p>
-        \
         <!-- TODO: Style button -->
         <button @click="() => getGraph()" type="button">Try Again</button>
       </div>
