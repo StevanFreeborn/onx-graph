@@ -13,6 +13,15 @@ class GraphProcessor(
 
   public async Task ProcessAsync(GraphQueueItem item)
   {
+    // TODO: Implement actual processing
+    // will need to get the graph from the database
+    // will need to get the user from the database
+    // will need to decrypt the user's encryption key
+    // will need to decrypt the graph's api key
+    // will need to create Onspring client with api key
+    // will need to fetch apps for the graph
+    // will need to fetch the fields for each app
+    // will need to store the results with the graph
     _logger.LogInformation("Processing item {ItemId} for graph {GraphId}", item.Id, item.GraphId);
 
     using var scope = _serviceScopeFactory.CreateScope();
