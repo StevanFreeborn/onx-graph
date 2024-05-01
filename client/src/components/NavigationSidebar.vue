@@ -6,6 +6,7 @@
   import { computed, onMounted, ref } from 'vue';
   import { useRouter } from 'vue-router';
 
+  // TODO: Save sidebar state to local storage
   const isSidebarOpen = ref(true);
   const isMounted = useMounted();
   const router = useRouter();
@@ -40,6 +41,7 @@
 
     if (user.err) {
       for (const error of user.val) {
+        // eslint-disable-next-line no-console
         console.error(error);
       }
       return;
@@ -57,6 +59,7 @@
 
     if (logoutResult.err) {
       for (const error of logoutResult.val) {
+        // eslint-disable-next-line no-console
         console.error(error);
       }
       alert('An error occurred while logging out. Please try again.');
