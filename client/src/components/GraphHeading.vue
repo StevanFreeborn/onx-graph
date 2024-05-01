@@ -11,6 +11,7 @@
 <template>
   <div class="heading-container">
     <div>
+      <!-- TODO: Deal with long graph names -->
       <h2>{{ props.name }}</h2>
     </div>
     <div class="status-icon-container">

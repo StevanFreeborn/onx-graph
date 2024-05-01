@@ -36,4 +36,11 @@ interface IGraphRepository
   /// <param name="userId">The id of the user who owns the graphs.</param>
   /// <returns>A page of graphs as a <see cref="Page{Graph}"/> instance.</returns>
   Task<Page<Graph>> GetGraphsAsync(int pageNumber, int pageSize, string userId);
+
+  /// <summary>
+  /// Updates a graph.
+  /// </summary>
+  /// <param name="graph">The graph to update.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task UpdateGraphAsync(Graph graph);
 }

@@ -9,4 +9,14 @@ public interface IGraphsClient
   /// Receives an update.
   /// </summary>
   Task ReceiveUpdate(string update);
+
+  /// <summary>
+  /// Sends a message.
+  /// </summary>
+  Task GraphBuilt();
+
+  /// <summary>
+  /// Sends a message.
+  /// </summary>
+  Task GraphError();
 }

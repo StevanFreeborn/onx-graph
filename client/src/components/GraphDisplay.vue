@@ -56,6 +56,10 @@
   onMounted(async () => {
     await getGraph();
   });
+
+  async function handleGraphProcessed() {
+    await getGraph();
+  }
 </script>
 
 <template>
@@ -66,24 +70,27 @@
     <div v-else-if="graphData.status === 'error'">
       <div>
         <p>There was an error loading the graph.</p>
+        \
+        <!-- TODO: Style button -->
         <button @click="() => getGraph()" type="button">Try Again</button>
       </div>
     </div>
     <div v-else-if="graphData.status === 'building'">
       <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
-      <GraphMonitor :graph-id="graphData.data.id" />
+      <GraphMonitor :graph-id="graphData.data.id" @graph-processed="handleGraphProcessed" />
     </div>
     <div v-else-if="graphData.status === 'not-built'">
       <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
 
       <div>
         <p>The graph has not been built yet.</p>
+        <!-- TODO: Style button -->
+        <!-- TODO: Implement request to build graph again -->
         <button type="button">Build Graph</button>
       </div>
     </div>
     <div v-else :data-testid="`graph-${graphData.data.id}`">
       <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
-
       <pre>{{ graphData.data }}</pre>
     </div>
   </Transition>

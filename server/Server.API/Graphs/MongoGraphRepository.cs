@@ -4,11 +4,12 @@ namespace Server.API.Graphs;
 /// A repository for managing graphs in MongoDB.
 /// </summary>
 /// <inheritdoc cref="IGraphRepository"/>
-class MongoGraphRepository(MongoDbContext context) : IGraphRepository
+class MongoGraphRepository(MongoDbContext context, TimeProvider timeProvider) : IGraphRepository
 {
   private const string CountFacetName = "count";
   private const string DataFacetName = "data";
   private readonly MongoDbContext _context = context;
+  private readonly TimeProvider _timeProvider = timeProvider;
 
   public async Task<Graph> CreateGraphAsync(Graph graph)
   {
@@ -85,5 +86,12 @@ class MongoGraphRepository(MongoDbContext context) : IGraphRepository
       totalCount: count,
       data: [.. data]
     );
+  }
+
+  public Task UpdateGraphAsync(Graph graph)
+  {
+    graph.UpdatedAt = _timeProvider.GetUtcNow().DateTime;
+    var filter = Builders<Graph>.Filter.Eq(u => u.Id, graph.Id);
+    return _context.Graphs.ReplaceOneAsync(filter, graph);
   }
 }

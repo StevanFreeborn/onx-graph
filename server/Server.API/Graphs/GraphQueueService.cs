@@ -17,7 +17,18 @@ class GraphQueueService(ILogger<GraphQueueService> logger, IGraphQueue queue, IG
         continue;
       }
 
-      _ = Task.Run(async () => await _processor.ProcessAsync(item), stoppingToken);
+      _ = Task.Run(async () =>
+      {
+        try
+        {
+          await _processor.ProcessAsync(item);
+        }
+        catch (Exception ex)
+        {
+          _logger.LogError(ex, "Error processing item {ItemId} for graph {GraphId}", item.Id, item.GraphId);
+        }
+      }, stoppingToken);
+
       _logger.LogInformation("Dequeued item {ItemId} for processing graph {GraphId}", item.Id, item.GraphId);
     }
   }

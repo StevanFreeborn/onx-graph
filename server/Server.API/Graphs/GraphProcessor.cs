@@ -17,7 +17,6 @@ class GraphProcessor(
 
     using var scope = _serviceScopeFactory.CreateScope();
     var graphRepository = scope.ServiceProvider.GetRequiredService<IGraphRepository>();
-
     var graph = await graphRepository.GetGraphAsync(item.GraphId, item.UserId);
 
     if (graph is null)
@@ -28,24 +27,39 @@ class GraphProcessor(
 
     var groupId = $"{graph.UserId}-{graph.Id}";
 
-    await _hubContext.Clients.Group(groupId).ReceiveUpdate("Building graph...");
+    try
+    {
+      await _hubContext.Clients.Group(groupId).ReceiveUpdate("Building graph...");
 
-    await Task.Delay(5000);
+      await Task.Delay(5000);
 
-    await _hubContext.Clients.Group(groupId).ReceiveUpdate("Fetching apps for the graph...");
+      await _hubContext.Clients.Group(groupId).ReceiveUpdate("Fetching apps for the graph...");
 
-    await Task.Delay(5000);
+      await Task.Delay(5000);
 
-    await _hubContext.Clients.Group(groupId).ReceiveUpdate("Fetching fields for the graph...");
+      await _hubContext.Clients.Group(groupId).ReceiveUpdate("Fetching fields for the graph...");
 
-    await Task.Delay(5000);
+      await Task.Delay(5000);
 
-    await _hubContext.Clients.Group(groupId).ReceiveUpdate("Building graph...");
+      await _hubContext.Clients.Group(groupId).ReceiveUpdate("Building graph...");
 
-    await Task.Delay(5000);
+      await Task.Delay(5000);
 
-    await _hubContext.Clients.Group(groupId).ReceiveUpdate("Graph built successfully!");
+      graph.Status = GraphStatus.Built;
+      await graphRepository.UpdateGraphAsync(graph);
 
-    _logger.LogInformation("Item {ItemId} for graph {GraphId} processed successfully", item.Id, item.GraphId);
+      await _hubContext.Clients.Group(groupId).GraphBuilt();
+
+      _logger.LogInformation("Item {ItemId} for graph {GraphId} processed successfully", item.Id, item.GraphId);
+    }
+    catch (Exception ex)
+    {
+      graph.Status = GraphStatus.NotBuilt;
+      await graphRepository.UpdateGraphAsync(graph);
+
+      await _hubContext.Clients.Group(groupId).GraphError();
+
+      _logger.LogError(ex, "Error processing item {ItemId} for graph {GraphId}", item.Id, item.GraphId);
+    }
   }
 }

@@ -3,12 +3,13 @@ namespace Server.API.Tests.Integration;
 public class MongoGraphRepositoryTests : IClassFixture<TestDb>, IDisposable
 {
   private readonly MongoDbContext _context;
+  private readonly Mock<TimeProvider> _timeProvider = new();
   private readonly MongoGraphRepository _sut;
 
   public MongoGraphRepositoryTests(TestDb testDb)
   {
     _context = testDb.Context;
-    _sut = new MongoGraphRepository(testDb.Context);
+    _sut = new MongoGraphRepository(testDb.Context, _timeProvider.Object);
   }
 
   public void Dispose()
