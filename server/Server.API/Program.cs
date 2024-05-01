@@ -200,7 +200,10 @@ try
   builder.Services
     .AddHttpClient(
       OnspringClientFactory.HttpClientName,
-      client => client.BaseAddress = new Uri("https://api.onspring.com")
+      client =>
+      {
+        client.BaseAddress = new Uri("https://api.onspring.com");
+      }
     )
     .AddStandardResilienceHandler();
   builder.Services.AddSingleton<IOnspringClientFactory, OnspringClientFactory>();
