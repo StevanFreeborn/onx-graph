@@ -2,6 +2,12 @@ import { useUserStore } from '@/stores/userStore';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { useAuthService } from './useAuthService';
 
+export const GraphHubEvents = {
+  GraphBuilt: 'GraphBuilt',
+  GraphError: 'GraphError',
+  ReceiveUpdate: 'ReceiveUpdate',
+} as const;
+
 export function useGraphHub() {
   const userStore = useUserStore();
   const authService = useAuthService(userStore);

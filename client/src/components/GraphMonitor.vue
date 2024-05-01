@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { useGraphHub } from '@/composables/useGraphHub';
+  import { GraphHubEvents, useGraphHub } from '@/composables/useGraphHub';
   import { onMounted, onUnmounted, ref } from 'vue';
   import SpinningLoader from './SpinningLoader.vue';
 
@@ -15,16 +15,16 @@
 
   let connection = useGraphHub();
 
-  connection.on('ReceiveUpdate', data => {
+  connection.on(GraphHubEvents.ReceiveUpdate, data => {
     message.value = data;
   });
 
-  connection.on('GraphBuilt', () => {
+  connection.on(GraphHubEvents.GraphBuilt, () => {
     message.value = 'Graph built successfully!';
     emits('graphProcessed');
   });
 
-  connection.on('GraphError', () => {
+  connection.on(GraphHubEvents.GraphError, () => {
     message.value = 'Error building graph!';
     emits('graphProcessed');
   });
