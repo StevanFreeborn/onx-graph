@@ -6,6 +6,7 @@ export const GraphHubEvents = {
   GraphBuilt: 'GraphBuilt',
   GraphError: 'GraphError',
   ReceiveUpdate: 'ReceiveUpdate',
+  JoinGraph: 'JoinGraph',
 } as const;
 
 export function useGraphHub() {
