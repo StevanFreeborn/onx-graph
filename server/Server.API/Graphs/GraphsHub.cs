@@ -7,6 +7,6 @@ class GraphsHub : Hub<IGraphsClient>
   {
     var userId = Context.User!.FindFirstValue(ClaimTypes.NameIdentifier);
     await Groups.AddToGroupAsync(Context.ConnectionId, $"{userId}-{graphId}");
-    await Clients.Group($"{userId}-{graphId}").ReceiveUpdate("User joined the graph");
+    await Clients.Group($"{userId}-{graphId}").ReceiveUpdate("Waiting for updates...");
   }
 }
