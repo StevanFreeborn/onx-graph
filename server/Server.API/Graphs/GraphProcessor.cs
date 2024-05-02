@@ -19,7 +19,6 @@ class GraphProcessor(
 
   public async Task ProcessAsync(GraphQueueItem item)
   {
-    // TODO: Cleanup
     _logger.LogInformation("Processing item {ItemId} for graph {GraphId}", item.Id, item.GraphId);
 
     using var scope = _serviceScopeFactory.CreateScope();
@@ -65,51 +64,7 @@ class GraphProcessor(
 
       await SendUpdate(groupId, "Fetching apps for the graph...");
 
-      var apps = new ConcurrentBag<App>();
-      var appsResponse = await onspringClient.GetAppsAsync(new PagingRequest() { PageNumber = 1 });
-
-      if (appsResponse.IsSuccessful is false)
-      {
-        _logger.LogWarning(
-          "Unable to fetch page 1 of apps for graph {GraphId}: {ResponseStatus} - {ResponseMessage}",
-          graph.Id,
-          appsResponse.StatusCode,
-          appsResponse.Message
-        );
-        throw new GraphProcessingException("Unable to fetch apps for the graph.");
-      }
-
-      appsResponse.Value.Items.ForEach(apps.Add);
-
-      var currentPage = appsResponse.Value.PageNumber;
-      var totalPages = appsResponse.Value.TotalPages;
-
-      if (totalPages > currentPage)
-      {
-        var remainingAppRequests = Enumerable
-          .Range(currentPage + 1, totalPages - 1)
-          .Select(page => new PagingRequest() { PageNumber = page });
-
-        await Task.WhenAll(remainingAppRequests.Select(async pageRequest =>
-        {
-          var response = await onspringClient.GetAppsAsync(pageRequest);
-
-          if (response.IsSuccessful is false)
-          {
-            _logger.LogWarning(
-              "Unable to fetch page {Page} of apps for graph {GraphId}: {ResponseStatus} - {ResponseMessage}",
-              pageRequest.PageNumber,
-              graph.Id,
-              response.StatusCode,
-              response.Message
-            );
-
-            return;
-          }
-
-          response.Value.Items.ForEach(apps.Add);
-        }));
-      }
+      var apps = await GetAppsAsync(onspringClient, graph);
 
       if (apps.IsEmpty)
       {
@@ -119,72 +74,9 @@ class GraphProcessor(
 
       await SendUpdate(groupId, "Fetching fields for the graph...");
 
-      var referenceFields = new ConcurrentBag<Field>();
+      var fields = await GetFieldsAsync(onspringClient, graph, apps);
 
-      await Task.WhenAll(apps.Select(async app =>
-      {
-        var fieldsResponse = await onspringClient.GetFieldsForAppAsync(app.Id, new PagingRequest() { PageNumber = 1 });
-
-        if (fieldsResponse.IsSuccessful is false)
-        {
-          _logger.LogWarning(
-            "Unable to fetch fields for app {AppId} in graph {GraphId}: {ResponseStatus} - {ResponseMessage}",
-            app.Id,
-            graph.Id,
-            fieldsResponse.StatusCode,
-            fieldsResponse.Message
-          );
-
-          return;
-        }
-
-        fieldsResponse.Value.Items.ForEach(field =>
-        {
-          if (field.Type is FieldType.Reference or FieldType.SurveyReference)
-          {
-            referenceFields.Add(field);
-          }
-        });
-
-        var currentPage = fieldsResponse.Value.PageNumber;
-        var totalPages = fieldsResponse.Value.TotalPages;
-
-        if (totalPages > currentPage)
-        {
-          var remainingFieldRequests = Enumerable
-            .Range(currentPage + 1, totalPages - 1)
-            .Select(page => new PagingRequest() { PageNumber = page })
-
-          await Task.WhenAll(remainingFieldRequests.Select(async request =>
-          {
-            var response = await onspringClient.GetFieldsForAppAsync(app.Id, request);
-
-            if (response.IsSuccessful is false)
-            {
-              _logger.LogWarning(
-                "Unable to fetch page {Page} of fields for app {AppId} in graph {GraphId}: {ResponseStatus} - {ResponseMessage}",
-                request.PageNumber,
-                app.Id,
-                graph.Id,
-                response.StatusCode,
-                response.Message
-              );
-
-              return;
-            }
-
-            response.Value.Items.ForEach(field =>
-            {
-              if (field.Type is FieldType.Reference or FieldType.SurveyReference)
-              {
-                referenceFields.Add(field);
-              }
-            });
-          }));
-        }
-      }));
-
-      if (referenceFields.IsEmpty)
+      if (fields.IsEmpty)
       {
         _logger.LogWarning("No fields found for graph {GraphId}", graph.Id);
         throw new GraphProcessingException("No fields found for the graph.");
@@ -192,12 +84,10 @@ class GraphProcessor(
 
       await _hubContext.Clients.Group(groupId).ReceiveUpdate("Updating graph...");
 
-      var edgesMap = new Dictionary<string, List<Field>>();
-
-      foreach (var app in apps)
-      {
-        edgesMap[app.Id.ToString()] = referenceFields.Where(f => f.AppId == app.Id).ToList();
-      }
+      var edgesMap = apps.ToDictionary(
+        app => app.Id.ToString(),
+        app => fields.Where(field => field.AppId == app.Id).ToList()
+      );
 
       graph.Nodes = [.. apps];
       graph.EdgesMap = edgesMap;
@@ -222,6 +112,134 @@ class GraphProcessor(
 
       _logger.LogError(ex, "Error processing item {ItemId} for graph {GraphId}", item.Id, item.GraphId);
     }
+  }
+
+  private async Task<ConcurrentBag<App>> GetAppsAsync(IOnspringClient client, Graph graph)
+  {
+    var apps = new ConcurrentBag<App>();
+
+    var appsResponse = await client.GetAppsAsync(new PagingRequest() { PageNumber = 1 });
+
+    if (appsResponse.IsSuccessful is false)
+    {
+      _logger.LogWarning(
+        "Unable to fetch page 1 of apps for graph {GraphId}: {ResponseStatus} - {ResponseMessage}",
+        graph.Id,
+        appsResponse.StatusCode,
+        appsResponse.Message
+      );
+
+      throw new GraphProcessingException("Unable to fetch apps for the graph.");
+    }
+
+    appsResponse.Value.Items.ForEach(apps.Add);
+
+    var currentPage = appsResponse.Value.PageNumber;
+    var totalPages = appsResponse.Value.TotalPages;
+
+    if (totalPages > currentPage)
+    {
+      var nextPage = currentPage + 1;
+      var numRemaining = totalPages - 1;
+
+      var remainingAppRequests = Enumerable
+        .Range(nextPage, numRemaining)
+        .Select(page => new PagingRequest() { PageNumber = page });
+
+      await Parallel.ForEachAsync(remainingAppRequests, async (pageRequest, token) =>
+      {
+        var response = await client.GetAppsAsync(pageRequest);
+
+        if (response.IsSuccessful is false)
+        {
+          _logger.LogWarning(
+            "Unable to fetch page {Page} of apps for graph {GraphId}: {ResponseStatus} - {ResponseMessage}",
+            pageRequest.PageNumber,
+            graph.Id,
+            response.StatusCode,
+            response.Message
+          );
+
+          return;
+        }
+
+        response.Value.Items.ForEach(apps.Add);
+      });
+    }
+
+    return apps;
+  }
+
+  private async Task<ConcurrentBag<Field>> GetFieldsAsync(IOnspringClient client, Graph graph, ConcurrentBag<App> apps)
+  {
+    var fields = new ConcurrentBag<Field>();
+
+    await Parallel.ForEachAsync(apps, async (app, token) =>
+    {
+      var fieldsResponse = await client.GetFieldsForAppAsync(app.Id, new PagingRequest() { PageNumber = 1 });
+
+      if (fieldsResponse.IsSuccessful is false)
+      {
+        _logger.LogWarning(
+          "Unable to fetch fields for app {AppId} in graph {GraphId}: {ResponseStatus} - {ResponseMessage}",
+          app.Id,
+          graph.Id,
+          fieldsResponse.StatusCode,
+          fieldsResponse.Message
+        );
+
+        return;
+      }
+
+      fieldsResponse.Value.Items.ForEach(field =>
+      {
+        if (field.Type is FieldType.Reference or FieldType.SurveyReference)
+        {
+          fields.Add(field);
+        }
+      });
+
+      var currentPage = fieldsResponse.Value.PageNumber;
+      var totalPages = fieldsResponse.Value.TotalPages;
+
+      if (totalPages > currentPage)
+      {
+        var nextPage = currentPage + 1;
+        var numRemaining = totalPages - 1;
+        var remainingFieldRequests = Enumerable
+          .Range(nextPage, numRemaining)
+          .Select(page => new PagingRequest() { PageNumber = page });
+
+        await Parallel.ForEachAsync(remainingFieldRequests, async (pageRequest, token) =>
+        {
+          var response = await client.GetFieldsForAppAsync(app.Id, pageRequest);
+
+          if (response.IsSuccessful is false)
+          {
+            _logger.LogWarning(
+              "Unable to fetch page {Page} of fields for app {AppId} in graph {GraphId}: {ResponseStatus} - {ResponseMessage}",
+              pageRequest.PageNumber,
+              app.Id,
+              graph.Id,
+              response.StatusCode,
+              response.Message
+            );
+
+            return;
+          }
+
+          response.Value.Items.ForEach(field =>
+          {
+            if (field.Type is FieldType.Reference or FieldType.SurveyReference)
+            {
+              fields.Add(field);
+            }
+          });
+        });
+      }
+    });
+
+    return fields;
   }
 
   private async Task SendUpdate(string groupId, string message)
