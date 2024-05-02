@@ -14,26 +14,31 @@ class GraphQueueService(
   {
     while (stoppingToken.IsCancellationRequested is false)
     {
-      var item = await _queue.DequeueAsync();
-
-      if (item is null)
-      {
-        continue;
-      }
-
-      _ = Task.Run(async () =>
-      {
-        try
-        {
-          await _processor.ProcessAsync(item);
-        }
-        catch (Exception ex)
-        {
-          _logger.LogError(ex, "Error processing item {ItemId} for graph {GraphId}", item.Id, item.GraphId);
-        }
-      }, stoppingToken);
-
-      _logger.LogInformation("Dequeued item {ItemId} for processing graph {GraphId}", item.Id, item.GraphId);
+      await ProcessItemAsync(stoppingToken);
     }
+  }
+
+  internal async Task ProcessItemAsync(CancellationToken stoppingToken)
+  {
+    var item = await _queue.DequeueAsync();
+
+    if (item is null)
+    {
+      return;
+    }
+
+    _ = Task.Run(async () =>
+    {
+      try
+      {
+        await _processor.ProcessAsync(item);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError(ex, "Error processing item {ItemId} for graph {GraphId}", item.Id, item.GraphId);
+      }
+    }, stoppingToken);
+
+    _logger.LogInformation("Dequeued item {ItemId} for processing graph {GraphId}", item.Id, item.GraphId);
   }
 }
