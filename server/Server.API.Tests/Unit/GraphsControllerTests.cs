@@ -311,6 +311,12 @@ public class GraphsControllerTests
           ),
         Times.Once
       );
+
+    _graphQueueMock
+      .Verify(
+        q => q.EnqueueAsync(It.IsAny<GraphQueueItem>()),
+        Times.Once
+      );
   }
 
   private GetGraphsRequest CreateGetGraphsRequest(int pageNumber, int pageSize) => new(
