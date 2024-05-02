@@ -83,11 +83,12 @@ export class Client implements IClient {
       credentials: credentials,
     };
 
-    const request = new Request(url, requestConfig);
-    const response = await fetch(request);
+    const firstTryRequest = new Request(url, requestConfig);
+    const secondTryRequest = new Request(url, requestConfig);
+    const response = await fetch(firstTryRequest);
 
     if (response.status === 401 && this._clientConfig?.unauthorizedResponseHandler) {
-      return await this._clientConfig.unauthorizedResponseHandler(request);
+      return await this._clientConfig.unauthorizedResponseHandler(secondTryRequest);
     }
 
     return response;
