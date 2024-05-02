@@ -188,7 +188,7 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
 
     responseBody!.Data.Should().HaveCount(5);
     responseBody!.PageNumber.Should().Be(1);
-    responseBody!.PageCount.Should().Be(1);
+    responseBody!.PageCount.Should().Be(5);
     responseBody!.TotalPages.Should().Be(1);
     responseBody!.TotalCount.Should().Be(5);
   }
