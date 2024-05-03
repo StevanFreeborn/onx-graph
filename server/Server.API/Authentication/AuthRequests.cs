@@ -107,10 +107,7 @@ record RefreshTokenRequest(
 /// <summary>
 /// Represents the data needed to resend verification email
 /// </summary>
-record ResendVerificationEmailDto(string Email)
-{
-  internal ResendVerificationEmailDto() : this(string.Empty) { }
-}
+record ResendVerificationEmailDto(string Email);
 
 /// <summary>
 /// Validator for <see cref="LoginDto"/>
