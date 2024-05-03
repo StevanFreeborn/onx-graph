@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup, fireEvent, render } from '@testing-library/vue';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import DataPager from '../../src/components/DataPager.vue';
 
@@ -90,7 +90,7 @@ describe('DataPager', () => {
     expect(nextButton).toBeDisabled();
   });
 
-  it('should display previous and next buttons as enabled if current page is not the first or last page', () => {
+  it('should display previous and next buttons as enabled if current page is not the first or last page', async () => {
     const { getByRole } = render(DataPager, {
       props: { page: mockSecondPage },
     });
@@ -98,8 +98,10 @@ describe('DataPager', () => {
     const previousButton = getByRole('button', { name: /previous/i });
     const nextButton = getByRole('button', { name: /next/i });
 
-    expect(previousButton).toBeEnabled();
-    expect(nextButton).toBeEnabled();
+    await waitFor(() => {
+      expect(previousButton).toBeEnabled();
+      expect(nextButton).toBeEnabled();
+    });
   });
 
   it('should emit previous event when previous button is clicked', async () => {
