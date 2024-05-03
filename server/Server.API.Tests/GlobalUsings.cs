@@ -53,3 +53,7 @@ global using Server.API.Tests.Integration.Utilities;
 global using Testcontainers.MongoDb;
 
 global using Xunit;
+
+global using Onspring.API.SDK;
+global using Onspring.API.SDK.Models;
+global using Onspring.API.SDK.Enums;

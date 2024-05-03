@@ -79,6 +79,15 @@ static class FakeDataFactory
     .RuleFor(g => g.ApiKey, f => f.Random.AlphaNumeric(32))
     .RuleFor(g => g.CreatedAt, f => DateTime.UtcNow)
     .RuleFor(g => g.UpdatedAt, f => DateTime.UtcNow);
+
+  /// <summary>
+  /// Generates a new <see cref="GraphQueueItem"/> instance
+  /// </summary>
+  internal static readonly Faker<GraphQueueItem> GraphQueueItem = new Faker<GraphQueueItem>()
+    .CustomInstantiator(f => new GraphQueueItem())
+    .RuleFor(i => i.Id, f => ObjectId.GenerateNewId().ToString())
+    .RuleFor(i => i.GraphId, f => ObjectId.GenerateNewId().ToString())
+    .RuleFor(i => i.UserId, f => ObjectId.GenerateNewId().ToString());
 }
 
 /// <summary>

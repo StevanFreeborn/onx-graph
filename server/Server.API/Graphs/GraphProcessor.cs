@@ -76,12 +76,6 @@ class GraphProcessor(
 
       var fields = await GetFieldsAsync(onspringClient, graph, apps);
 
-      if (fields.IsEmpty)
-      {
-        _logger.LogWarning("No fields found for graph {GraphId}", graph.Id);
-        throw new GraphProcessingException("No fields found for the graph.");
-      }
-
       await _hubContext.Clients.Group(groupId).ReceiveUpdate("Updating graph...");
 
       var edgesMap = apps.ToDictionary(
