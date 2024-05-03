@@ -31,6 +31,10 @@ describe('GraphsService', () => {
     expect(graphsService.getGraphs).toBeInstanceOf(Function);
   });
 
+  it('should have a getGraph method', () => {
+    expect(graphsService.getGraph).toBeInstanceOf(Function);
+  });
+
   describe('addGraph', () => {
     it('should return an error if the response status is 400', async () => {
       mockClient.post.mockReturnValueOnce({
@@ -131,6 +135,42 @@ describe('GraphsService', () => {
 
       expect(result.err).toBe(false);
       expect(result.val).toEqual(page);
+    });
+  });
+
+  describe('getGraph', () => {
+    it('should return an error if the response status is not ok', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+      mockClient.get.mockReturnValueOnce({ ok: false });
+
+      const result = await graphsService.getGraph('123');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to get graph.')]);
+    });
+
+    it('should return an error if the request fails', async () => {
+      mockClient.get.mockRejectedValueOnce(new Error('Failed to get graph.'));
+
+      const result = await graphsService.getGraph('123');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to get graph.')]);
+    });
+
+    it('should return the response body if the request is successful', async () => {
+      const graph = { id: '123', name: 'graph', apiKey: 'key' };
+
+      mockClient.get.mockReturnValueOnce({
+        ok: true,
+        json: async () => graph,
+      });
+
+      const result = await graphsService.getGraph('123');
+
+      expect(result.err).toBe(false);
+      expect(result.val).toEqual(graph);
     });
   });
 });
