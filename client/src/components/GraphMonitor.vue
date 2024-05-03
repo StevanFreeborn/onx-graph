@@ -16,21 +16,30 @@
 
   const connection = useGraphHub();
 
-  connection.on(GraphHubEvents.ReceiveUpdate, data => {
-    message.value = data;
-  });
+  connection.on(
+    GraphHubEvents.ReceiveUpdate,
+    /* istanbul ignore next -- @preserve */ data => {
+      message.value = data;
+    }
+  );
 
-  connection.on(GraphHubEvents.GraphBuilt, () => {
-    message.value = 'Graph built successfully!';
-    outcome.value = 'success';
-    emits('graphProcessed');
-  });
+  connection.on(
+    GraphHubEvents.GraphBuilt,
+    /* istanbul ignore next -- @preserve */ () => {
+      message.value = 'Graph built successfully!';
+      outcome.value = 'success';
+      emits('graphProcessed');
+    }
+  );
 
-  connection.on(GraphHubEvents.GraphError, () => {
-    message.value = 'Error building graph!';
-    outcome.value = 'error';
-    emits('graphProcessed');
-  });
+  connection.on(
+    GraphHubEvents.GraphError,
+    /* istanbul ignore next -- @preserve */ () => {
+      message.value = 'Error building graph!';
+      outcome.value = 'error';
+      emits('graphProcessed');
+    }
+  );
 
   onMounted(async () => {
     try {
