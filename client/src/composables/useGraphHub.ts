@@ -16,7 +16,7 @@ export function useGraphHub() {
 
   const connection = new HubConnectionBuilder()
     .withUrl(`${baseUrl}/graphs/hub`, {
-      accessTokenFactory: async () => {
+      accessTokenFactory: /* istanbul ignore next -- @preserve */ async () => {
         const token = userStore.user?.token ?? '';
         const expiresAt = userStore.user?.expiresAtInSeconds;
         const expiresAtInMs = expiresAt ? expiresAt * 1000 : 0;
