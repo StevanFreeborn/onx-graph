@@ -26,8 +26,8 @@
     <div :class="checkmarkClasses"></div>
     <div :class="xClasses"></div>
     <div class="circle">
-      <div class="checkmark-icon"></div>
-      <div class="x-icon"></div>
+      <div class="checkmark-icon" data-testid="success-icon"></div>
+      <div class="x-icon" data-testid="error-icon"></div>
     </div>
     <div>{{ msg }}</div>
   </div>
