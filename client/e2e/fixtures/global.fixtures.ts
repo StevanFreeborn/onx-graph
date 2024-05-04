@@ -29,7 +29,15 @@ type GlobalFixtures = {
   mailhog: mailhog.API;
   dbcontext: Db;
   authenticatedUserPage: AuthenticatedUserPage;
-  insertGraphForUser: (userId: string) => Promise<{
+  insertFakeGraphForUser: (userId: string) => Promise<{
+    _id: string;
+    userId: string;
+    name: string;
+    apiKey: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
+  insertRealGraphForUser: (userId: string) => Promise<{
     _id: string;
     userId: string;
     name: string;
@@ -41,8 +49,10 @@ type GlobalFixtures = {
 
 const testPassword = '@Password1';
 const testPasswordHash = '$2a$11$Xs1mALyCfYD7Er2542tlVupp7GnXIwj5kA/0e6d1Dapws80QwuWoq';
-const testUserEncryptionKey = 'jm4FmaUQy6siVjtKrui4mgP6VqD9ITqhW27hiMg2hDw=';
-const testEncryptedApiKey = '6iOGOCLgeHeuANqNBFqCsg==';
+const testUserEncryptionKey = 'A9UGXuD0vFKVHdfnC0+DHds0dAWUzTp0+nhNztiNYa8=';
+const testEncryptedFakeApiKey = 'fubdMXZfydPqUk/+epV7aQ==';
+const testEncryptedRealApiKey =
+  '8DX/R556rHqYUmWIdzrp7xwCAu2emofxlTn3CR1QTbdr9QWNtzwik4f+seaGp664aRYt3VZgczwlVsqQXIcukw==';
 
 export const test = base.extend<GlobalFixtures>({
   page: async ({ browser }, use) => {
@@ -140,17 +150,24 @@ export const test = base.extend<GlobalFixtures>({
 
     await use(page);
   },
-  insertGraphForUser: async ({ dbcontext }, use) => {
-    await use(async (userId: string) => await insertGraph(dbcontext, userId));
+  insertFakeGraphForUser: async ({ dbcontext }, use) => {
+    await use(
+      async (userId: string) => await insertGraph(dbcontext, userId, testEncryptedFakeApiKey)
+    );
+  },
+  insertRealGraphForUser: async ({ dbcontext }, use) => {
+    await use(
+      async (userId: string) => await insertGraph(dbcontext, userId, testEncryptedRealApiKey)
+    );
   },
 });
 
-async function insertGraph(dbcontext: Db, userId: string) {
+async function insertGraph(dbcontext: Db, userId: string, apiKey: string) {
   const graph = {
     _id: faker.database.mongodbObjectId(),
     userId,
     name: faker.lorem.words(),
-    apiKey: testEncryptedApiKey,
+    apiKey: apiKey,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

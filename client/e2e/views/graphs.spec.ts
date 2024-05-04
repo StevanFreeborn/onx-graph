@@ -20,7 +20,7 @@ test.describe('GraphsView', () => {
     verifiedUser: user,
     authenticatedUserPage: page,
     getAccessibilityResults,
-    insertGraphForUser,
+    insertFakeGraphForUser: insertGraphForUser,
   }) => {
     const graph = await insertGraphForUser(user.id);
     await page.goto('/graphs');

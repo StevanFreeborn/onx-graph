@@ -87,6 +87,8 @@ jobs:
         run: npm install
       - name: Install playwright dependencies
         run: npx playwright install
+      - name: Generate .env.integration_tests file
+        run: echo "EncryptionOptions__Key=${{ secrets.INTEGRATION_TEST_ENCRYPTION_KEY }}" >> .env.integration_tests
       - name: Run tests
         run: npm run test:e2e
       - name: Upload e2e test results
