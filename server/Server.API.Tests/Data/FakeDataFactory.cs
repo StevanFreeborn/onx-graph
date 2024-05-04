@@ -87,7 +87,8 @@ static class FakeDataFactory
     .CustomInstantiator(f => new GraphQueueItem())
     .RuleFor(i => i.Id, f => ObjectId.GenerateNewId().ToString())
     .RuleFor(i => i.GraphId, f => ObjectId.GenerateNewId().ToString())
-    .RuleFor(i => i.UserId, f => ObjectId.GenerateNewId().ToString());
+    .RuleFor(i => i.UserId, f => ObjectId.GenerateNewId().ToString())
+    .RuleFor(i => i.CreatedAt, f => DateTime.UtcNow);
 }
 
 /// <summary>
