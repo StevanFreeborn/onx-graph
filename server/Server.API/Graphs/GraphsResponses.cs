@@ -15,6 +15,8 @@ record GraphDto
   public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
   public DateTime UpdatedAt { get; init; } = DateTime.UtcNow;
   public GraphStatus Status { get; init; } = GraphStatus.NotBuilt;
+  public List<App> Nodes { get; init; } = [];
+  public Dictionary<string, List<ReferenceField>> EdgesMap { get; init; } = [];
 
   [JsonConstructor]
   internal GraphDto()
@@ -28,6 +30,8 @@ record GraphDto
     CreatedAt = graph.CreatedAt;
     UpdatedAt = graph.UpdatedAt;
     Status = graph.Status;
+    Nodes = graph.Nodes;
+    EdgesMap = graph.EdgesMap;
   }
 }
 

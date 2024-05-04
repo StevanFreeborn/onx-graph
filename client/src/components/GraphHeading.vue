@@ -45,6 +45,7 @@
 
 <style scoped>
   .heading-container {
+    z-index: 1;
     position: absolute;
     top: 0.5rem;
     left: 0.5rem;

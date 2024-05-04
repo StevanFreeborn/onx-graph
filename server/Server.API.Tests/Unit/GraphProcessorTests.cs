@@ -322,7 +322,7 @@ public class GraphProcessorTests
         {
           Items =
           [
-            new Field(),
+            new ReferenceField(),
           ],
           PageNumber = 1,
           TotalPages = 1,
@@ -405,7 +405,7 @@ public class GraphProcessorTests
         {
           Items =
           [
-            new Field() { AppId = 1, Type = FieldType.Reference },
+            new ReferenceField() { AppId = 1, Type = FieldType.Reference },
           ],
           PageNumber = 1,
           TotalPages = 2,
@@ -418,7 +418,7 @@ public class GraphProcessorTests
         {
           Items =
           [
-            new Field() { AppId = 2, Type = FieldType.Reference },
+            new ReferenceField() { AppId = 2, Type = FieldType.Reference },
           ],
           PageNumber = 1,
           TotalPages = 2,
@@ -431,7 +431,7 @@ public class GraphProcessorTests
         {
           Items =
           [
-            new Field() { AppId = 1, Type = FieldType.SurveyReference },
+            new ReferenceField() { AppId = 1, Type = FieldType.Reference },
           ],
           PageNumber = 2,
           TotalPages = 2,
@@ -444,7 +444,7 @@ public class GraphProcessorTests
         {
           Items =
           [
-            new Field() { AppId = 2, Type = FieldType.SurveyReference },
+            new ReferenceField() { AppId = 2, Type = FieldType.Reference },
           ],
           PageNumber = 2,
           TotalPages = 2,

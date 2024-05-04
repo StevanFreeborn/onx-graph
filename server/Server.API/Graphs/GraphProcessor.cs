@@ -164,9 +164,9 @@ class GraphProcessor(
     return apps;
   }
 
-  private async Task<ConcurrentBag<Field>> GetFieldsAsync(IOnspringClient client, Graph graph, ConcurrentBag<App> apps)
+  private async Task<ConcurrentBag<ReferenceField>> GetFieldsAsync(IOnspringClient client, Graph graph, ConcurrentBag<App> apps)
   {
-    var fields = new ConcurrentBag<Field>();
+    var fields = new ConcurrentBag<ReferenceField>();
 
     await Parallel.ForEachAsync(apps, async (app, token) =>
     {
@@ -187,9 +187,9 @@ class GraphProcessor(
 
       fieldsResponse.Value.Items.ForEach(field =>
       {
-        if (field.Type is FieldType.Reference or FieldType.SurveyReference)
+        if (field is ReferenceField reference)
         {
-          fields.Add(field);
+          fields.Add(reference);
         }
       });
 
@@ -224,9 +224,9 @@ class GraphProcessor(
 
           response.Value.Items.ForEach(field =>
           {
-            if (field.Type is FieldType.Reference or FieldType.SurveyReference)
+            if (field is ReferenceField reference)
             {
-              fields.Add(field);
+              fields.Add(reference);
             }
           });
         });

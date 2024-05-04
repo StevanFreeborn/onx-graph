@@ -6,6 +6,7 @@
   import { GraphStatus, type Graph } from '@/types';
   import { onMounted, ref } from 'vue';
   import GraphHeading from './GraphHeading.vue';
+  import OnxGraph from './OnxGraph.vue';
 
   const props = defineProps<{
     graphId: string;
@@ -90,7 +91,7 @@
     </div>
     <div v-else :data-testid="`graph-${graphData.data.id}`">
       <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
-      <pre>{{ graphData.data }}</pre>
+      <OnxGraph :graph="graphData.data" />
     </div>
   </Transition>
 </template>
