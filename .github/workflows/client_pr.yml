@@ -76,6 +76,7 @@ jobs:
       PW_TEST_USER_PASSWORD: "@Password1"
       PW_TEST_USER_USERNAME: "test"
       PW_MAILHOG_PORT: 3999
+      PW_TEST_API_KEY: ${{ secrets.PW_TEST_API_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

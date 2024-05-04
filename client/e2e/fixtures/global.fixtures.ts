@@ -29,7 +29,10 @@ type GlobalFixtures = {
   mailhog: mailhog.API;
   dbcontext: Db;
   authenticatedUserPage: AuthenticatedUserPage;
-  insertFakeGraphForUser: (userId: string) => Promise<{
+  insertFakeGraphForUser: (
+    userId: string,
+    status?: number
+  ) => Promise<{
     _id: string;
     userId: string;
     name: string;
@@ -37,7 +40,10 @@ type GlobalFixtures = {
     createdAt: Date;
     updatedAt: Date;
   }>;
-  insertRealGraphForUser: (userId: string) => Promise<{
+  insertRealGraphForUser: (
+    userId: string,
+    status?: number
+  ) => Promise<{
     _id: string;
     userId: string;
     name: string;
@@ -45,6 +51,7 @@ type GlobalFixtures = {
     createdAt: Date;
     updatedAt: Date;
   }>;
+  testApiKey: string;
 };
 
 const testPassword = '@Password1';
@@ -152,17 +159,20 @@ export const test = base.extend<GlobalFixtures>({
   },
   insertFakeGraphForUser: async ({ dbcontext }, use) => {
     await use(
-      async (userId: string) => await insertGraph(dbcontext, userId, testEncryptedFakeApiKey)
+      async (userId: string, status: number = 1) =>
+        await insertGraph(dbcontext, userId, testEncryptedFakeApiKey, status)
     );
   },
   insertRealGraphForUser: async ({ dbcontext }, use) => {
     await use(
-      async (userId: string) => await insertGraph(dbcontext, userId, testEncryptedRealApiKey)
+      async (userId: string, status: number = 1) =>
+        await insertGraph(dbcontext, userId, testEncryptedRealApiKey, status)
     );
   },
+  testApiKey: async ({}, use) => await use(env.PW_TEST_API_KEY),
 });
 
-async function insertGraph(dbcontext: Db, userId: string, apiKey: string) {
+async function insertGraph(dbcontext: Db, userId: string, apiKey: string, status: number) {
   const graph = {
     _id: faker.database.mongodbObjectId(),
     userId,
@@ -170,6 +180,7 @@ async function insertGraph(dbcontext: Db, userId: string, apiKey: string) {
     apiKey: apiKey,
     createdAt: new Date(),
     updatedAt: new Date(),
+    status: status,
   };
 
   await dbcontext.collection('graphs').insertOne(graph as any);
