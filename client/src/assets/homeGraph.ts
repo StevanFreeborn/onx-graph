@@ -1,18 +1,6 @@
-export const homeGraph = {
-  nodes: {
-    node1: { name: 'Node 5' },
-    node2: { name: 'Node 2' },
-    node3: { name: 'Node 3' },
-    node4: { name: 'Node 4' },
-  },
-  edges: {
-    edge1: { source: 'node1', target: 'node2' },
-    edge2: { source: 'node2', target: 'node3' },
-    edge3: { source: 'node3', target: 'node4' },
-  },
-};
+import type { Graph } from '@/types';
 
-export const exampleGraph = {
+export const exampleGraph: Graph = {
   id: '66328733d353c9c99d85acc4',
   name: 'IDM15',
   createdAt: '2024-05-01T18:17:23.56Z',

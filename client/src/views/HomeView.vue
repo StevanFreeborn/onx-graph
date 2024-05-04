@@ -14,6 +14,8 @@
     display: flex;
     width: 100%;
     flex: 1;
+    background-color: var(--color-background-soft);
+    border-radius: 0.5rem;
   }
 
   @media (min-width: 1024px) {
