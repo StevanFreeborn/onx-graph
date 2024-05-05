@@ -20,5 +20,14 @@
     "AllowedOrigins": [
       "https://localhost:3001"
     ]
+  },
+  "SmtpOptions": {
+    "SmtpAddress": "",
+    "SmtpPort": 0,
+    "SenderEmail": "",
+    "SenderPassword": ""
+  },
+  "EncryptionOptions": {
+    "Key": ""
   }
 }
