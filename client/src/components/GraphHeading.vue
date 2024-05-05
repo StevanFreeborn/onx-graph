@@ -9,8 +9,7 @@
 
 <template>
   <div class="heading-container">
-    <div>
-      <!-- TODO: Deal with long graph names -->
+    <div class="heading-wrapper">
       <h2>{{ props.name }}</h2>
     </div>
     <div class="status-icon-container">
@@ -57,6 +56,19 @@
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
+    overflow: hidden;
+    max-width: 250px;
+
+    & .heading-wrapper {
+      overflow: hidden;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     .status-icon-container {
       display: flex;
