@@ -39,6 +39,10 @@ global using MongoDB.Driver;
 
 global using Moq;
 
+global using Onspring.API.SDK;
+global using Onspring.API.SDK.Enums;
+global using Onspring.API.SDK.Models;
+
 global using Server.API.Authentication;
 global using Server.API.Configuration;
 global using Server.API.Email;
@@ -53,7 +57,3 @@ global using Server.API.Tests.Integration.Utilities;
 global using Testcontainers.MongoDb;
 
 global using Xunit;
-
-global using Onspring.API.SDK;
-global using Onspring.API.SDK.Models;
-global using Onspring.API.SDK.Enums;

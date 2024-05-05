@@ -33,8 +33,8 @@ global using MongoDB.Bson.Serialization.IdGenerators;
 global using MongoDB.Driver;
 
 global using Onspring.API.SDK;
-global using Onspring.API.SDK.Models;
 global using Onspring.API.SDK.Enums;
+global using Onspring.API.SDK.Models;
 
 global using Serilog;
 global using Serilog.Formatting.Compact;
