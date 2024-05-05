@@ -111,6 +111,11 @@ describe('GraphDisplay', () => {
       },
       global: {
         provide: defaultProvide,
+        stubs: {
+          OnxGraph: {
+            template: `<div>graph</div>`,
+          },
+        },
       },
     });
 
