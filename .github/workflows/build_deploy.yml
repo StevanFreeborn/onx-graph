@@ -85,9 +85,6 @@ jobs:
         working-directory: server/Server.API
         run: versionize -i --exit-insignificant-commits --commit-suffix "[skip ci]"
         continue-on-error: true
-      - name: Commit changes
-        run: |
-          git commit -a -m "chore: update version [skip ci]"
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
