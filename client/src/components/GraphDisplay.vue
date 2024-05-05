@@ -80,7 +80,6 @@
     </div>
     <div v-else-if="graphData.status === 'not-built'">
       <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
-
       <div>
         <p>The graph has not been built yet.</p>
         <!-- TODO: Implement request to build graph again -->
