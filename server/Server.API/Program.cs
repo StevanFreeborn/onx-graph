@@ -219,7 +219,7 @@ try
             partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers["X-Forwarded-For"].ToString(),
             factory: partition => new FixedWindowRateLimiterOptions
             {
-              PermitLimit = 10,
+              PermitLimit = 10000,
               QueueLimit = 0,
               Window = TimeSpan.FromMinutes(1)
             }
