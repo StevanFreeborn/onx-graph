@@ -8,6 +8,7 @@ const envSchema = z.object({
   PW_TEST_USER_USERNAME: z.string().min(1),
   PW_MAILHOG_PORT: z.coerce.number(),
   CI: z.string().optional(),
+  PW_TEST_API_KEY: z.string().min(1),
 });
 
 export const env = envSchema.parse(process.env);

@@ -1,14 +1,19 @@
+
 namespace Server.API.Tests.Integration.Fixtures;
 
-public class TestDb : IDisposable
+public class TestDb : IAsyncLifetime
 {
   private readonly MongoDbContainer _container;
-  internal MongoDbContext Context { get; init; }
+  internal MongoDbContext Context { get; set; } = null!;
 
   public TestDb()
   {
     _container = new MongoDbBuilder().Build();
-    _container.StartAsync().Wait();
+  }
+
+  public async Task InitializeAsync()
+  {
+    await _container.StartAsync();
     Context = new(
       Options.Create(new MongoDbOptions
       {
@@ -18,9 +23,5 @@ public class TestDb : IDisposable
     );
   }
 
-  public void Dispose()
-  {
-    _container.DisposeAsync().AsTask();
-    GC.SuppressFinalize(this);
-  }
+  async Task IAsyncLifetime.DisposeAsync() => await _container.DisposeAsync();
 }

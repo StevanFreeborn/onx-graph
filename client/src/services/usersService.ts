@@ -50,6 +50,7 @@ export class UsersService implements IUsersService {
 
       return Ok(body as GetUserResponse);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
       return Err([new Error('Failed to get user.')]);
     }

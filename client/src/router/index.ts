@@ -87,6 +87,7 @@ export const routes = [
           // refresh token and the access token
           // are not valid
           for (const error of refreshResult.val) {
+            // eslint-disable-next-line no-console
             console.error(error);
           }
 
@@ -111,6 +112,11 @@ export const routes = [
         component: () => import('../views/AddGraphView.vue'),
       },
       {
+        path: 'graphs/:id',
+        name: 'graph',
+        component: () => import('../views/GraphView.vue'),
+      },
+      {
         path: ':pathMatch(.*)*',
         component: () => import('../views/NotFoundView.vue'),
       },
@@ -123,8 +129,8 @@ const router = createRouter({
   routes: routes,
 });
 
-// TODO: Add actual error handling for router
 router.onError(error => {
+  // eslint-disable-next-line no-console
   console.error(error);
 });
 

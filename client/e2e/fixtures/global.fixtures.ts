@@ -12,7 +12,7 @@ type TestUser = {
   username: string;
 };
 
-type VerifiedUser = TestUser;
+type VerifiedUser = TestUser & { id: string };
 
 type UnverifiedUser = TestUser & { verificationToken: string };
 
@@ -29,12 +29,37 @@ type GlobalFixtures = {
   mailhog: mailhog.API;
   dbcontext: Db;
   authenticatedUserPage: AuthenticatedUserPage;
+  insertFakeGraphForUser: (
+    userId: string,
+    status?: number
+  ) => Promise<{
+    _id: string;
+    userId: string;
+    name: string;
+    apiKey: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
+  insertRealGraphForUser: (
+    userId: string,
+    status?: number
+  ) => Promise<{
+    _id: string;
+    userId: string;
+    name: string;
+    apiKey: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
+  testApiKey: string;
 };
 
 const testPassword = '@Password1';
 const testPasswordHash = '$2a$11$Xs1mALyCfYD7Er2542tlVupp7GnXIwj5kA/0e6d1Dapws80QwuWoq';
-const testUserEncryptionKey = 'jm4FmaUQy6siVjtKrui4mgP6VqD9ITqhW27hiMg2hDw=';
-// const testEncryptedApiKey = '6iOGOCLgeHeuANqNBFqCsg==';
+const testUserEncryptionKey = 'A9UGXuD0vFKVHdfnC0+DHds0dAWUzTp0+nhNztiNYa8=';
+const testEncryptedFakeApiKey = 'fubdMXZfydPqUk/+epV7aQ==';
+const testEncryptedRealApiKey =
+  '8DX/R556rHqYUmWIdzrp7xwCAu2emofxlTn3CR1QTbdr9QWNtzwik4f+seaGp664aRYt3VZgczwlVsqQXIcukw==';
 
 export const test = base.extend<GlobalFixtures>({
   page: async ({ browser }, use) => {
@@ -79,7 +104,7 @@ export const test = base.extend<GlobalFixtures>({
 
     await dbcontext.collection('users').insertOne(user as any);
 
-    await use({ email: user.email, password: testPassword, username: user.username });
+    await use({ email: user.email, password: testPassword, username: user.username, id: user._id });
 
     await cleanupUser(dbcontext, user);
   },
@@ -132,7 +157,36 @@ export const test = base.extend<GlobalFixtures>({
 
     await use(page);
   },
+  insertFakeGraphForUser: async ({ dbcontext }, use) => {
+    await use(
+      async (userId: string, status: number = 1) =>
+        await insertGraph(dbcontext, userId, testEncryptedFakeApiKey, status)
+    );
+  },
+  insertRealGraphForUser: async ({ dbcontext }, use) => {
+    await use(
+      async (userId: string, status: number = 1) =>
+        await insertGraph(dbcontext, userId, testEncryptedRealApiKey, status)
+    );
+  },
+  testApiKey: async ({}, use) => await use(env.PW_TEST_API_KEY),
 });
+
+async function insertGraph(dbcontext: Db, userId: string, apiKey: string, status: number) {
+  const graph = {
+    _id: faker.database.mongodbObjectId(),
+    userId,
+    name: faker.lorem.words(),
+    apiKey: apiKey,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    status: status,
+  };
+
+  await dbcontext.collection('graphs').insertOne(graph as any);
+
+  return graph;
+}
 
 async function cleanupUser(dbcontext: Db, user: { email: string; _id: string }) {
   await dbcontext.collection('users').deleteOne({ email: user.email });

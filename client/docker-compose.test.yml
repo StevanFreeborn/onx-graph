@@ -1,4 +1,3 @@
-version: '3.8'
 name: onxgraph-test
 services:
   mailhog:
@@ -30,6 +29,8 @@ services:
     ports:
       - '4002:8080'
     restart: unless-stopped
+    env_file:
+      - ./.env.integration_tests
     environment:
       - ASPNETCORE_ENVIRONMENT=Test
       - Logging__LogLevel__Default=Information
@@ -46,7 +47,6 @@ services:
       - SmtpOptions__SmtpPort=1025
       - SmtpOptions__SenderEmail=onxgraph@test.com
       - SmtpOptions__SenderPassword=
-      - EncryptionOptions__Key=CGsi1iKOFk2A4oBKVQSZJTnmKQ9xzJCA
   client:
     container_name: client-test
     build:

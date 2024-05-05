@@ -6,3 +6,10 @@ class GraphAlreadyExistsError : Error
   {
   }
 }
+
+class GraphNotFoundError : Error
+{
+  internal GraphNotFoundError(string id) : base($"Graph not found with id: {id}")
+  {
+  }
+}

@@ -58,6 +58,12 @@ public class TestServerFactory : WebApplicationFactory<Program>, IAsyncLifetime
       services.AddHttpClient<MailHogService>(
         client => client.BaseAddress = new Uri(mailHogBaseUrl)
       );
+
+      var encryptionService = services.BuildServiceProvider().GetRequiredService<IEncryptionService>();
+      services.Configure<EncryptionOptions>(options =>
+      {
+        options.Key = encryptionService.GenerateKey();
+      });
     });
 
     builder.ConfigureServices(

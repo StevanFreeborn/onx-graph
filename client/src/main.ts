@@ -28,6 +28,7 @@ app.use(VNetworkGraph);
 
 // TODO: Add actual global error handling for the app
 app.config.errorHandler = (err, vm, info) => {
+  // eslint-disable-next-line no-console
   console.error(err, vm, info);
 };
 

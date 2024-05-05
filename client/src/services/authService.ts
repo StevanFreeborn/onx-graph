@@ -65,6 +65,7 @@ export class AuthService implements IAuthService {
 
       return Ok(true);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
       return Err([new Error('Verifying account failed')]);
     }
@@ -104,6 +105,7 @@ export class AuthService implements IAuthService {
 
       return Ok(true);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
       return Err([new Error('Resending verification email failed')]);
     }
@@ -121,6 +123,7 @@ export class AuthService implements IAuthService {
 
       return Ok(true);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
       return Err([new Error('Logout failed')]);
     }
@@ -143,6 +146,7 @@ export class AuthService implements IAuthService {
       const body = await res.json();
       return Ok(body as LoginResponse);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
       return Err([new Error('Refreshing token failed.')]);
     }
@@ -183,6 +187,7 @@ export class AuthService implements IAuthService {
       const body = await res.json();
       return Ok(body as LoginResponse);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
       return Err([new Error('Login failed. Please try again.')]);
     }
@@ -219,6 +224,7 @@ export class AuthService implements IAuthService {
       const body = await res.json();
       return Ok(body as RegisterResponse);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
       return Err([new Error('Registration failed. Please try again.')]);
     }

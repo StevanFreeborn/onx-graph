@@ -29,5 +29,25 @@ record AddGraphRequest(
   [FromServices] IValidator<AddGraphDto> Validator,
   [FromServices] IGraphService GraphService,
   [FromServices] IUserService UserService,
-  [FromServices] IEncryptionService EncryptionService
+  [FromServices] IEncryptionService EncryptionService,
+  [FromServices] IGraphQueue GraphQueue
+);
+
+/// <summary>
+/// Represents a request to get graphs
+/// </summary>
+record GetGraphsRequest(
+  HttpContext HttpContext,
+  [FromServices] IGraphService GraphService,
+  [FromQuery] int PageNumber = 1,
+  [FromQuery] int PageSize = 10
+);
+
+/// <summary>
+/// Represents a request to get a graph
+/// </summary>
+record GetGraphRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromServices] IGraphService GraphService
 );

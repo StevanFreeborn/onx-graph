@@ -24,6 +24,8 @@ global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Http.HttpResults;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.Testing;
+global using Microsoft.AspNetCore.SignalR;
+global using Microsoft.AspNetCore.SignalR.Client;
 global using Microsoft.AspNetCore.TestHost;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +38,10 @@ global using MongoDB.Bson;
 global using MongoDB.Driver;
 
 global using Moq;
+
+global using Onspring.API.SDK;
+global using Onspring.API.SDK.Enums;
+global using Onspring.API.SDK.Models;
 
 global using Server.API.Authentication;
 global using Server.API.Configuration;

@@ -5,6 +5,7 @@
   "dotnet.defaultSolution": "server/Server.sln",
   "cSpell.words": [
     "Bson",
+    "buttonborder",
     "composables",
     "Dapws",
     "dbcontext",
@@ -19,7 +20,9 @@
     "rushstack",
     "Swashbuckle",
     "Testcontainers",
+    "testid",
     "textbox",
+    "Unmap",
     "VITE",
     "Vupp"
   ],

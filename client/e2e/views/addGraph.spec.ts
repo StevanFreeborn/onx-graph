@@ -86,4 +86,45 @@ test.describe('AddGraphView', () => {
 
     expect(graph).not.toBeNull();
   });
+
+  test('when user submits form with valid data, but graph fails to build, they should see graph not built', async ({
+    authenticatedUserPage: page,
+  }) => {
+    await page.goto('/graphs/add');
+
+    const nameInput = page.getByLabel('Name');
+    const apiKeyInput = page.getByLabel('API Key');
+    const addGraphButton = page.getByRole('button', { name: 'Add' });
+
+    const graphName = 'Test Graph';
+
+    await nameInput.fill(graphName);
+    await apiKeyInput.fill('test-api-key');
+    await addGraphButton.click();
+
+    const notBuiltMsg = page.getByText(/has not been built yet/i);
+
+    await expect(notBuiltMsg).toBeVisible({ timeout: 10000 });
+  });
+
+  test('when user submits form with valid data and graph builds successfully, they should see graph built', async ({
+    authenticatedUserPage: page,
+    testApiKey,
+  }) => {
+    await page.goto('/graphs/add');
+
+    const nameInput = page.getByLabel('Name');
+    const apiKeyInput = page.getByLabel('API Key');
+    const addGraphButton = page.getByRole('button', { name: 'Add' });
+
+    const graphName = 'Test Graph';
+
+    await nameInput.fill(graphName);
+    await apiKeyInput.fill(testApiKey);
+    await addGraphButton.click();
+
+    const graphBuiltIcon = page.getByTitle(/built/i);
+
+    await expect(graphBuiltIcon).toBeVisible({ timeout: 30000 });
+  });
 });

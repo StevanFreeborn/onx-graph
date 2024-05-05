@@ -1,18 +1,11 @@
 namespace Server.API.Tests.Integration;
 
-public class AccountMonitorTests(TestDb testDb) : IClassFixture<TestDb>, IDisposable
+public class AccountMonitorTests(TestDb testDb) : IClassFixture<TestDb>
 {
   private readonly Mock<ILogger<AccountMonitor>> _loggerMock = new();
   private readonly Mock<TimeProvider> _timeProviderMock = new();
   private readonly FakeTimeProvider _fakeTimeProvider = new();
   private readonly MongoDbContext _context = testDb.Context;
-
-  public void Dispose()
-  {
-    _context.Users.DeleteMany(u => true);
-    _context.Tokens.DeleteMany(t => true);
-    GC.SuppressFinalize(this);
-  }
 
   [Fact]
   public async Task StartAsync_WhenCalled_ItShouldCreateTimer()
