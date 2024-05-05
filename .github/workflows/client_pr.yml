@@ -50,6 +50,9 @@ jobs:
     name: Run vitest tests
     needs: lint-and-format
     runs-on: ubuntu-latest
+    env:
+      VITE_API_BASE_URL: "http://localhost:3002"
+      VITE_SENDING_EMAIL: "test@test.com"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -93,6 +96,7 @@ jobs:
       - name: Run tests
         run: npm run test:e2e
       - name: Upload e2e test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
