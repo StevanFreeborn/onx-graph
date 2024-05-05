@@ -5,7 +5,7 @@
 
 <template>
   <main>
-    <OnxGraph :graph="exampleGraph" />
+    <OnxGraph :graph="exampleGraph" data-testid="demo-graph" />
   </main>
 </template>
 
