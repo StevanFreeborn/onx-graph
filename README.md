@@ -24,7 +24,7 @@ The application is built using:
 
 ## Authentication
 
-The application uses [Json Web Tokens](https://jwt.io/) for authentication. A user logs in using their email and password and upon a successful attempt the server generates an access token and returns it to the caller, which is then passed to the front-end. The front-end stores the token in local storage and passes it in the `Authorization` header of when making a request to the server that requires authentication. The server validates the token and returns a 401 if it is invalid. The server also exposes an endpoint to refresh the token, which can be called by the front-end when the access token expires to generate a new access token. The refresh token is stored in an http-only, secure cookie and is issued when the user logs in and is rotated each time the user refreshes their access token.
+The application uses [Json Web Tokens](https://jwt.io/) for authentication. A user logs in using their email and password and upon a successful attempt the server generates an access token and returns it to the caller, which is then passed to the front-end. The front-end stores the token in local storage and passes it in the `Authorization` header when making a request to the server that requires authentication. The server validates the token and returns a 401 if it is invalid. The server also exposes an endpoint to refresh the token, which can be called by the front-end when the access token expires to generate a new access token. The refresh token is stored in an http-only, secure cookie and is issued when the user logs in and is rotated each time the user refreshes their access token.
 
 ## Server
 
