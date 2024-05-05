@@ -28,7 +28,7 @@ public class GraphQueueServiceTests
   [Fact]
   public async Task ProcessAsync_WhenCalledAndItem_ShouldProcessItem()
   {
-    var item = new GraphQueueItem();
+    var item = new GraphQueueItem() with { CreatedAt = DateTime.UtcNow.AddSeconds(-5) };
 
     _queueMock
       .Setup(x => x.DequeueAsync())
@@ -43,7 +43,7 @@ public class GraphQueueServiceTests
   [Fact]
   public async Task ProcessAsync_WhenCalledAndItemAndProcessorThrows_ShouldLogError()
   {
-    var item = new GraphQueueItem();
+    var item = new GraphQueueItem() with { CreatedAt = DateTime.UtcNow.AddSeconds(-5) };
     var exception = new Exception();
 
     _queueMock
