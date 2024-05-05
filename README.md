@@ -8,14 +8,19 @@ The application is built using:
 
 - [Vue.js](https://vuejs.org/) for the front-end
 - [Vite](https://vitejs.dev/) for the front-end build tool
+- [Vitest](https://vitest.dev/) for unit and integration testing in the front-end
+- [Pinia](https://pinia.vuejs.org/) for state management in the front-end
+- [Vue Router](https://router.vuejs.org/) for routing in the front-end
+- [Playwright](https://playwright.dev/) for end-to-end testing in the front-end
 - [.NET](https://dotnet.microsoft.com/) for the back-end
 - [MongoDB](https://www.mongodb.com/) for the database
-- [Serilog](https://serilog.net/) for logging
-- [xUnit](https://xunit.net/) for unit and integration testing
-- [Moq](https://github.com/devlooped/moq) for mocking
-- [Bogus](https://github.com/bchavez/Bogus) for generating fake data
-- [Testcontainers](https://www.testcontainers.org/) for integration testing
-- [Swagger](https://swagger.io/) for API documentation
+- [Serilog](https://serilog.net/) for logging in the back-end
+- [xUnit](https://xunit.net/) for unit and integration testing in the back-end
+- [Moq](https://github.com/devlooped/moq) for mocking in the back-end
+- [Bogus](https://github.com/bchavez/Bogus) for generating fake data in the back-end
+- [Testcontainers](https://www.testcontainers.org/) for integration testing in the back-end
+- [Swagger](https://swagger.io/) for API documentation and testing in development
+- [Docker](https://www.docker.com/) for containerization
 
 ## Authentication
 
@@ -24,3 +29,7 @@ The application uses [Json Web Tokens](https://jwt.io/) for authentication. A us
 ## Server
 
 The server is a .NET web api that exposes a RESTful API for the front-end to consume. It connects to a MongoDB database to store and retrieve data.
+
+## Client
+
+The client is a Vue.js application that consumes the server's API. It uses [Pinia](https://pinia.vuejs.org/) for state management and [Vue Router](https://router.vuejs.org/) for routing.
