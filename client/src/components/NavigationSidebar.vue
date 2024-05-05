@@ -141,6 +141,7 @@
     --sidebar-width: 250px;
     --sidebar-x-padding: 1rem;
     --container-width: calc(var(--sidebar-width) - 2 * var(--sidebar-x-padding));
+    z-index: 2;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
