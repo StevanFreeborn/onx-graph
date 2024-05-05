@@ -71,8 +71,7 @@
     <div v-else-if="graphData.status === 'error'">
       <div>
         <p>There was an error loading the graph.</p>
-        <!-- TODO: Style button -->
-        <button @click="() => getGraph()" type="button">Try Again</button>
+        <button @click="() => getGraph()" type="button" class="button">Try Again</button>
       </div>
     </div>
     <div v-else-if="graphData.status === 'building'">
@@ -84,9 +83,8 @@
 
       <div>
         <p>The graph has not been built yet.</p>
-        <!-- TODO: Style button -->
         <!-- TODO: Implement request to build graph again -->
-        <button type="button">Build Graph</button>
+        <button type="button" class="button">Build Graph</button>
       </div>
     </div>
     <div v-else :data-testid="`graph-${graphData.data.id}`">
@@ -119,5 +117,27 @@
     align-items: center;
     height: 100%;
     width: 100%;
+
+    & .button {
+      background-color: var(--color-background-mute);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      border-width: 2px;
+      border-style: outset;
+      border-color: buttonborder;
+      border-image: initial;
+      color: var(--color-text);
+      cursor: pointer;
+    }
+
+    & .button:active {
+      border-style: inset;
+    }
+
+    @media (hover: hover) {
+      & .button:hover {
+        color: var(--orange);
+      }
+    }
   }
 </style>
