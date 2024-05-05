@@ -47,7 +47,7 @@ public class SmtpEmailClientTests : IAsyncLifetime
       IsBodyHtml = true,
     };
 
-    var sut = new SmtpEmailClient(SmtpOptions);
+    using var sut = new SmtpEmailClient(SmtpOptions);
 
     await sut.SendMailAsync(mailMessage);
 
