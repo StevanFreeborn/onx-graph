@@ -1,6 +1,6 @@
 namespace Server.API.Tests.Integration;
 
-public class MongoUserRepositoryTests : IClassFixture<TestDb>, IDisposable
+public class MongoUserRepositoryTests : IClassFixture<TestDb>
 {
   private readonly Mock<TimeProvider> _timeProvider = new();
   private readonly MongoDbContext _context;
@@ -14,12 +14,6 @@ public class MongoUserRepositoryTests : IClassFixture<TestDb>, IDisposable
 
     _context = testDb.Context;
     _sut = new(testDb.Context, _timeProvider.Object);
-  }
-
-  public void Dispose()
-  {
-    _context.Users.DeleteMany(u => true);
-    GC.SuppressFinalize(this);
   }
 
   [Fact]

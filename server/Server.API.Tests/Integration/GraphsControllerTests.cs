@@ -1,14 +1,7 @@
 namespace Server.API.Tests.Integration;
 
-public class GraphsControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory), IDisposable
+public class GraphsControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory)
 {
-  public void Dispose()
-  {
-    Context.Users.DeleteMany(_ => true);
-    Context.Graphs.DeleteMany(_ => true);
-    GC.SuppressFinalize(this);
-  }
-
   [Fact]
   public async Task AddGraph_WhenCalledByUnauthenticatedUser_ItShouldReturnUnauthorized()
   {

@@ -1,14 +1,7 @@
 namespace Server.API.Tests.Integration;
 
-public partial class AuthControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory), IDisposable
+public partial class AuthControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory)
 {
-  public void Dispose()
-  {
-    Context.Users.DeleteMany(_ => true);
-    Context.Tokens.DeleteMany(_ => true);
-    GC.SuppressFinalize(this);
-  }
-
   [Fact]
   public async Task Register_WhenCalledAndGivenValidEmailAndPassword_ItShouldReturn201StatusCodeWithRegisteredUsersId()
   {

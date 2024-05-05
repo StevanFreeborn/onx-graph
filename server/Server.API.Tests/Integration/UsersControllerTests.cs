@@ -1,13 +1,7 @@
 namespace Server.API.Tests.Integration;
 
-public class UsersControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory), IDisposable
+public class UsersControllerTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory)
 {
-  public void Dispose()
-  {
-    Context.Users.DeleteMany(_ => true);
-    GC.SuppressFinalize(this);
-  }
-
   [Fact]
   public async Task GetUser_WhenCalledByUnauthenticatedUser_ItShouldReturnUnauthorized()
   {

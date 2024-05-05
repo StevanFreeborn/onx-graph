@@ -59,7 +59,7 @@ jobs:
       - name: Build project
         run: dotnet build --no-restore
       - name: Test project
-        run: dotnet test -e DOTNET_ENVIRONMENT=CI --no-build --verbosity quiet --blame-hang --blame-hang-timeout 2m
+        run: dotnet test -e DOTNET_ENVIRONMENT=CI --no-build --verbosity normal --blame-hang --blame-hang-timeout 2m
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()

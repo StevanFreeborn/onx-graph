@@ -1,12 +1,7 @@
 namespace Server.API.Tests.Integration;
 
-public class GraphsHubTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory), IDisposable
+public class GraphsHubTests(TestServerFactory serverFactory) : IntegrationTest(serverFactory)
 {
-  public void Dispose()
-  {
-    GC.SuppressFinalize(this);
-  }
-
   [Fact]
   public async Task ReceiveUpdate_WhenCalled_ItShouldSendUpdateToClientsInGroup()
   {
