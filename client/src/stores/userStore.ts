@@ -10,6 +10,7 @@ export type User = {
   id: string;
   expiresAtInSeconds: number;
   token: string;
+  expanded: boolean;
 };
 
 type JwtTokenPayload = {
@@ -35,6 +36,7 @@ export const useUserStore = defineStore('userStore', () => {
       id: sub,
       expiresAtInSeconds: exp,
       token: jwtToken,
+      expanded: true,
     };
     localStorage.setItem(USER_KEY, JSON.stringify(loggedInUser));
     user.value = loggedInUser;
@@ -73,10 +75,22 @@ export const useUserStore = defineStore('userStore', () => {
     return await fetch(originalRequest);
   }
 
+  function updateSidebarState(expanded: boolean) {
+    const user = getUserFromLocalStorage();
+
+    if (user === null) {
+      return;
+    }
+
+    user.expanded = expanded;
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  }
+
   return {
     user: user,
     logUserIn,
     logUserOut,
     refreshAccessToken,
+    updateSidebarState,
   };
 });

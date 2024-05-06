@@ -292,4 +292,45 @@ describe('NavigationSidebar', () => {
       expect(alertSpy).toHaveBeenCalled();
     });
   });
+
+  it('should store expanded or collapsed state in user store', async () => {
+    const { getByRole } = await customRender(NavigationSidebar, {
+      global: {
+        provide: defaultProvide,
+      },
+    });
+
+    const collapseButton = getByRole('button', { name: /collapse/i });
+    const userStore = useUserStore();
+
+    await fireEvent.click(collapseButton);
+
+    expect(userStore.updateSidebarState).toHaveBeenCalledWith(false);
+
+    const expandButton = getByRole('button', { name: /expand/i });
+    await fireEvent.click(expandButton);
+
+    expect(userStore.updateSidebarState).toHaveBeenCalledWith(true);
+  });
+
+  it('should display with expanded or collapsed state based on user store', async () => {
+    const user = {
+      id: 'test-id',
+      expiresAtInSeconds: Date.now() / 1000 + 15 * 60 * 60,
+      token: 'token',
+      expanded: false,
+    };
+
+    localStorageMock.getItem.mockReturnValue(JSON.stringify(user));
+
+    const { getByRole } = await customRender(NavigationSidebar, {
+      global: {
+        provide: defaultProvide,
+      },
+    });
+
+    const expandButton = getByRole('button', { name: /expand/i });
+
+    expect(expandButton).toBeInTheDocument();
+  });
 });
