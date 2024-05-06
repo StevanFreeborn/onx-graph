@@ -98,25 +98,32 @@ describe('userStore', () => {
     expect(user).toEqual(fakeUser);
   });
 
-  it('it should provide a logUserIn action', () => {
+  it('should provide a logUserIn action', () => {
     localStorageMock.getItem.mockReturnValue(null);
 
     const { logUserIn } = useUserStore();
     expect(logUserIn).toBeInstanceOf(Function);
   });
 
-  it('it should provide a logUserOut action', () => {
+  it('should provide a logUserOut action', () => {
     localStorageMock.getItem.mockReturnValue(null);
 
     const { logUserOut } = useUserStore();
     expect(logUserOut).toBeInstanceOf(Function);
   });
 
-  it('it should provide a refreshAccessToken action', () => {
+  it('should provide a refreshAccessToken action', () => {
     localStorageMock.getItem.mockReturnValue(null);
 
     const { refreshAccessToken } = useUserStore();
     expect(refreshAccessToken).toBeInstanceOf(Function);
+  });
+
+  it('should provide an updateSidebarState action', () => {
+    localStorageMock.getItem.mockReturnValue(null);
+
+    const { updateSidebarState } = useUserStore();
+    expect(updateSidebarState).toBeInstanceOf(Function);
   });
 
   describe('logUserIn', () => {
@@ -130,6 +137,7 @@ describe('userStore', () => {
         id: payload.sub,
         expiresAtInSeconds: payload.exp,
         token: payload.token,
+        expanded: true,
       };
 
       store.logUserIn(payload.token);
@@ -210,6 +218,7 @@ describe('userStore', () => {
         id: payload.sub,
         expiresAtInSeconds: payload.exp,
         token: payload.token,
+        expanded: true,
       };
 
       global.fetch = vi.fn().mockResolvedValue(new Response());
@@ -220,6 +229,37 @@ describe('userStore', () => {
 
       expect(store.user).toEqual(user);
       expect(response.status).toBe(200);
+    });
+  });
+
+  describe('updateSidebarState', () => {
+    it('should do nothing if user is not logged in', () => {
+      localStorageMock.getItem.mockReturnValue(null);
+
+      const store = useUserStore();
+
+      store.updateSidebarState(true);
+
+      expect(localStorageMock.setItem).not.toHaveBeenCalled();
+    });
+
+    it('should update user in local storage', () => {
+      const user = {
+        id: 'test',
+        expiresAtInSeconds: 123,
+        token: 'token',
+        expanded: true,
+      };
+
+      const updatedUser = { ...user, expanded: false };
+
+      localStorageMock.getItem.mockReturnValue(JSON.stringify(user));
+
+      const store = useUserStore();
+
+      store.updateSidebarState(false);
+
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(USER_KEY, JSON.stringify(updatedUser));
     });
   });
 });

@@ -7,13 +7,14 @@
   import { useRouter } from 'vue-router';
 
   // TODO: Save sidebar state to local storage
-  const isSidebarOpen = ref(true);
   const isMounted = useMounted();
   const router = useRouter();
   const userStore = useUserStore();
   const authService = useAuthService(userStore);
   const usersService = useUsersService(userStore);
   const userIdentifier = ref<string>(userStore.user?.id ?? '');
+  const isSidebarOpen = ref<boolean>(userStore.user?.expanded ?? true);
+
   const username = computed(() => (isMounted ? userIdentifier.value : 'Loading...'));
 
   const sidebarContainerClasses = computed(() => ({
@@ -52,6 +53,7 @@
 
   function toggleSidebar() {
     isSidebarOpen.value = !isSidebarOpen.value;
+    userStore.updateSidebarState(isSidebarOpen.value);
   }
 
   async function handleLogout() {
