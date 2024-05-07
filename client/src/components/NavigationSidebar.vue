@@ -162,6 +162,7 @@
       left: calc(-1 * var(--button-size) / 2);
       display: flex;
       align-items: center;
+      justify-content: center;
       width: var(--button-size);
       height: var(--button-size);
       color: var(--color-text);
@@ -171,6 +172,12 @@
       transition-property: transform;
       transition-duration: var(--transition-duration);
       transition-timing-function: var(--transition-function);
+
+      & svg {
+        width: 1rem;
+        height: 1rem;
+        overflow: visible;
+      }
     }
 
     @media (hover: hover) {
@@ -261,6 +268,11 @@
         height: 3rem;
         padding: 0.5rem;
         background-color: var(--color-background-mute);
+
+        & svg {
+          width: 3rem;
+          height: 3rem;
+        }
       }
 
       & .user-info-container {
@@ -291,6 +303,12 @@
           background-color: inherit;
           color: var(--color-text);
           cursor: pointer;
+
+          & svg {
+            width: 1rem;
+            height: 1rem;
+            overflow: visible;
+          }
         }
 
         @media (hover: hover) {

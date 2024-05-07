@@ -83,6 +83,11 @@
         align-items: center;
         height: 1.5rem;
         width: 1.5rem;
+
+        svg {
+          height: 1.5rem;
+          width: 1.5rem;
+        }
       }
 
       .built {
