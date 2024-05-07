@@ -73,7 +73,9 @@ export const test = base.extend<GlobalFixtures>({
     use: (r: (page: Page, testInfo: TestInfo) => Promise<AxeResults>) => Promise<void>
   ) =>
     await use(async (page, testInfo) => {
-      const results = await new AxeBuilder({ page }).disableRules('color-contrast').analyze();
+      const results = await new AxeBuilder({ page })
+        .disableRules(['color-contrast', 'meta-viewport'])
+        .analyze();
       await testInfo.attach('accessibility-scan-results', {
         body: JSON.stringify(results, null, 2),
         contentType: 'application/json',

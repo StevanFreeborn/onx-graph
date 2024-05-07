@@ -64,6 +64,12 @@
       background-color: var(--color-background-mute);
       border-radius: 50%;
       cursor: pointer;
+
+      & svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        overflow: visible;
+      }
     }
 
     & button:disabled {
