@@ -5,6 +5,7 @@
   import { useUserStore } from '@/stores/userStore';
   import { GraphStatus, type Graph } from '@/types';
   import { onMounted, ref } from 'vue';
+  import GraphActionsMenu from './GraphActionsMenu.vue';
   import GraphHeading from './GraphHeading.vue';
   import OnxGraph from './OnxGraph.vue';
 
@@ -100,6 +101,7 @@
         :name="graphData.data.name"
         :status="graphData.data.status"
       />
+      <GraphActionsMenu />
       <OnxGraph :graph="graphData.data" />
     </div>
   </Transition>
