@@ -19,6 +19,7 @@ The application is built using:
 - [Vitest](https://vitest.dev/) for unit and integration testing in the front-end
 - [Pinia](https://pinia.vuejs.org/) for state management in the front-end
 - [Vue Router](https://router.vuejs.org/) for routing in the front-end
+- [v-network-graph](https://dash14.github.io/v-network-graph/) for creating the graphs
 - [Playwright](https://playwright.dev/) for end-to-end testing
 - [.NET](https://dotnet.microsoft.com/) for the back-end
 - [SignalR](https://dotnet.microsoft.com/apps/aspnet/signalr) for real-time communication
