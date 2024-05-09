@@ -24,6 +24,7 @@ export interface IGraphsService {
     pageSize?: number
   ) => Promise<Result<PageWithData<Graph>, Error[]>>;
   getGraph: (id: string) => Promise<Result<Graph, Error[]>>;
+  getGraphKey: (id: string) => Promise<Result<GetGraphKeyResponse, Error[]>>;
 }
 
 export class GraphsService implements IGraphsService {
@@ -38,15 +39,39 @@ export class GraphsService implements IGraphsService {
     return `${this.baseURL}/graphs/${id}`;
   }
 
+  private createGetGraphKeyEndpoint(id: string) {
+    return `${this.baseURL}/graphs/${id}/key`;
+  }
+
   private readonly endpoints = {
     addGraph: `${this.baseURL}/graphs/add`,
     getGraphs: (pageNumber: number, pageSize: number) =>
       this.createGetGraphsEndpoint(pageNumber, pageSize),
     getGraph: (id: string) => this.createGetGraphEndpoint(id),
+    getGraphKey: (id: string) => this.createGetGraphKeyEndpoint(id),
   };
 
   constructor(client: IClient) {
     this.client = client;
+  }
+
+  async getGraphKey(id: string) {
+    const request = new ClientRequest(this.endpoints.getGraphKey(id));
+
+    try {
+      const res = await this.client.get(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Failed to get graph key.')]);
+      }
+
+      const body = await res.json();
+      return Ok(body as GetGraphKeyResponse);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return Err([new Error('Failed to get graph key.')]);
+    }
   }
 
   async getGraph(id: string) {
@@ -127,4 +152,8 @@ export class GraphsService implements IGraphsService {
 
 type AddGraphResponse = {
   id: string;
+};
+
+type GetGraphKeyResponse = {
+  key: string;
 };
