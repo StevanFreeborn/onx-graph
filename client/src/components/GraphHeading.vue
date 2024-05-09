@@ -180,6 +180,7 @@
         border: transparent;
         background-color: var(--color-background-mute);
         color: var(--color-text);
+        padding-right: 1.5rem;
       }
 
       & button {
