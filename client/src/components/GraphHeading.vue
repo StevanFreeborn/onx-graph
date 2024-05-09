@@ -118,7 +118,6 @@
     background-color: var(--color-background);
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
-    gap: 1rem;
     overflow: hidden;
     max-width: 250px;
 
