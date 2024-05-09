@@ -60,3 +60,8 @@ record GetGraphsResponse
     Data = page.Data.Select(g => new GraphDto(g)).ToList();
   }
 }
+
+/// <summary>
+/// Represents a response to getting a graph key
+/// </summary>
+record GetGraphKeyResponse(string Key);

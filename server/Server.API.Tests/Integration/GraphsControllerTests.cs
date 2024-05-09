@@ -74,10 +74,9 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
     var existingGraph = FakeDataFactory.Graph.Generate();
-
     var encryptionKey = EncryptionService.GenerateKey();
-    var encryptedApiKey = await EncryptionService.EncryptAsync(encryptionKey);
-    user.EncryptionKey = encryptedApiKey;
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
 
     existingGraph.UserId = user.Id;
 
@@ -103,8 +102,8 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
     var encryptionKey = EncryptionService.GenerateKey();
-    var encryptedKey = await EncryptionService.EncryptAsync(encryptionKey);
-    user.EncryptionKey = encryptedKey;
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
 
     var userJwtToken = TestJwtTokenBuilder
       .Create()
@@ -150,8 +149,8 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
     var encryptionKey = EncryptionService.GenerateKey();
-    var encryptedApiKey = await EncryptionService.EncryptAsync(encryptionKey);
-    user.EncryptionKey = encryptedApiKey;
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
 
     var userJwtToken = TestJwtTokenBuilder
       .Create()
@@ -191,8 +190,8 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
     var encryptionKey = EncryptionService.GenerateKey();
-    var encryptedApiKey = await EncryptionService.EncryptAsync(encryptionKey);
-    user.EncryptionKey = encryptedApiKey;
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
 
     var userJwtToken = TestJwtTokenBuilder
       .Create()
@@ -240,8 +239,8 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
   {
     var (_, user) = FakeDataFactory.TestUser.Generate();
     var encryptionKey = EncryptionService.GenerateKey();
-    var encryptedApiKey = await EncryptionService.EncryptAsync(encryptionKey);
-    user.EncryptionKey = encryptedApiKey;
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
 
     var userJwtToken = TestJwtTokenBuilder
       .Create()
@@ -263,8 +262,8 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
     var graph = FakeDataFactory.Graph.Generate();
     var (_, user) = FakeDataFactory.TestUser.Generate();
     var encryptionKey = EncryptionService.GenerateKey();
-    var encryptedApiKey = await EncryptionService.EncryptAsync(encryptionKey);
-    user.EncryptionKey = encryptedApiKey;
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
 
     var userJwtToken = TestJwtTokenBuilder
       .Create()
@@ -286,8 +285,8 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
     var graph = FakeDataFactory.Graph.Generate();
     var (_, user) = FakeDataFactory.TestUser.Generate();
     var encryptionKey = EncryptionService.GenerateKey();
-    var encryptedApiKey = await EncryptionService.EncryptAsync(encryptionKey);
-    user.EncryptionKey = encryptedApiKey;
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
     graph.UserId = user.Id;
 
     var userJwtToken = TestJwtTokenBuilder
@@ -308,5 +307,113 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
 
     responseBody!.Id.Should().Be(graph.Id);
     responseBody!.Name.Should().Be(graph.Name);
+  }
+
+  [Fact]
+  public async Task GetGraphKey_WhenCalledByUnauthenticatedUser_ItShouldReturnUnauthorized()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+
+    var response = await _client.GetAsync($"/graphs/{graph.Id}/key");
+
+    response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+  }
+
+  [Fact]
+  public async Task GetGraphKey_WhenCalledWithInvalidGraphId_ItShouldReturnBadRequest()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    var response = await _client.GetAsync("/graphs/invalid-graph-id/key");
+
+    response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+  }
+
+  [Fact]
+  public async Task GetGraphKey_WhenCalledAndUserDoesNotExist_ItShouldReturnNotFound()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    var response = await _client.GetAsync($"/graphs/{graph.Id}/key");
+
+    response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+  }
+
+  [Fact]
+  public async Task GetGraphKey_WhenCalledAndGraphDoesNotExist_ItShouldReturnNotFound()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Users.InsertOneAsync(user);
+
+    var response = await _client.GetAsync($"/graphs/{graph.Id}/key");
+
+    response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+  }
+
+  [Fact]
+  public async Task GetGraphKey_WhenCalledAndGraphExists_ItShouldReturnGraphKey()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+    var unencryptedApiKey = graph.ApiKey;
+
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+    graph.UserId = user.Id;
+
+    var encryptedGraphApiKey = await EncryptionService.EncryptForUserAsync(graph.ApiKey, user);
+    graph.ApiKey = encryptedGraphApiKey;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Users.InsertOneAsync(user);
+    await Context.Graphs.InsertOneAsync(graph);
+
+    var response = await _client.GetAsync($"/graphs/{graph.Id}/key");
+
+    response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+    var responseBody = await response.Content.ReadFromJsonAsync<GetGraphKeyResponse>();
+
+    responseBody!.Key.Should().Be(unencryptedApiKey);
   }
 }

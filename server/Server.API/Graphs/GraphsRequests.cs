@@ -51,3 +51,14 @@ record GetGraphRequest(
   [FromRoute] string Id,
   [FromServices] IGraphService GraphService
 );
+
+/// <summary>
+/// Represents a request to get a graph key
+/// </summary>
+record GetGraphKeyRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromServices] IGraphService GraphService,
+  [FromServices] IUserService UserService,
+  [FromServices] IEncryptionService EncryptionService
+);

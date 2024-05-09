@@ -38,6 +38,16 @@ static class GraphsRoutes
 
     group.MapHub<GraphsHub>("/hub");
 
+    group
+      .MapGet("{id}/key", GraphsController.GetGraphKey)
+      .RequireAuthorization()
+      .Produces<GetGraphKeyResponse>((int)HttpStatusCode.OK)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("GetGraphKey")
+      .WithDescription("Gets a graph's key by graph id");
+
     return group;
   }
 }
