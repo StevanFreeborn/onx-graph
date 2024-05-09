@@ -168,6 +168,7 @@
       color: var(--color-text);
       background-color: var(--color-background-mute);
       border-radius: 50%;
+      border-color: var(--color-background);
       cursor: pointer;
       transition-property: transform;
       transition-duration: var(--transition-duration);
@@ -303,6 +304,7 @@
           background-color: inherit;
           color: var(--color-text);
           cursor: pointer;
+          border-color: var(--color-background);
 
           & svg {
             width: 1rem;
