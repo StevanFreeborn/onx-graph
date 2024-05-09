@@ -75,11 +75,19 @@
       </div>
     </div>
     <div v-else-if="graphData.status === 'building'">
-      <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
+      <GraphHeading
+        :id="graphData.data.id"
+        :name="graphData.data.name"
+        :status="graphData.data.status"
+      />
       <GraphMonitor :graph-id="graphData.data.id" @graph-processed="handleGraphProcessed" />
     </div>
     <div v-else-if="graphData.status === 'not-built'">
-      <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
+      <GraphHeading
+        :id="graphData.data.id"
+        :name="graphData.data.name"
+        :status="graphData.data.status"
+      />
       <div>
         <p>The graph has not been built yet.</p>
         <!-- TODO: Implement request to build graph again -->
@@ -87,7 +95,11 @@
       </div>
     </div>
     <div v-else :data-testid="`graph-${graphData.data.id}`">
-      <GraphHeading :name="graphData.data.name" :status="graphData.data.status" />
+      <GraphHeading
+        :id="graphData.data.id"
+        :name="graphData.data.name"
+        :status="graphData.data.status"
+      />
       <OnxGraph :graph="graphData.data" />
     </div>
   </Transition>
@@ -127,6 +139,7 @@
       border-image: initial;
       color: var(--color-text);
       cursor: pointer;
+      border-color: var(--color-background);
     }
 
     & .button:active {
