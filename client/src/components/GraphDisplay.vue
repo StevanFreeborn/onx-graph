@@ -89,6 +89,7 @@
         :name="graphData.data.name"
         :status="graphData.data.status"
       />
+      <GraphActionsMenu />
       <div>
         <p>The graph has not been built yet.</p>
         <!-- TODO: Implement request to build graph again -->
