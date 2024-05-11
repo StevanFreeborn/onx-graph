@@ -39,6 +39,10 @@ describe('GraphsService', () => {
     expect(graphsService.getGraphKey).toBeInstanceOf(Function);
   });
 
+  it('should have a deleteGraph method', () => {
+    expect(graphsService.deleteGraph).toBeInstanceOf(Function);
+  });
+
   describe('addGraph', () => {
     it('should return an error if the response status is 400', async () => {
       mockClient.post.mockReturnValueOnce({
@@ -209,6 +213,37 @@ describe('GraphsService', () => {
 
       expect(result.err).toBe(false);
       expect(result.unwrap().key).toEqual('key');
+    });
+  });
+
+  describe('deleteGraph', () => {
+    it('should return an error if the response status is not ok', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+      mockClient.delete.mockReturnValueOnce({ ok: false });
+
+      const result = await graphsService.deleteGraph('123');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to delete graph.')]);
+    });
+
+    it('should return an error if the request fails', async () => {
+      mockClient.delete.mockRejectedValueOnce(new Error('Failed to delete graph.'));
+
+      const result = await graphsService.deleteGraph('123');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to delete graph.')]);
+    });
+
+    it('should return true if the request is successful', async () => {
+      mockClient.delete.mockReturnValueOnce({ ok: true });
+
+      const result = await graphsService.deleteGraph('123');
+
+      expect(result.err).toBe(false);
+      expect(result.val).toBe(true);
     });
   });
 });

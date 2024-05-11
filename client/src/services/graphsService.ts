@@ -25,6 +25,7 @@ export interface IGraphsService {
   ) => Promise<Result<PageWithData<Graph>, Error[]>>;
   getGraph: (id: string) => Promise<Result<Graph, Error[]>>;
   getGraphKey: (id: string) => Promise<Result<GetGraphKeyResponse, Error[]>>;
+  deleteGraph: (id: string) => Promise<Result<boolean, Error[]>>;
 }
 
 export class GraphsService implements IGraphsService {
@@ -55,6 +56,24 @@ export class GraphsService implements IGraphsService {
     this.client = client;
   }
 
+  async deleteGraph(id: string) {
+    const request = new ClientRequest(this.endpoints.getGraph(id));
+
+    try {
+      const res = await this.client.delete(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Failed to delete graph.')]);
+      }
+
+      return Ok(true);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return Err([new Error('Failed to delete graph.')]);
+    }
+  }
+
   async getGraphKey(id: string) {
     const request = new ClientRequest(this.endpoints.getGraphKey(id));
 
@@ -79,6 +98,10 @@ export class GraphsService implements IGraphsService {
 
     try {
       const res = await this.client.get(request);
+
+      if (res.status === 404) {
+        return Err([new GraphNotFoundError()]);
+      }
 
       if (res.ok === false) {
         return Err([new Error('Failed to get graph.')]);
@@ -157,3 +180,9 @@ type AddGraphResponse = {
 type GetGraphKeyResponse = {
   key: string;
 };
+
+export class GraphNotFoundError extends Error {
+  constructor() {
+    super('Graph not found.');
+  }
+}
