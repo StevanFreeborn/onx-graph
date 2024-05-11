@@ -21,6 +21,12 @@ class GraphService(IGraphRepository graphRepository) : IGraphService
     return Result.Ok(createdGraph);
   }
 
+  public async Task<Result> DeleteGraphAsync(string id)
+  {
+    await _graphRepository.DeleteGraphAsync(id);
+    return Result.Ok();
+  }
+
   public async Task<Result<Graph>> GetGraphAsync(string id, string userId)
   {
     var graph = await _graphRepository.GetGraphAsync(id, userId);

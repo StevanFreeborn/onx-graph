@@ -28,4 +28,10 @@ interface IGraphService
   /// <param name="userId">The id of the user who owns the graphs.</param>
   /// <returns>A page of graphs as a <see cref="Page{Graph}"/> instance.</returns>
   Task<Result<Page<Graph>>> GetGraphsAsync(int pageNumber, int pageSize, string userId);
+
+  /// <summary>
+  /// Deletes a graph by id.
+  /// </summary>
+  /// <param name="id">The id of the graph to delete.</param>
+  Task<Result> DeleteGraphAsync(string id);
 }

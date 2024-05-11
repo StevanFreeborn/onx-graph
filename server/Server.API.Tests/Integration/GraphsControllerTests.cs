@@ -416,4 +416,107 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
 
     responseBody!.Key.Should().Be(unencryptedApiKey);
   }
+
+  [Fact]
+  public async Task DeleteGraph_WhenCalledByUnauthenticatedUser_ItShouldReturnUnauthorized()
+  {
+    var response = await _client.DeleteAsync("/graphs/123");
+
+    response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+  }
+
+  [Fact]
+  public async Task DeleteGraph_WhenCalledWithInvalidGraphId_ItShouldReturnBadRequest()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    var response = await _client.DeleteAsync("/graphs/invalid-graph-id");
+
+    response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+  }
+
+  [Fact]
+  public async Task DeleteGraph_WhenCalledAndUserDoesNotExist_ItShouldReturnNotFound()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    var response = await _client.DeleteAsync($"/graphs/{graph.Id}");
+
+    response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+  }
+
+  [Fact]
+  public async Task DeleteGraph_WhenCalledAndGraphDoesNotExist_ItShouldReturnNotFound()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Users.InsertOneAsync(user);
+
+    var response = await _client.DeleteAsync($"/graphs/{graph.Id}");
+
+    response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+  }
+
+  [Fact]
+  public async Task DeleteGraph_WhenCalledAndGraphExists_ItShouldDeleteGraph()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+    graph.UserId = user.Id;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Users.InsertOneAsync(user);
+    await Context.Graphs.InsertOneAsync(graph);
+
+    var response = await _client.DeleteAsync($"/graphs/{graph.Id}");
+
+    response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+    var deletedGraph = await Context.Graphs
+      .Find(g => g.Id == graph.Id)
+      .SingleOrDefaultAsync();
+
+    deletedGraph.Should().BeNull();
+  }
 }

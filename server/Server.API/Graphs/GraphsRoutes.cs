@@ -48,6 +48,16 @@ static class GraphsRoutes
       .WithName("GetGraphKey")
       .WithDescription("Gets a graph's key by graph id");
 
+    group
+      .MapDelete("{id}", GraphsController.DeleteGraph)
+      .RequireAuthorization()
+      .Produces((int)HttpStatusCode.NoContent)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("DeleteGraph")
+      .WithDescription("Deletes a graph by id");
+
     return group;
   }
 }

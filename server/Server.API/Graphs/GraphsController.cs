@@ -176,4 +176,63 @@ static class GraphsController
 
     return Results.Ok(getGraphApiKeyResponse);
   }
+
+  /// <summary>
+  /// Deletes a graph
+  /// </summary>
+  public static async Task<IResult> DeleteGraph([AsParameters] DeleteGraphRequest request)
+  {
+    var userId = request.HttpContext.GetUserId();
+
+    if (userId is null)
+    {
+      return Results.Unauthorized();
+    }
+
+    if (ObjectId.TryParse(request.Id, out var _) is false)
+    {
+      return Results.ValidationProblem(new Dictionary<string, string[]>()
+      {
+        { nameof(request.Id), [ "Invalid graph id"] }
+      });
+    }
+
+    var getUserResult = await request.UserService.GetUserByIdAsync(userId);
+
+    if (getUserResult.IsFailed && getUserResult.Errors.Exists(e => e is UserDoesNotExistError))
+    {
+      return Results.Problem(
+        title: "Failed to get user",
+        detail: "Unable to retrieve user. See errors for details.",
+        statusCode: StatusCodes.Status404NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", getUserResult.Errors } }
+      );
+    }
+
+    var getGraphResult = await request.GraphService.GetGraphAsync(request.Id, userId);
+
+    if (getGraphResult.IsFailed && getGraphResult.Errors.Exists(e => e is GraphNotFoundError))
+    {
+      return Results.Problem(
+        title: "Failed to get graph",
+        detail: "Unable to retrieve graph. See errors for details.",
+        statusCode: StatusCodes.Status404NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", getGraphResult.Errors } }
+      );
+    }
+
+    var deleteGraphResult = await request.GraphService.DeleteGraphAsync(getGraphResult.Value.Id);
+
+    if (deleteGraphResult.IsFailed)
+    {
+      return Results.Problem(
+        title: "Failed to delete graph",
+        detail: "Unable to delete graph. See errors for details.",
+        statusCode: StatusCodes.Status500InternalServerError,
+        extensions: new Dictionary<string, object?> { { "Errors", deleteGraphResult.Errors } }
+      );
+    }
+
+    return Results.NoContent();
+  }
 }

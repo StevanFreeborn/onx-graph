@@ -43,4 +43,11 @@ interface IGraphRepository
   /// <param name="graph">The graph to update.</param>
   /// <returns>A <see cref="Task"/>.</returns>
   Task UpdateGraphAsync(Graph graph);
+
+  /// <summary>
+  /// Deletes a graph by its id.
+  /// </summary>
+  /// <param name="id">The id of the graph to delete.</param>
+  /// <returns>A <see cref="Task"/>.</returns>
+  Task DeleteGraphAsync(string id);
 }

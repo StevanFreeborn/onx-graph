@@ -62,3 +62,13 @@ record GetGraphKeyRequest(
   [FromServices] IUserService UserService,
   [FromServices] IEncryptionService EncryptionService
 );
+
+/// <summary>
+/// Represents a request to delete a graph
+/// </summary>
+record DeleteGraphRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromServices] IUserService UserService,
+  [FromServices] IGraphService GraphService
+);
