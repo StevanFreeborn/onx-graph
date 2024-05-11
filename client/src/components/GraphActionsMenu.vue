@@ -1,9 +1,19 @@
 <script setup lang="ts">
+  import { useGraphsService } from '@/composables/useGraphsService';
   import { useMounted } from '@/composables/useMounted.js';
+  import { useUserStore } from '@/stores/userStore';
   import { computed, onMounted, onUnmounted, ref } from 'vue';
+  import { useRouter } from 'vue-router';
   import ConfirmDialog from './ConfirmDialog.vue';
 
+  const props = defineProps<{
+    graphId: string;
+  }>();
+
+  const router = useRouter();
   const mounted = useMounted();
+  const userStore = useUserStore();
+  const graphService = useGraphsService(userStore);
   const menuVisible = ref(false);
   const showConfirmDialog = ref(false);
   const menuClasses = computed(() => ({
@@ -40,12 +50,27 @@
     showConfirmDialog.value = true;
   }
 
-  function handleConfirmDelete() {
+  function handleCancelDelete() {
     showConfirmDialog.value = false;
   }
 
-  function handleCancelDelete() {
+  async function handleConfirmDelete() {
     showConfirmDialog.value = false;
+
+    const deleteResult = await graphService.deleteGraph(props.graphId);
+
+    if (deleteResult.err) {
+      alert('Unable to delete graph. Please try again.');
+      // eslint-disable-next-line no-console
+      for (const error of deleteResult.val) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+
+      return;
+    }
+
+    router.push('/graphs');
   }
 </script>
 
