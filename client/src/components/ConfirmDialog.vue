@@ -64,6 +64,8 @@
     display: none;
     justify-content: center;
     align-items: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 0.5rem;
 
     &.visible {
       display: flex;
