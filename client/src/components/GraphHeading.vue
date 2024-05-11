@@ -49,7 +49,7 @@
   <div class="heading-container">
     <div class="heading-row">
       <div class="heading-wrapper">
-        <h2>{{ props.name }}</h2>
+        <h2 :title="props.name">{{ props.name }}</h2>
       </div>
       <div class="status-icon-container">
         <span v-if="props.status === GraphStatus.Built" class="status-icon built" title="Built">
