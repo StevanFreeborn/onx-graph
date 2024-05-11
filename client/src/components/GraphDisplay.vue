@@ -2,6 +2,7 @@
   import GraphMonitor from '@/components/GraphMonitor.vue';
   import SpinningLoader from '@/components/SpinningLoader.vue';
   import { useGraphsService } from '@/composables/useGraphsService';
+  import { GraphNotFoundError } from '@/services/graphsService';
   import { useUserStore } from '@/stores/userStore';
   import { GraphStatus, type Graph } from '@/types';
   import { onMounted, ref } from 'vue';
@@ -18,7 +19,8 @@
     | { status: 'built'; data: Graph }
     | { status: 'building'; data: Graph }
     | { status: 'not-built'; data: Graph }
-    | { status: 'error' };
+    | { status: 'error' }
+    | { status: 'not-found' };
 
   const graphData = ref<GraphData>({ status: 'loading' });
 
@@ -31,6 +33,11 @@
     }
 
     const graphResult = await graphsService.getGraph(props.graphId);
+
+    if (graphResult.err && graphResult.val.some(error => error instanceof GraphNotFoundError)) {
+      graphData.value = { status: 'not-found' };
+      return;
+    }
 
     if (graphResult.err) {
       for (const error of graphResult.val) {
@@ -69,6 +76,9 @@
     <div v-if="graphData.status === 'loading'">
       <SpinningLoader height="3rem" width="3rem" />
     </div>
+    <div v-else-if="graphData.status === 'not-found'">
+      <p>Hmm...doesn't look like that graph exists.</p>
+    </div>
     <div v-else-if="graphData.status === 'error'">
       <div>
         <p>There was an error loading the graph.</p>
@@ -89,7 +99,7 @@
         :name="graphData.data.name"
         :status="graphData.data.status"
       />
-      <GraphActionsMenu />
+      <GraphActionsMenu :graph-id="graphData.data.id" />
       <div>
         <p>The graph has not been built yet.</p>
         <!-- TODO: Implement request to build graph again -->
@@ -102,7 +112,7 @@
         :name="graphData.data.name"
         :status="graphData.data.status"
       />
-      <GraphActionsMenu />
+      <GraphActionsMenu :graph-id="graphData.data.id" />
       <OnxGraph :graph="graphData.data" />
     </div>
   </Transition>
