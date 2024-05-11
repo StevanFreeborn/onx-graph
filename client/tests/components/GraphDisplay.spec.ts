@@ -115,6 +115,9 @@ describe('GraphDisplay', () => {
           OnxGraph: {
             template: `<div>graph</div>`,
           },
+          GraphActionsMenu: {
+            template: `<div>actions menu</div>`,
+          },
         },
       },
     });
@@ -149,7 +152,7 @@ describe('GraphDisplay', () => {
     });
   });
 
-  it('should display not built graph message and build graph button when loaded and graph has status of unbuilt', async () => {
+  it('should display not built graph message and build graph button when loaded and graph has status of not built', async () => {
     mockGraphsService.getGraph.mockReturnValueOnce({
       err: false,
       val: { ...mockGraph, status: GraphStatus.NotBuilt },
@@ -161,6 +164,11 @@ describe('GraphDisplay', () => {
       },
       global: {
         provide: defaultProvide,
+        stubs: {
+          GraphActionsMenu: {
+            template: `<div>actions menu</div>`,
+          },
+        },
       },
     });
 
