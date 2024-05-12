@@ -2,7 +2,7 @@
   import { useGraphsService } from '@/composables/useGraphsService';
   import { useMounted } from '@/composables/useMounted.js';
   import { useUserStore } from '@/stores/userStore';
-  import { computed, onMounted, onUnmounted, ref } from 'vue';
+  import { onMounted, onUnmounted, ref } from 'vue';
   import { useRouter } from 'vue-router';
   import ConfirmDialog from './ConfirmDialog.vue';
 
@@ -16,10 +16,6 @@
   const graphService = useGraphsService(userStore);
   const menuVisible = ref(false);
   const showConfirmDialog = ref(false);
-  const menuClasses = computed(() => ({
-    menu: true,
-    visible: menuVisible.value,
-  }));
 
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
@@ -82,8 +78,9 @@
           d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
         />
       </svg>
+      <span class="sr-only">Toggle Actions Menu</span>
     </button>
-    <div class="menu" :class="menuClasses">
+    <div v-if="menuVisible" class="menu" role="menu">
       <ul>
         <li>
           <button type="button" @click="handleDeleteGraph" :disabled="mounted === false">
@@ -147,7 +144,7 @@
     }
 
     & .menu {
-      display: none;
+      display: block;
       position: absolute;
       top: 0;
       right: 1.75rem;
@@ -179,10 +176,6 @@
       & button:active {
         background-color: var(--color-background-mute);
       }
-    }
-
-    & .menu.visible {
-      display: block;
     }
   }
 
