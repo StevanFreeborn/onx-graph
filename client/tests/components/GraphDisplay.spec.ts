@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup, waitFor } from '@testing-library/vue';
+import { cleanup, fireEvent, waitFor } from '@testing-library/vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import GraphDisplay from '../../src/components/GraphDisplay.vue';
-import { GraphsServiceFactoryKey } from '../../src/services/graphsService';
+import { GraphNotFoundError, GraphsServiceFactoryKey } from '../../src/services/graphsService';
 import { GraphStatus } from '../../src/types';
 import { customRender } from '../testUtils';
 
@@ -175,6 +175,54 @@ describe('GraphDisplay', () => {
     await waitFor(() => {
       expect(getByText(/graph has not been built/i)).toBeInTheDocument();
       expect(getByRole('button', { name: /build graph/i })).toBeInTheDocument();
+    });
+  });
+
+  it('should attempt to retrieve graph again when initial load fails and try again button is clicked', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    mockGraphsService.getGraph.mockReturnValue({
+      err: true,
+      val: [new Error('Failed to get graph.')],
+    });
+
+    const { getByRole } = await customRender(GraphDisplay, {
+      props: {
+        graphId: mockGraph.id,
+      },
+      global: {
+        provide: defaultProvide,
+      },
+    });
+
+    await waitFor(async () => {
+      const tryAgainButton = getByRole('button', { name: /try again/i });
+      await fireEvent.click(tryAgainButton);
+    });
+
+    await waitFor(() => {
+      expect(mockGraphsService.getGraph).toHaveBeenCalledTimes(2);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  it('should display not found message when graph is not found', async () => {
+    mockGraphsService.getGraph.mockReturnValueOnce({
+      err: true,
+      val: [new GraphNotFoundError()],
+    });
+
+    const { getByText } = await customRender(GraphDisplay, {
+      props: {
+        graphId: mockGraph.id,
+      },
+      global: {
+        provide: defaultProvide,
+      },
+    });
+
+    await waitFor(() => {
+      expect(getByText(/hmm...doesn't look like that graph exists/i)).toBeInTheDocument();
     });
   });
 });
