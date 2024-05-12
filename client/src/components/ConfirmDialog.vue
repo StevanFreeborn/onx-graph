@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { useMounted } from '@/composables/useMounted';
-  import { computed, onMounted, onUnmounted } from 'vue';
+  import { onMounted, onUnmounted } from 'vue';
 
   const props = defineProps<{
     show: boolean;
@@ -13,17 +13,12 @@
     cancel: [];
   }>();
 
-  const overlayClasses = computed(() => ({
-    overlay: true,
-    visible: props.show,
-  }));
-
   const mounted = useMounted();
 
   function handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
 
-    if (props.show && target.closest('.overlay')) {
+    if (props.show && target.classList.contains('overlay')) {
       emit('cancel');
     }
   }
@@ -38,7 +33,7 @@
 </script>
 
 <template>
-  <div :class="overlayClasses">
+  <div v-if="show" class="overlay" role="alertdialog">
     <div class="confirm">
       <slot></slot>
       <div class="buttons-container">
@@ -61,15 +56,11 @@
     left: 0;
     height: 100%;
     width: 100%;
-    display: none;
+    display: flex;
     justify-content: center;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 0.5rem;
-
-    &.visible {
-      display: flex;
-    }
 
     & .confirm {
       display: flex;
