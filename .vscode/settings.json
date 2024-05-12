@@ -4,6 +4,7 @@
   },
   "dotnet.defaultSolution": "server/Server.sln",
   "cSpell.words": [
+    "alertdialog",
     "Bson",
     "buttonborder",
     "composables",
