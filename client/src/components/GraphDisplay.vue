@@ -77,6 +77,10 @@
       return;
     }
 
+    if (name === graphData.value.data.name) {
+      return;
+    }
+
     const updatedGraph = { ...graphData.value.data, name };
     const updateResult = await graphsService.updateGraph(updatedGraph);
 
