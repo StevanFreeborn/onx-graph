@@ -34,7 +34,7 @@ export class ClientRequestWithBody<T> extends ClientRequest {
 }
 
 export type UnauthorizedResponseHandler =
-  | ((originalRequest: Request) => Promise<Response>)
+  | ((originalRequest: Request) => Promise<{ response: Response; accessToken: string }>)
   | undefined;
 
 export class ClientConfig {
@@ -88,7 +88,9 @@ export class Client implements IClient {
     const response = await fetch(firstTryRequest);
 
     if (response.status === 401 && this._clientConfig?.unauthorizedResponseHandler) {
-      return await this._clientConfig.unauthorizedResponseHandler(secondTryRequest);
+      const retryResult = await this._clientConfig.unauthorizedResponseHandler(secondTryRequest);
+      this._clientConfig.authHeader = { Authorization: `Bearer ${retryResult.accessToken}` };
+      return retryResult.response;
     }
 
     return response;
