@@ -69,6 +69,30 @@
   async function handleGraphProcessed() {
     await getGraph();
   }
+
+  async function handleNameUpdate(name: string) {
+    const status = graphData.value.status;
+
+    if (status === 'error' || status === 'not-found' || status === 'loading') {
+      return;
+    }
+
+    const updatedGraph = { ...graphData.value.data, name };
+    const updateResult = await graphsService.updateGraph(updatedGraph);
+
+    if (updateResult.err) {
+      for (const error of updateResult.val) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+
+      alert(updateResult.val.reduce((acc, error) => `${error.message}\n${acc}`, ''));
+
+      return;
+    }
+
+    graphData.value = { status, data: updatedGraph };
+  }
 </script>
 
 <template>
@@ -98,6 +122,7 @@
         :id="graphData.data.id"
         :name="graphData.data.name"
         :status="graphData.data.status"
+        @update-name="handleNameUpdate"
       />
       <GraphActionsMenu :graph-id="graphData.data.id" />
       <div>

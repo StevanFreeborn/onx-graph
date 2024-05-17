@@ -519,4 +519,61 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
 
     deletedGraph.Should().BeNull();
   }
+
+  [Fact]
+  public async Task UpdateGraph_WhenCalledByUnauthenticatedUser_ItShouldReturnUnauthorized()
+  {
+    var response = await _client.PutAsJsonAsync("/graphs/123", new { });
+
+    response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+  }
+
+  [Fact]
+  public async Task UpdateGraph_WhenCalledWithInvalidGraphId_ItShouldReturnBadRequest()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    var response = await _client.PutAsJsonAsync("/graphs/invalid-graph-id", new { });
+
+    response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+  }
+
+  [Fact]
+  public async Task UpdateGraph_WhenCalledAndNameIsEmpty_ItShouldReturnBadRequest()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+    graph.UserId = user.Id;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Users.InsertOneAsync(user);
+    await Context.Graphs.InsertOneAsync(graph);
+
+    var response = await _client.PutAsJsonAsync($"/graphs/{graph.Id}", new { name = string.Empty });
+
+    response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+    var responseBody = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+
+    responseBody!.Errors["Name"].Should().Contain("'Name' must not be empty.");
+  }
 }

@@ -44,4 +44,10 @@ class GraphService(IGraphRepository graphRepository) : IGraphService
     var graphs = await _graphRepository.GetGraphsAsync(pageNumber, pageSize, userId);
     return Result.Ok(graphs);
   }
+
+  public async Task<Result<Graph>> UpdateGraphAsync(Graph graph)
+  {
+    await _graphRepository.UpdateGraphAsync(graph);
+    return Result.Ok();
+  }
 }

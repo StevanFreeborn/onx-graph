@@ -58,6 +58,16 @@ static class GraphsRoutes
       .WithName("DeleteGraph")
       .WithDescription("Deletes a graph by id");
 
+    group
+      .MapPut("{id}", GraphsController.UpdateGraph)
+      .RequireAuthorization()
+      .Produces((int)HttpStatusCode.NoContent)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("UpdateGraph")
+      .WithDescription("Updates a graph by id");
+
     return group;
   }
 }

@@ -11,10 +11,15 @@
     status: GraphStatus;
   }>();
 
+  const emit = defineEmits<{
+    updateName: [string];
+  }>();
+
   const mounted = useMounted();
   const userStore = useUserStore();
   const graphService = useGraphsService(userStore);
 
+  const nameDisabled = ref<boolean>(true);
   const fakeApiKey = '*'.repeat(32);
   const apiKey = ref<string>(fakeApiKey);
   const showApiKey = ref<boolean>(false);
@@ -43,13 +48,31 @@
 
     apiKey.value = fakeApiKey;
   }
+
+  async function handleNameFocus() {
+    nameDisabled.value = false;
+  }
+
+  async function handleNameBlur(event: FocusEvent) {
+    nameDisabled.value = true;
+    emit('updateName', (event.target as HTMLInputElement).value);
+  }
 </script>
 
 <template>
   <div class="heading-container">
     <div class="heading-row">
       <div class="heading-wrapper">
-        <h2 :title="props.name">{{ props.name }}</h2>
+        <label for="name" class="sr-only">Graph Name</label>
+        <input
+          id="name"
+          name="name"
+          :value="props.name"
+          :title="props.name"
+          @focus="handleNameFocus"
+          @blur="handleNameBlur"
+          :readonly="nameDisabled === true"
+        />
       </div>
       <div class="status-icon-container">
         <span v-if="props.status === GraphStatus.Built" class="status-icon built" title="Built">
@@ -85,7 +108,7 @@
     </div>
     <div class="api-key-row">
       <label for="apiKey" class="sr-only">API Key</label>
-      <input id="apiKey" name="apiKey" :value="apiKey" />
+      <input id="apiKey" name="apiKey" :value="apiKey" :disabled="showApiKey === false" />
       <button type="button" @click="toggleApiKeyVisibility" :disabled="mounted === false">
         <span v-if="showApiKey" class="show-api-key-icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor">
@@ -114,12 +137,15 @@
     position: absolute;
     top: 0.5rem;
     left: 0.5rem;
-    padding: 0.25rem 1rem 0.75rem 1rem;
+    padding: 0.75rem 1rem 0.75rem 1rem;
     background-color: var(--color-background);
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
     overflow: hidden;
     max-width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 
     & .heading-row {
       display: flex;
@@ -128,14 +154,22 @@
       gap: 1rem;
 
       & .heading-wrapper {
-        overflow: hidden;
-      }
+        input {
+          font-size: 1.25rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          width: 100%;
+          padding: 0.25rem;
+          border-radius: 0.25rem;
+          background-color: var(--color-background-mute);
+          color: var(--color-text);
+          border: none;
+        }
 
-      h2 {
-        font-size: 1.25rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        & input:read-only {
+          background-color: var(--color-background);
+        }
       }
 
       .status-icon-container {
@@ -182,11 +216,15 @@
         padding-right: 1.5rem;
       }
 
+      & input:disabled {
+        background-color: var(--color-background);
+      }
+
       & button {
         position: absolute;
         right: 1px;
         top: 3.5px;
-        background-color: var(--color-background-mute);
+        background-color: inherit;
         color: var(--color-text);
         border: none;
         cursor: pointer;

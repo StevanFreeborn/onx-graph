@@ -197,13 +197,16 @@ static class GraphsController
       });
     }
 
+    var title = "Failed to delete graph";
+    var detail = "Unable to delete graph. See errors for details.";
+
     var getUserResult = await request.UserService.GetUserByIdAsync(userId);
 
     if (getUserResult.IsFailed && getUserResult.Errors.Exists(e => e is UserDoesNotExistError))
     {
       return Results.Problem(
-        title: "Failed to get user",
-        detail: "Unable to retrieve user. See errors for details.",
+        title: title,
+        detail: detail,
         statusCode: StatusCodes.Status404NotFound,
         extensions: new Dictionary<string, object?> { { "Errors", getUserResult.Errors } }
       );
@@ -214,8 +217,8 @@ static class GraphsController
     if (getGraphResult.IsFailed && getGraphResult.Errors.Exists(e => e is GraphNotFoundError))
     {
       return Results.Problem(
-        title: "Failed to get graph",
-        detail: "Unable to retrieve graph. See errors for details.",
+        title: title,
+        detail: detail,
         statusCode: StatusCodes.Status404NotFound,
         extensions: new Dictionary<string, object?> { { "Errors", getGraphResult.Errors } }
       );
@@ -226,13 +229,96 @@ static class GraphsController
     if (deleteGraphResult.IsFailed)
     {
       return Results.Problem(
-        title: "Failed to delete graph",
-        detail: "Unable to delete graph. See errors for details.",
+        title: title,
+        detail: detail,
         statusCode: StatusCodes.Status500InternalServerError,
         extensions: new Dictionary<string, object?> { { "Errors", deleteGraphResult.Errors } }
       );
     }
 
     return Results.NoContent();
+  }
+
+  /// <summary>
+  /// Updates a graph
+  /// </summary>
+  public static async Task<IResult> UpdateGraph([AsParameters] UpdateGraphRequest request)
+  {
+    var userId = request.HttpContext.GetUserId();
+
+    if (userId is null)
+    {
+      return Results.Unauthorized();
+    }
+
+    if (ObjectId.TryParse(request.Id, out var _) is false)
+    {
+      return Results.ValidationProblem(new Dictionary<string, string[]>()
+      {
+        { nameof(request.Id), [ "Invalid graph id"] }
+      });
+    }
+
+    var validationResult = await request.Validator.ValidateAsync(request.Dto);
+
+    if (validationResult.IsValid is false)
+    {
+      return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
+    var title = "Failed to update graph";
+    var detail = "Unable to update graph. See errors for details.";
+
+    var getUserResult = await request.UserService.GetUserByIdAsync(userId);
+
+    if (getUserResult.IsFailed)
+    {
+      return Results.Problem(
+        title: title,
+        detail: detail,
+        statusCode: StatusCodes.Status404NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", getUserResult.Errors } }
+      );
+    }
+
+    var getGraphResult = await request.GraphService.GetGraphAsync(request.Id, userId);
+
+    if (getGraphResult.IsFailed && getGraphResult.Errors.Exists(e => e is GraphNotFoundError))
+    {
+      return Results.Problem(
+        title: title,
+        detail: detail,
+        statusCode: StatusCodes.Status404NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", getGraphResult.Errors } }
+      );
+    }
+
+    var updatedGraph = request.Dto.ToGraph(getGraphResult.Value.ApiKey);
+
+    var updateGraphResult = await request.GraphService.UpdateGraphAsync(updatedGraph);
+
+    if (updateGraphResult.IsFailed)
+    {
+      return Results.Problem(
+        title: title,
+        detail: detail,
+        statusCode: StatusCodes.Status500InternalServerError,
+        extensions: new Dictionary<string, object?> { { "Errors", updateGraphResult.Errors } }
+      );
+    }
+
+    var getUpdatedGraphResult = await request.GraphService.GetGraphAsync(request.Id, userId);
+
+    if (getUpdatedGraphResult.IsFailed)
+    {
+      return Results.Problem(
+        title: title,
+        detail: detail,
+        statusCode: StatusCodes.Status500InternalServerError,
+        extensions: new Dictionary<string, object?> { { "Errors", getUpdatedGraphResult.Errors } }
+      );
+    }
+
+    return Results.Ok(getUpdatedGraphResult.Value);
   }
 }

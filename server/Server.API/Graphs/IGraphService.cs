@@ -9,7 +9,7 @@ interface IGraphService
   /// Adds a new graph.
   /// </summary>
   /// <param name="graph">The <see cref="Graph"/> to add.</param>
-  /// <returns>The added graph as a <see cref="Graph"/> instance.</returns>
+  /// <returns>The added graph as a <see cref="Result{Graph}"/> instance.</returns>
   Task<Result<Graph>> AddGraphAsync(Graph graph);
 
   /// <summary>
@@ -17,7 +17,7 @@ interface IGraphService
   /// </summary>
   /// <param name="id">The id of the graph to get.</param>
   /// <param name="userId">The id of the user who owns the graph.</param>
-  /// <returns>The graph as a <see cref="Graph"/> instance.</returns>
+  /// <returns>The graph as a <see cref="Result{Graph}"/> instance.</returns>
   Task<Result<Graph>> GetGraphAsync(string id, string userId);
 
   /// <summary>
@@ -34,4 +34,11 @@ interface IGraphService
   /// </summary>
   /// <param name="id">The id of the graph to delete.</param>
   Task<Result> DeleteGraphAsync(string id);
+
+  /// <summary>
+  /// Updates a graph.
+  /// </summary>
+  /// <param name="graph">The graph to update.</param>
+  /// <returns>The updated graph as a <see cref="Result{Graph}"/> instance.</returns>
+  Task<Result<Graph>> UpdateGraphAsync(Graph graph);
 }

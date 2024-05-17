@@ -11,6 +11,7 @@ record AddGraphResponse(string Id);
 record GraphDto
 {
   public string Id { get; init; } = string.Empty;
+  public string UserId { get; init; } = string.Empty;
   public string Name { get; init; } = string.Empty;
   public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
   public DateTime UpdatedAt { get; init; } = DateTime.UtcNow;
@@ -26,6 +27,7 @@ record GraphDto
   public GraphDto(Graph graph)
   {
     Id = graph.Id;
+    UserId = graph.UserId;
     Name = graph.Name;
     CreatedAt = graph.CreatedAt;
     UpdatedAt = graph.UpdatedAt;
@@ -33,6 +35,19 @@ record GraphDto
     Nodes = graph.Nodes;
     EdgesMap = graph.EdgesMap;
   }
+
+  public Graph ToGraph(string apiKey) => new()
+  {
+    Id = Id,
+    UserId = UserId,
+    Name = Name,
+    CreatedAt = CreatedAt,
+    UpdatedAt = UpdatedAt,
+    Status = Status,
+    Nodes = Nodes,
+    EdgesMap = EdgesMap,
+    ApiKey = apiKey
+  };
 }
 
 /// <summary>

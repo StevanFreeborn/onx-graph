@@ -72,3 +72,27 @@ record DeleteGraphRequest(
   [FromServices] IUserService UserService,
   [FromServices] IGraphService GraphService
 );
+
+/// <summary>
+/// Validator for <see cref="GraphDto"/>
+/// </summary>
+class GraphDtoValidator : AbstractValidator<GraphDto>
+{
+  public GraphDtoValidator()
+  {
+    RuleFor(dto => dto.Name).NotEmpty();
+  }
+}
+
+
+/// <summary>
+/// Represents a request to update a graph
+/// </summary>
+record UpdateGraphRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromBody] GraphDto Dto,
+  [FromServices] IValidator<GraphDto> Validator,
+  [FromServices] IGraphService GraphService,
+  [FromServices] IUserService UserService
+);
