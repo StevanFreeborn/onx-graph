@@ -57,6 +57,49 @@
     nameDisabled.value = true;
     emit('updateName', (event.target as HTMLInputElement).value);
   }
+
+  async function updateApiKey(apiKey: string) {
+    const updateKeyResult = await graphService.updateGraphKey(props.id, apiKey);
+
+    if (updateKeyResult.err) {
+      for (const error of updateKeyResult.val) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+    }
+  }
+
+  function createApiKeyUpdateHandler(updateFn: (apiKey: string) => Promise<void>) {
+    let isWaiting = false;
+    let pendingValue: string | null = null;
+    const delay = 1000;
+
+    async function processUpdate() {
+      if (pendingValue === null) {
+        isWaiting = false;
+        return;
+      }
+
+      await updateFn(pendingValue);
+      pendingValue = null;
+      setTimeout(processUpdate, delay);
+    }
+
+    return async function (event: Event) {
+      const input = event.target as HTMLInputElement;
+
+      if (isWaiting) {
+        pendingValue = input.value;
+        return;
+      }
+
+      await updateFn(input.value);
+      isWaiting = true;
+      setTimeout(processUpdate, delay);
+    };
+  }
+
+  const handleApiKeyInput = createApiKeyUpdateHandler(updateApiKey);
 </script>
 
 <template>
@@ -108,7 +151,13 @@
     </div>
     <div class="api-key-row">
       <label for="apiKey" class="sr-only">API Key</label>
-      <input id="apiKey" name="apiKey" :value="apiKey" :disabled="showApiKey === false" />
+      <input
+        id="apiKey"
+        name="apiKey"
+        :value="apiKey"
+        :disabled="showApiKey === false"
+        @input="handleApiKeyInput"
+      />
       <button type="button" @click="toggleApiKeyVisibility" :disabled="mounted === false">
         <span v-if="showApiKey" class="show-api-key-icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor">
