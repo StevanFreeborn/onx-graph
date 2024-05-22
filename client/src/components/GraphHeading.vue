@@ -59,6 +59,10 @@
   }
 
   async function updateApiKey(apiKey: string) {
+    if (!apiKey) {
+      return;
+    }
+
     const updateKeyResult = await graphService.updateGraphKey(props.id, apiKey);
 
     if (updateKeyResult.err) {
