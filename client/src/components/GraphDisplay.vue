@@ -1,14 +1,14 @@
 <script setup lang="ts">
   import GraphMonitor from '@/components/GraphMonitor.vue';
-  import SpinningLoader from '@/components/SpinningLoader.vue';
-  import { useGraphsService } from '@/composables/useGraphsService';
-  import { GraphNotFoundError } from '@/services/graphsService';
-  import { useUserStore } from '@/stores/userStore';
-  import { GraphStatus, type Graph } from '@/types';
-  import { onMounted, ref } from 'vue';
-  import GraphActionsMenu from './GraphActionsMenu.vue';
-  import GraphHeading from './GraphHeading.vue';
-  import OnxGraph from './OnxGraph.vue';
+import SpinningLoader from '@/components/SpinningLoader.vue';
+import { useGraphsService } from '@/composables/useGraphsService';
+import { GraphNotFoundError } from '@/services/graphsService';
+import { useUserStore } from '@/stores/userStore';
+import { GraphStatus, type Graph } from '@/types';
+import { onMounted, ref } from 'vue';
+import GraphActionsMenu from './GraphActionsMenu.vue';
+import GraphHeading from './GraphHeading.vue';
+import OnxGraph from './OnxGraph.vue';
 
   const props = defineProps<{
     graphId: string;
@@ -118,6 +118,7 @@
         :id="graphData.data.id"
         :name="graphData.data.name"
         :status="graphData.data.status"
+        @update-name="handleNameUpdate"
       />
       <GraphMonitor :graph-id="graphData.data.id" @graph-processed="handleGraphProcessed" />
     </div>
@@ -140,6 +141,7 @@
         :id="graphData.data.id"
         :name="graphData.data.name"
         :status="graphData.data.status"
+        @update-name="handleNameUpdate"
       />
       <GraphActionsMenu :graph-id="graphData.data.id" />
       <OnxGraph :graph="graphData.data" />
