@@ -192,6 +192,7 @@ try
   // add graph service
   builder.Services.AddScoped<IValidator<AddGraphDto>, AddGraphDtoValidator>();
   builder.Services.AddScoped<IValidator<GraphDto>, GraphDtoValidator>();
+  builder.Services.AddScoped<IValidator<UpdateGraphKeyDto>, UpdateGraphKeyDtoValidator>();
   builder.Services.AddScoped<IGraphRepository, MongoGraphRepository>();
   builder.Services.AddScoped<IGraphService, GraphService>();
   builder.Services.AddSingleton<IGraphQueue, ChannelGraphQueue>();

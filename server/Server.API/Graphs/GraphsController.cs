@@ -1,3 +1,4 @@
+
 namespace Server.API.Graphs;
 
 /// <summary>
@@ -320,5 +321,77 @@ static class GraphsController
     }
 
     return Results.Ok(getUpdatedGraphResult.Value);
+  }
+
+  /// <summary>
+  /// Updates a graph's key
+  /// </summary>
+  internal static async Task<IResult> UpdateGraphKey([AsParameters] UpdateGraphKeyRequest request)
+  {
+    var userId = request.HttpContext.GetUserId();
+
+    if (userId is null)
+    {
+      return Results.Unauthorized();
+    }
+
+    if (ObjectId.TryParse(request.Id, out var _) is false)
+    {
+      return Results.ValidationProblem(new Dictionary<string, string[]>()
+      {
+        { nameof(request.Id), [ "Invalid graph id"] }
+      });
+    }
+
+    var validationResult = await request.Validator.ValidateAsync(request.Dto);
+
+    if (validationResult.IsValid is false)
+    {
+      return Results.ValidationProblem(validationResult.ToDictionary());
+    }
+
+    var title = "Failed to update graph key";
+    var detail = "Unable to update graph key. See errors for details.";
+
+    var getUserResult = await request.UserService.GetUserByIdAsync(userId);
+
+    if (getUserResult.IsFailed)
+    {
+      return Results.Problem(
+        title: title,
+        detail: detail,
+        statusCode: StatusCodes.Status404NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", getUserResult.Errors } }
+      );
+    }
+
+    var getGraphResult = await request.GraphService.GetGraphAsync(request.Id, userId);
+
+    if (getGraphResult.IsFailed && getGraphResult.Errors.Exists(e => e is GraphNotFoundError))
+    {
+      return Results.Problem(
+        title: title,
+        detail: detail,
+        statusCode: StatusCodes.Status404NotFound,
+        extensions: new Dictionary<string, object?> { { "Errors", getGraphResult.Errors } }
+      );
+    }
+
+    var encryptedApiKey = await request.EncryptionService.EncryptForUserAsync(request.Dto.Key, getUserResult.Value);
+    getGraphResult.Value.ApiKey = encryptedApiKey;
+
+    var updateGraphResult = await request.GraphService.UpdateGraphAsync(getGraphResult.Value);
+
+    if (updateGraphResult.IsFailed)
+    {
+      return Results.Problem(
+        title: title,
+        detail: detail,
+        statusCode: StatusCodes.Status500InternalServerError,
+        extensions: new Dictionary<string, object?> { { "Errors", updateGraphResult.Errors } }
+      );
+    }
+
+    return Results.NoContent();
   }
 }

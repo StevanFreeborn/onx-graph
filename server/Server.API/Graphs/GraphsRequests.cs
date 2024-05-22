@@ -96,3 +96,33 @@ record UpdateGraphRequest(
   [FromServices] IGraphService GraphService,
   [FromServices] IUserService UserService
 );
+
+/// <summary>
+/// Represents the data needed to update a graph key
+/// </summary>
+record UpdateGraphKeyDto(string Key);
+
+/// <summary>
+/// Validator for <see cref="UpdateGraphKeyDto"/>
+/// </summary>
+class UpdateGraphKeyDtoValidator : AbstractValidator<UpdateGraphKeyDto>
+{
+  public UpdateGraphKeyDtoValidator()
+  {
+    RuleFor(dto => dto.Key).NotEmpty();
+  }
+}
+
+
+/// <summary>
+/// Represents a request to update a graph key
+/// </summary>
+record UpdateGraphKeyRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromBody] UpdateGraphKeyDto Dto,
+  [FromServices] IValidator<UpdateGraphKeyDto> Validator,
+  [FromServices] IGraphService GraphService,
+  [FromServices] IUserService UserService,
+  [FromServices] IEncryptionService EncryptionService
+);

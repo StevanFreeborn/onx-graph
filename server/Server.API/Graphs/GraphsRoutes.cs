@@ -68,6 +68,16 @@ static class GraphsRoutes
       .WithName("UpdateGraph")
       .WithDescription("Updates a graph by id");
 
+    group
+      .MapPatch("{id}/key", GraphsController.UpdateGraphKey)
+      .RequireAuthorization()
+      .Produces((int)HttpStatusCode.NoContent)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("UpdateGraphKey")
+      .WithDescription("Updates a graph's key by graph id");
+
     return group;
   }
 }
