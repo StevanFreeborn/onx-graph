@@ -27,6 +27,7 @@ export interface IGraphsService {
   getGraphKey: (id: string) => Promise<Result<GetGraphKeyResponse, Error[]>>;
   deleteGraph: (id: string) => Promise<Result<boolean, Error[]>>;
   updateGraph: (graph: Graph) => Promise<Result<Graph, Error[]>>;
+  updateGraphKey: (id: string, key: string) => Promise<Result<boolean, Error[]>>;
 }
 
 export class GraphsService implements IGraphsService {
@@ -37,29 +38,46 @@ export class GraphsService implements IGraphsService {
     return `${this.baseURL}/graphs?pageNumber=${pageNumber}&pageSize=${pageSize}`;
   }
 
-  private createGetGraphEndpoint(id: string) {
+  private createGraphEndpoint(id: string) {
     return `${this.baseURL}/graphs/${id}`;
   }
 
-  private createGetGraphKeyEndpoint(id: string) {
+  private createGraphKeyEndpoint(id: string) {
     return `${this.baseURL}/graphs/${id}/key`;
-  }
-
-  private createUpdateGraphEndpoint(id: string) {
-    return `${this.baseURL}/graphs/${id}`;
   }
 
   private readonly endpoints = {
     addGraph: `${this.baseURL}/graphs/add`,
     getGraphs: (pageNumber: number, pageSize: number) =>
       this.createGetGraphsEndpoint(pageNumber, pageSize),
-    getGraph: (id: string) => this.createGetGraphEndpoint(id),
-    getGraphKey: (id: string) => this.createGetGraphKeyEndpoint(id),
-    updateGraph: (id: string) => this.createUpdateGraphEndpoint(id),
+    getGraph: (id: string) => this.createGraphEndpoint(id),
+    getGraphKey: (id: string) => this.createGraphKeyEndpoint(id),
+    updateGraph: (id: string) => this.createGraphEndpoint(id),
+    updateGraphKey: (id: string) => this.createGraphKeyEndpoint(id),
   };
 
   constructor(client: IClient) {
     this.client = client;
+  }
+
+  async updateGraphKey(id: string, key: string) {
+    const request = new ClientRequestWithBody(this.endpoints.updateGraphKey(id), undefined, {
+      key,
+    });
+
+    try {
+      const res = await this.client.patch(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Failed to update graph key.')]);
+      }
+
+      return Ok(true);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return Err([new Error('Failed to update graph key.')]);
+    }
   }
 
   async updateGraph(graph: Graph) {
