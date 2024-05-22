@@ -57,6 +57,7 @@ export interface IClient {
   get: (req: ClientRequest) => Promise<Response>;
   post: <T>(req: ClientRequestWithBody<T>) => Promise<Response>;
   put: <T>(req: ClientRequestWithBody<T>) => Promise<Response>;
+  patch: <T>(req: ClientRequestWithBody<T>) => Promise<Response>;
   delete: (req: ClientRequest) => Promise<Response>;
 }
 
@@ -119,6 +120,20 @@ export class Client implements IClient {
     const requestConfig = {
       ...req?.config,
       method: 'PUT',
+      body: JSON.stringify(req?.body),
+      headers: {
+        ...req?.config?.headers,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    return await this.request(req?.url, requestConfig);
+  }
+
+  async patch<T>(req: ClientRequestWithBody<T>) {
+    const requestConfig = {
+      ...req?.config,
+      method: 'PATCH',
       body: JSON.stringify(req?.body),
       headers: {
         ...req?.config?.headers,
