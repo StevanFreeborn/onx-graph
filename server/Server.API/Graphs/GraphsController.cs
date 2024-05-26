@@ -320,7 +320,9 @@ static class GraphsController
       );
     }
 
-    return Results.Ok(getUpdatedGraphResult.Value);
+    var graphDto = new GraphDto(getUpdatedGraphResult.Value);
+
+    return Results.Ok(graphDto);
   }
 
   /// <summary>

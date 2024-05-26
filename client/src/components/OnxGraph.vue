@@ -1,44 +1,44 @@
 <script setup lang="ts">
   import { useTheme } from '@/composables/useTheme';
-  import type { Graph } from '@/types';
+  import type { Graph, GraphLayout } from '@/types';
   import * as vNG from 'v-network-graph';
-  import {
-    ForceLayout,
-    type ForceEdgeDatum,
-    type ForceNodeDatum,
-  } from 'v-network-graph/lib/force-layout';
-  import { computed } from 'vue';
+  import { ForceLayout } from 'v-network-graph/lib/force-layout';
+  import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
 
   const props = defineProps<{
     graph: Graph;
   }>();
 
+  const emit = defineEmits<{
+    'update:layout': [layout: GraphLayout];
+  }>();
+
   const theme = useTheme();
 
-  const configs = computed(() =>
+  const configs: ComputedRef<vNG.Config> = computed(() =>
     vNG.defineConfigs({
       view: {
         autoPanAndZoomOnLoad: 'fit-content',
-        layoutHandler: new ForceLayout({
-          positionFixedByDrag: false,
-          positionFixedByClickWithAltKey: false,
-          noAutoRestartSimulation: true,
+        layoutHandler: props.graph.layout
+          ? undefined
+          : new ForceLayout({
+              positionFixedByDrag: false,
+              positionFixedByClickWithAltKey: false,
+              noAutoRestartSimulation: true,
 
-          createSimulation: (d3, nodes, edges) => {
-            const forceLink = d3
-              .forceLink<ForceNodeDatum, ForceEdgeDatum>(edges)
-              .id((d: ForceNodeDatum) => d.id);
-
-            return d3
-              .forceSimulation(nodes)
-              .force('edge', forceLink.distance(10).strength(2))
-              .force('charge', d3.forceManyBody().strength(-2000))
-              .force('x', d3.forceX())
-              .force('y', d3.forceY())
-              .stop()
-              .tick(100);
-          },
-        }),
+              createSimulation: (d3, nodes) => {
+                return (
+                  d3
+                    .forceSimulation(nodes)
+                    // .force('edge', forceLink.distance(10).strength(2))
+                    .force('charge', d3.forceManyBody().strength(-2000))
+                    .force('x', d3.forceX())
+                    .force('y', d3.forceY())
+                    .stop()
+                    .tick(100)
+                );
+              },
+            }),
       },
       node: {
         selectable: true,
@@ -135,7 +135,7 @@
     })
   );
 
-  const nodes = computed(() =>
+  const nodes: ComputedRef<vNG.Nodes> = computed(() =>
     props.graph.nodes.reduce(
       (nodes, node) => {
         nodes[`node${node.id}`] = {
@@ -148,7 +148,7 @@
     )
   );
 
-  const edges = computed(() =>
+  const edges: ComputedRef<vNG.Edges> = computed(() =>
     Object.keys(props.graph.edgesMap).reduce(
       (edges, edgeApp) => {
         const currentEdges = props.graph.edgesMap[edgeApp];
@@ -165,11 +165,66 @@
       {} as Record<string, any>
     )
   );
+
+  const initialLayouts = props.graph.layout
+    ? Object.keys(props.graph.layout).reduce(
+        (layouts, node) => {
+          const currentNode = props.graph.layout[node];
+
+          layouts.nodes[`node${node}`] = {
+            x: currentNode.x,
+            y: currentNode.y,
+          };
+
+          return layouts;
+        },
+        { nodes: {} as Record<string, any> }
+      )
+    : { nodes: {} };
+
+  const layouts: Ref<vNG.Layouts> = ref(initialLayouts);
+
+  function getGraphLayout(layouts: vNG.Layouts) {
+    return Object.keys(layouts.nodes).reduce((layout, node) => {
+      const nodeId = node.replace('node', '');
+      const currentNode = layouts.nodes[node];
+
+      layout[nodeId] = {
+        x: currentNode.x,
+        y: currentNode.y,
+      };
+
+      return layout;
+    }, {} as GraphLayout);
+  }
+
+  const eventHandlers: vNG.EventHandlers = {
+    'node:dragend': () => {
+      const layout = getGraphLayout(layouts.value);
+      emit('update:layout', layout);
+    },
+  };
+
+  // handle initial layout being
+  // generated for the graph
+  if (props.graph.layout === null) {
+    watch(layouts, newValue => {
+      const layout = getGraphLayout(newValue);
+      emit('update:layout', layout);
+    });
+  }
 </script>
 
 <template>
   <div class="container">
-    <v-network-graph class="graph" :nodes="nodes" :edges="edges" :configs="configs" />
+    <v-network-graph
+      class="graph"
+      :nodes="nodes"
+      :edges="edges"
+      v-model:layouts="layouts"
+      :configs="configs"
+      :eventHandlers="eventHandlers"
+    />
   </div>
 </template>
 

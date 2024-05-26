@@ -18,6 +18,7 @@ record GraphDto
   public GraphStatus Status { get; init; } = GraphStatus.NotBuilt;
   public List<App> Nodes { get; init; } = [];
   public Dictionary<string, List<ReferenceField>> EdgesMap { get; init; } = [];
+  public Dictionary<string, Point>? Layout { get; init; } = null;
 
   [JsonConstructor]
   internal GraphDto()
@@ -34,6 +35,7 @@ record GraphDto
     Status = graph.Status;
     Nodes = graph.Nodes;
     EdgesMap = graph.EdgesMap;
+    Layout = graph.Layout;
   }
 
   public Graph ToGraph(string apiKey) => new()
@@ -46,6 +48,7 @@ record GraphDto
     Status = Status,
     Nodes = Nodes,
     EdgesMap = EdgesMap,
+    Layout = Layout,
     ApiKey = apiKey
   };
 }

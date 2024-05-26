@@ -1,14 +1,14 @@
 <script setup lang="ts">
   import GraphMonitor from '@/components/GraphMonitor.vue';
-import SpinningLoader from '@/components/SpinningLoader.vue';
-import { useGraphsService } from '@/composables/useGraphsService';
-import { GraphNotFoundError } from '@/services/graphsService';
-import { useUserStore } from '@/stores/userStore';
-import { GraphStatus, type Graph } from '@/types';
-import { onMounted, ref } from 'vue';
-import GraphActionsMenu from './GraphActionsMenu.vue';
-import GraphHeading from './GraphHeading.vue';
-import OnxGraph from './OnxGraph.vue';
+  import SpinningLoader from '@/components/SpinningLoader.vue';
+  import { useGraphsService } from '@/composables/useGraphsService';
+  import { GraphNotFoundError } from '@/services/graphsService';
+  import { useUserStore } from '@/stores/userStore';
+  import { GraphStatus, type Graph, type GraphLayout } from '@/types';
+  import { onMounted, ref } from 'vue';
+  import GraphActionsMenu from './GraphActionsMenu.vue';
+  import GraphHeading from './GraphHeading.vue';
+  import OnxGraph from './OnxGraph.vue';
 
   const props = defineProps<{
     graphId: string;
@@ -97,6 +97,61 @@ import OnxGraph from './OnxGraph.vue';
 
     graphData.value = { status, data: updatedGraph };
   }
+
+  async function updateLayout(layout: GraphLayout) {
+    const status = graphData.value.status;
+
+    if (status === 'error' || status === 'not-found' || status === 'loading') {
+      return;
+    }
+
+    const updatedGraph = { ...graphData.value.data, layout };
+
+    const updateResult = await graphsService.updateGraph(updatedGraph);
+
+    if (updateResult.err) {
+      for (const error of updateResult.val) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+
+      alert(updateResult.val.reduce((acc, error) => `${error.message}\n${acc}`, ''));
+
+      return;
+    }
+
+    graphData.value = { status, data: updatedGraph };
+  }
+
+  function createLayoutUpdateHandler(updateFn: (layout: GraphLayout) => Promise<void>) {
+    let isWaiting = false;
+    let pendingValue: GraphLayout | null = null;
+    const delay = 1000;
+
+    async function processUpdate() {
+      if (pendingValue === null) {
+        isWaiting = false;
+        return;
+      }
+
+      await updateFn(pendingValue);
+      pendingValue = null;
+      setTimeout(processUpdate, delay);
+    }
+
+    return async function (layout: GraphLayout) {
+      if (isWaiting) {
+        pendingValue = layout;
+        return;
+      }
+
+      await updateFn(layout);
+      isWaiting = true;
+      setTimeout(processUpdate, delay);
+    };
+  }
+
+  const handleLayoutUpdate = createLayoutUpdateHandler(updateLayout);
 </script>
 
 <template>
@@ -144,7 +199,7 @@ import OnxGraph from './OnxGraph.vue';
         @update-name="handleNameUpdate"
       />
       <GraphActionsMenu :graph-id="graphData.data.id" />
-      <OnxGraph :graph="graphData.data" />
+      <OnxGraph :graph="graphData.data" @update:layout="handleLayoutUpdate" />
     </div>
   </Transition>
 </template>

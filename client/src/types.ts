@@ -49,7 +49,10 @@ export type Graph = {
   status: GraphStatus;
   nodes: AppNode[];
   edgesMap: Record<string, FieldEdge[]>;
+  layout: GraphLayout;
 };
+
+export type GraphLayout = Record<string, { x: number; y: number }>;
 
 export const GraphStatus = {
   NotBuilt: 0,
