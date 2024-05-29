@@ -5,8 +5,9 @@
   import { GraphNotFoundError } from '@/services/graphsService';
   import { useUserStore } from '@/stores/userStore';
   import { GraphStatus, type Graph, type GraphLayout } from '@/types';
-  import { onMounted, ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import GraphActionsMenu from './GraphActionsMenu.vue';
+  import GraphFilter from './GraphFilter.vue';
   import GraphHeading from './GraphHeading.vue';
   import OnxGraph from './OnxGraph.vue';
 
@@ -23,6 +24,36 @@
     | { status: 'not-found' };
 
   const graphData = ref<GraphData>({ status: 'loading' });
+  const nodeFilters = ref<number[]>([]);
+  const edgeFilters = ref<{ nodeId: number; fieldId: number }[]>([]);
+
+  const graph = computed(() => {
+    if (graphData.value.status !== 'built') {
+      return null;
+    }
+
+    const nodes = graphData.value.data.nodes.filter(
+      node => nodeFilters.value.includes(node.id) === false
+    );
+
+    const edgesMap = { ...graphData.value.data.edgesMap };
+
+    for (const edgeFilter of edgeFilters.value) {
+      const edges = edgesMap[edgeFilter.nodeId];
+
+      if (edges === undefined) {
+        continue;
+      }
+
+      edgesMap[edgeFilter.nodeId] = edges.filter(edge => edge.id !== edgeFilter.fieldId);
+    }
+
+    return {
+      ...graphData.value.data,
+      nodes,
+      edgesMap,
+    };
+  });
 
   const userStore = useUserStore();
   const graphsService = useGraphsService(userStore);
@@ -152,6 +183,26 @@
   }
 
   const handleLayoutUpdate = createLayoutUpdateHandler(updateLayout);
+
+  function handleNodeFilter(nodeId: number, show: boolean) {
+    if (show) {
+      nodeFilters.value = nodeFilters.value.filter(id => id !== nodeId);
+      return;
+    }
+
+    nodeFilters.value.push(nodeId);
+  }
+
+  function handleEdgeFilter(nodeId: number, fieldId: number, show: boolean) {
+    if (show) {
+      edgeFilters.value = edgeFilters.value.filter(
+        edge => edge.nodeId !== nodeId || edge.fieldId !== fieldId
+      );
+      return;
+    }
+
+    edgeFilters.value.push({ nodeId, fieldId });
+  }
 </script>
 
 <template>
@@ -191,15 +242,23 @@
         <button type="button" class="button">Build Graph</button>
       </div>
     </div>
-    <div v-else :data-testid="`graph-${graphData.data.id}`">
-      <GraphHeading
-        :id="graphData.data.id"
-        :name="graphData.data.name"
-        :status="graphData.data.status"
-        @update-name="handleNameUpdate"
-      />
+    <div v-else-if="graph !== null" :data-testid="`graph-${graphData.data.id}`">
+      <div class="heading-filter-container">
+        <GraphHeading
+          :id="graphData.data.id"
+          :name="graphData.data.name"
+          :status="graphData.data.status"
+          @update-name="handleNameUpdate"
+        />
+        <GraphFilter
+          :nodes="graphData.data.nodes"
+          :edgesMap="graphData.data.edgesMap"
+          @filter:node="handleNodeFilter"
+          @filter:edge="handleEdgeFilter"
+        />
+      </div>
       <GraphActionsMenu :graph-id="graphData.data.id" />
-      <OnxGraph :graph="graphData.data" @update:layout="handleLayoutUpdate" />
+      <OnxGraph :graph="graph" @update:layout="handleLayoutUpdate" />
     </div>
   </Transition>
 </template>
@@ -219,7 +278,7 @@
   }
 
   .graph-container,
-  .graph-container > div:not(.heading-container) {
+  .graph-container > div:not(.heading-filter-container) {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -227,6 +286,16 @@
     align-items: center;
     height: 100%;
     width: 100%;
+
+    & .heading-filter-container {
+      z-index: 1;
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
 
     & .button {
       background-color: var(--color-background-mute);

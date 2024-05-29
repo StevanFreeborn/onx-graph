@@ -24,7 +24,7 @@ const FieldEdgeType = {
 
 type FieldEdgeType = (typeof FieldEdgeType)[keyof typeof FieldEdgeType];
 
-type FieldEdge = {
+export type FieldEdge = {
   multiplicity: FieldEdgeMultiplicity;
   referencedAppId: number;
   id: number;
@@ -36,7 +36,7 @@ type FieldEdge = {
   isUnique: boolean;
 };
 
-type AppNode = {
+export type AppNode = {
   id: number;
   name: string;
 };

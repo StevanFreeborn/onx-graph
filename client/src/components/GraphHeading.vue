@@ -186,10 +186,6 @@
 
 <style scoped>
   .heading-container {
-    z-index: 1;
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
     padding: 0.75rem 1rem 0.75rem 1rem;
     background-color: var(--color-background);
     border-radius: 0.5rem;
