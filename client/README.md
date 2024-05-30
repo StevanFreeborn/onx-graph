@@ -2,6 +2,16 @@
 
 ## Project Setup
 
+### Create Local Development Certificate
+
+```sh
+# Create a local development certificate
+mkcert -install
+mkcert -key-file ./.certs/key.pem -cert-file ../.certs/cert.pem localhost
+```
+
+### Install Dependencies
+
 ```sh
 npm install
 ```

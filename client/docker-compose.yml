@@ -1,0 +1,12 @@
+name: onx-graph-client
+services:
+  client:
+    image: stevanfreeborn/onx-graph-client:${VERSION}
+    build:
+      target: production-stage
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+        - VITE_SENDING_EMAIL=${VITE_SENDING_EMAIL}
+        - CI=${CI}

@@ -1,0 +1,62 @@
+name: onxgraph-test
+services:
+  mailhog:
+    container_name: mailhog-test
+    image: mailhog/mailhog:latest
+    ports:
+      - '3998:1025'
+      - '3999:8025'
+    restart: unless-stopped
+  mongodb:
+    container_name: mongo-test
+    image: mongo:latest
+    ports:
+      - '4000:27017'
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=testAdmin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=onxGraphTest
+  server:
+    depends_on:
+      - mongodb
+      - mailhog
+    container_name: server-test
+    build:
+      target: production-stage
+      context: ../server/Server.API/
+      dockerfile: Dockerfile
+    ports:
+      - '4002:8080'
+    restart: unless-stopped
+    env_file:
+      - ./.env.integration_tests
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Test
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__Microsoft.AspNetCore=Warning
+      - AllowedHosts=*
+      - JwtOptions__Secret=qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q=
+      - JwtOptions__Issuer=TestIssuer
+      - JwtOptions__Audience=TestAudience
+      - JwtOptions__ExpiryInMinutes=5
+      - MongoDbOptions__ConnectionString=mongodb://testAdmin:password@mongodb:27017/onxGraphTest?authMechanism=SCRAM-SHA-256&authSource=admin&retryWrites=true&w=majority
+      - MongoDbOptions__DatabaseName=onxGraphTest
+      - CorsOptions__AllowedOrigins__0=http://localhost:4001
+      - SmtpOptions__SmtpAddress=mailhog
+      - SmtpOptions__SmtpPort=1025
+      - SmtpOptions__SenderEmail=onxgraph@test.com
+      - SmtpOptions__SenderPassword=
+  client:
+    container_name: client-test
+    build:
+      target: production-stage
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:4002
+        - VITE_SENDING_EMAIL=onxgraph@test.com
+        - CI=true
+    ports:
+      - '4001:80'
+    restart: unless-stopped

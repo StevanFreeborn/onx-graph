@@ -1,0 +1,33 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "MongoDbOptions": {
+    "ConnectionString": "ConnectionString",
+    "DatabaseName": "DatabaseName"
+  },
+  "JwtOptions": {
+    "Secret": "qqs+CKdh2KQOoXS4asnTaIdu+/DFnfsMIh10u1ODG1Q=",
+    "Issuer": "TestIssuer",
+    "Audience": "TestAudience",
+    "ExpiryInMinutes": 5
+  },
+  "CorsOptions": {
+    "AllowedOrigins": [
+      "https://localhost:3001"
+    ]
+  },
+  "SmtpOptions": {
+    "SmtpAddress": "",
+    "SmtpPort": 0,
+    "SenderEmail": "",
+    "SenderPassword": ""
+  },
+  "EncryptionOptions": {
+    "Key": ""
+  }
+}

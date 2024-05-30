@@ -1,0 +1,16 @@
+node_modules/
+e2e/
+playwright-report/
+test-results/
+tests/
+.git/
+.gitignore
+.eslintrc.cjs
+.prettierrc.json
+playwright.config.ts
+README.md
+vitest.config.ts
+!.env.project
+!.env.vault
+.env*
+.flaskenv*

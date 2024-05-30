@@ -1,4 +1,31 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
   "dotnet.defaultSolution": "server/Server.sln",
-  "cSpell.words": ["Pinia"]
+  "cSpell.words": [
+    "alertdialog",
+    "Bson",
+    "buttonborder",
+    "composables",
+    "Dapws",
+    "dbcontext",
+    "decryptor",
+    "Encryptor",
+    "Hmac",
+    "Instantiator",
+    "mailhog",
+    "onxgraph",
+    "Pinia",
+    "Resends",
+    "rushstack",
+    "Swashbuckle",
+    "Testcontainers",
+    "testid",
+    "textbox",
+    "Unmap",
+    "VITE",
+    "Vupp"
+  ],
+  "editor.formatOnSave": true,
 }

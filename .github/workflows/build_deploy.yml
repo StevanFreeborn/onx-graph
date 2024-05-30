@@ -1,0 +1,180 @@
+name: Build and Deploy
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*/README.md'
+      - '**/*/LICENSE.md'
+      - '**/*/docker-compose*.yml'
+      - '**/*/.gitingore'
+      - '**/*/.dockerignore'
+      - '**/*/.editorconfig'
+      - '**/*/Dockerfile'
+      - '.vscode/**'
+      - '.github/**'
+      - '**/*/.env.vault'
+jobs:
+  version_client:
+    name: Version client
+    runs-on: ubuntu-latest
+    outputs:
+      current_version: ${{ steps.get-current-version.outputs.version }}
+      updated_version: ${{ steps.get-updated-version.outputs.version }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - name: Get current version
+        id: get-current-version
+        working-directory: client
+        run: echo "version=$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT
+      - name: Print current version
+        run: echo "${{ steps.get-current-version.outputs.version }}"
+      - name: Install dependencies
+        working-directory: client
+        run: npm install
+      - name: Run semantic release to update version
+        working-directory: client
+        run: npx semantic-release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.ACTIONS_PAT }}
+      - name: Get updated version
+        id: get-updated-version
+        working-directory: client
+        run: echo "version=$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT
+  version_server:
+    name: Version server
+    needs: version_client
+    runs-on: ubuntu-latest
+    outputs:
+      current_version: ${{ steps.get-current-version.outputs.version }}
+      updated_version: ${{ steps.get-updated-version.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.ACTIONS_PAT }}
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x.x
+      - name: Install versionize
+        run: dotnet tool install --global Versionize
+      - name: Get current version
+        working-directory: server/Server.API
+        id: get-current-version
+        run: echo "version=$(versionize inspect)" >> $GITHUB_OUTPUT
+      - name: Print current version
+        run: echo "${{ steps.get-current-version.outputs.version }}"
+      - name: Configure git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Run versionize to update version
+        working-directory: server/Server.API
+        run: versionize -i --exit-insignificant-commits --commit-suffix "[skip ci]"
+        continue-on-error: true
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.ACTIONS_PAT }}
+          branch: ${{ github.ref }}
+          tags: true
+          force_with_lease: true
+      - name: Get updated version
+        working-directory: server/Server.API
+        id: get-updated-version
+        run: echo "version=$(versionize inspect)" >> $GITHUB_OUTPUT
+  build_images:
+    name: Build images
+    needs: [version_client, version_server]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push server image
+        working-directory: server/Server.API
+        env:
+          VERSION: ${{ needs.version_server.outputs.updated_version }}
+        run: |
+          docker compose build --no-cache
+          docker compose push
+      - name: Build and push client image
+        working-directory: client
+        env:
+          VERSION: ${{ needs.version_client.outputs.updated_version }}
+          VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          VITE_SENDING_EMAIL: ${{ secrets.SMTPOPTIONS__SENDEREMAIL }}
+          CI: true
+        run: |
+          docker compose build --no-cache
+          docker compose push
+  deploy:
+    name: Deploy
+    needs: [version_client, version_server, build_images]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate .env file
+        run: |
+          echo "SERVER_VERSION=${{ needs.version_server.outputs.updated_version }}" >> .env
+          echo "CLIENT_VERSION=${{ needs.version_client.outputs.updated_version }}" >> .env
+          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
+          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
+          echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
+          echo "Logging__LogLevel__Default=${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}" >> .env
+          echo "AllowedHosts=${{ secrets.ALLOWEDHOSTS }}" >> .env
+          echo "JwtOptions__Secret=${{ secrets.JWTOPTIONS__SECRET }}" >> .env
+          echo "JwtOptions__Issuer=${{ secrets.JWTOPTIONS__ISSUER }}" >> .env
+          echo "JwtOptions__Audience=${{ secrets.JWTOPTIONS__AUDIENCE }}" >> .env
+          echo "JwtOptions__ExpiryInMinutes=${{ secrets.JWTOPTIONS__EXPIRYINMINUTES }}" >> .env
+          echo "SmtpOptions__SmtpAddress=${{ secrets.SMTPOPTIONS__SMTPADDRESS }}" >> .env
+          echo "SmtpOptions__SmtpPort=${{ secrets.SMTPOPTIONS__SMTPPORT }}" >> .env
+          echo "SmtpOptions__SenderEmail=${{ secrets.SMTPOPTIONS__SENDEREMAIL }}" >> .env
+          echo "SmtpOptions__SenderPassword=${{ secrets.SMTPOPTIONS__SENDERPASSWORD }}" >> .env
+          echo "MongoDbOptions__ConnectionString=${{ secrets.MONGODBOPTIONS__CONNECTIONSTRING }}" >> .env
+          echo "MongoDbOptions__DatabaseName=${{ secrets.MONGODBOPTIONS__DATABASENAME }}" >> .env
+          echo "CorsOptions__AllowedOrigins__0=${{ secrets.CORSOPTIONS__ALLOWEDORIGINS__0 }}" >> .env
+          echo "LOKI_URL=${{ secrets.LOKI_URL }}" >> .env
+          echo "EncryptionOptions__Key=${{ secrets.API_ENCRYPTION_KEY }}" >> .env
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "docker-compose.production.yml,.env"
+          target: onx-graph
+      - name: SSH into server and start containers
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker compose -f onx-graph/docker-compose.production.yml down
+            docker compose -f onx-graph/docker-compose.production.yml pull
+            docker-compose -f onx-graph/docker-compose.production.yml up -d --wait
+            rm onx-graph/docker-compose.production.yml
+            rm onx-graph/.env

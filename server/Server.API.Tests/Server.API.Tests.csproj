@@ -9,14 +9,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.3.0" />
     <PackageReference Include="coverlet.msbuild" Version="6.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.4" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="8.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="ReportGenerator" Version="5.2.0" />
+    <PackageReference Include="Testcontainers" Version="3.6.0" />
+    <PackageReference Include="Testcontainers.MongoDb" Version="3.6.0" />
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -33,15 +39,26 @@
     <CoverletOutput>./TestResults/coverage/</CoverletOutput>
     <CoverletOutputFormat>cobertura</CoverletOutputFormat>
     <Include>[Server.API]*</Include>
-    <ExcludeByFile>**/program.cs</ExcludeByFile>
+    <ExcludeByFile>**/Server.API/Program.cs</ExcludeByFile>
+    <ExcludeByFile>**/Server.API/Swagger/**</ExcludeByFile>
   </PropertyGroup>
 
   <Target Name="GenerateHtmlCoverageReport" AfterTargets="GenerateCoverageResultAfterTest">
     <Exec Command="reportgenerator -reports:./TestResults/coverage/*.xml -targetdir:./TestResults/coverage/report/ -reporttypes:Html_Dark" />
   </Target>
 
+  <Target Name="OpenTestReport" AfterTargets="GenerateHtmlCoverageReport" Condition="'$(DOTNET_ENVIRONMENT)' != 'CI'">
+    <Exec Command="start ./TestResults/coverage/report/index.html" />
+  </Target>
+
   <ItemGroup>
     <ProjectReference Include="..\Server.API\Server.API.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="integration.tests.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

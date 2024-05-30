@@ -1,47 +1,55 @@
 import { defineConfig, devices } from '@playwright/test';
+import { env } from './e2e/env';
 
 export default defineConfig({
+  reportSlowTests: null,
   testDir: './e2e',
   timeout: 30 * 1000,
   expect: {
     timeout: 5000,
   },
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? [['blob'], ['github']] : [['html'], ['list']],
+  forbidOnly: !!env.CI,
+  retries: env.CI ? 2 : 0,
+  workers: env.CI ? 1 : undefined,
+  reporter: env.CI ? [['blob'], ['github'], ['list'], ['html']] : [['html'], ['list']],
   use: {
     actionTimeout: 0,
-    baseURL: 'https://localhost:5173',
+    baseURL: 'http://localhost:4001',
     trace: 'retain-on-failure',
-    headless: !!process.env.CI,
+    headless: true,
     viewport: { width: 1920, height: 1080 },
+    navigationTimeout: 0,
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'docker-up',
+      testMatch: '**/setup/docker-up.ts',
+      teardown: 'docker-down',
+    },
+    {
+      name: 'docker-down',
+      testMatch: '**/cleanup/docker-down.ts',
+    },
+    {
+      name: 'chrome',
       use: {
         ...devices['Desktop Chrome'],
       },
+      dependencies: ['docker-up'],
     },
     {
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
       },
+      dependencies: ['docker-up'],
     },
     {
-      name: 'webkit',
+      name: 'edge',
       use: {
-        ...devices['Desktop Safari'],
+        ...devices['Desktop Edge'],
       },
-    },
-  ],
-  webServer: [
-    {
-      command: process.env.CI ? 'vite preview --port 5173' : 'vite dev',
-      port: 5173,
-      reuseExistingServer: !process.env.CI,
+      dependencies: ['docker-up'],
     },
   ],
 });

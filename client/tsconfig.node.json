@@ -1,6 +1,6 @@
 {
   "extends": "@tsconfig/node18/tsconfig.json",
-  "include": ["vite.config.*", "vitest.config.*", "playwright.config.*"],
+  "include": ["vite.config.*", "vitest.config.*", "playwright.config.*", "./e2e/env.ts"],
   "compilerOptions": {
     "composite": true,
     "noEmit": true,
