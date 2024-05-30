@@ -220,21 +220,25 @@
       </div>
     </div>
     <div v-else-if="graphData.status === 'building'">
-      <GraphHeading
-        :id="graphData.data.id"
-        :name="graphData.data.name"
-        :status="graphData.data.status"
-        @update-name="handleNameUpdate"
-      />
+      <div class="heading-filter-container">
+        <GraphHeading
+          :id="graphData.data.id"
+          :name="graphData.data.name"
+          :status="graphData.data.status"
+          @update-name="handleNameUpdate"
+        />
+      </div>
       <GraphMonitor :graph-id="graphData.data.id" @graph-processed="handleGraphProcessed" />
     </div>
     <div v-else-if="graphData.status === 'not-built'">
-      <GraphHeading
-        :id="graphData.data.id"
-        :name="graphData.data.name"
-        :status="graphData.data.status"
-        @update-name="handleNameUpdate"
-      />
+      <div class="heading-filter-container">
+        <GraphHeading
+          :id="graphData.data.id"
+          :name="graphData.data.name"
+          :status="graphData.data.status"
+          @update-name="handleNameUpdate"
+        />
+      </div>
       <GraphActionsMenu :graph-id="graphData.data.id" />
       <div>
         <p>The graph has not been built yet.</p>

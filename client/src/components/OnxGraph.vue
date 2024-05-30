@@ -27,16 +27,13 @@
               noAutoRestartSimulation: true,
 
               createSimulation: (d3, nodes) => {
-                return (
-                  d3
-                    .forceSimulation(nodes)
-                    // .force('edge', forceLink.distance(10).strength(2))
-                    .force('charge', d3.forceManyBody().strength(-2000))
-                    .force('x', d3.forceX())
-                    .force('y', d3.forceY())
-                    .stop()
-                    .tick(100)
-                );
+                return d3
+                  .forceSimulation(nodes)
+                  .force('charge', d3.forceManyBody().strength(-2000))
+                  .force('x', d3.forceX())
+                  .force('y', d3.forceY())
+                  .stop()
+                  .tick(100);
               },
             }),
       },
@@ -166,24 +163,6 @@
     )
   );
 
-  const initialLayouts = props.graph.layout
-    ? Object.keys(props.graph.layout).reduce(
-        (layouts, node) => {
-          const currentNode = props.graph.layout[node];
-
-          layouts.nodes[`node${node}`] = {
-            x: currentNode.x,
-            y: currentNode.y,
-          };
-
-          return layouts;
-        },
-        { nodes: {} as Record<string, any> }
-      )
-    : { nodes: {} };
-
-  const layouts: Ref<vNG.Layouts> = ref(initialLayouts);
-
   function getGraphLayout(layouts: vNG.Layouts) {
     return Object.keys(layouts.nodes).reduce((layout, node) => {
       const nodeId = node.replace('node', '');
@@ -197,6 +176,24 @@
       return layout;
     }, {} as GraphLayout);
   }
+
+  const layouts: Ref<vNG.Layouts> = ref(
+    props.graph.layout
+      ? Object.keys(props.graph.layout).reduce(
+          (layouts, node) => {
+            const currentNode = props.graph.layout[node];
+
+            layouts.nodes[`node${node}`] = {
+              x: currentNode.x,
+              y: currentNode.y,
+            };
+
+            return layouts;
+          },
+          { nodes: {} as Record<string, any> }
+        )
+      : { nodes: {} }
+  );
 
   const eventHandlers: vNG.EventHandlers = {
     'node:dragend': () => {

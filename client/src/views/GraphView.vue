@@ -19,5 +19,6 @@
     width: 100%;
     background-color: var(--color-background-mute);
     border-radius: 0.5rem;
+    overflow: hidden;
   }
 </style>
