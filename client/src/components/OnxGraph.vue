@@ -3,7 +3,7 @@
   import type { Graph, GraphLayout } from '@/types';
   import * as vNG from 'v-network-graph';
   import { ForceLayout } from 'v-network-graph/lib/force-layout';
-  import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
+  import { computed, watch, type ComputedRef, type WritableComputedRef } from 'vue';
 
   const props = defineProps<{
     graph: Graph;
@@ -177,23 +177,28 @@
     }, {} as GraphLayout);
   }
 
-  const layouts: Ref<vNG.Layouts> = ref(
-    props.graph.layout
-      ? Object.keys(props.graph.layout).reduce(
-          (layouts, node) => {
-            const currentNode = props.graph.layout[node];
+  const layouts: WritableComputedRef<vNG.Layouts> = computed({
+    get() {
+      return props.graph.layout
+        ? Object.keys(props.graph.layout).reduce(
+            (layouts, node) => {
+              const currentNode = props.graph.layout[node];
 
-            layouts.nodes[`node${node}`] = {
-              x: currentNode.x,
-              y: currentNode.y,
-            };
+              layouts.nodes[`node${node}`] = {
+                x: currentNode.x,
+                y: currentNode.y,
+              };
 
-            return layouts;
-          },
-          { nodes: {} as Record<string, any> }
-        )
-      : { nodes: {} }
-  );
+              return layouts;
+            },
+            { nodes: {} as Record<string, any> }
+          )
+        : { nodes: {} };
+    },
+    set(newValue) {
+      return newValue;
+    },
+  });
 
   const eventHandlers: vNG.EventHandlers = {
     'node:dragend': () => {
