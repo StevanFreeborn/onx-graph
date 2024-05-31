@@ -447,7 +447,7 @@
               <td
                 v-for="[index, cell] in Object.values(row).entries()"
                 :key="`${row.fieldId}-${index}`"
-                title="cell"
+                :title="cell.toString()"
               >
                 {{ cell }}
               </td>
