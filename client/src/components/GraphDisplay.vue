@@ -45,7 +45,12 @@
         continue;
       }
 
-      edgesMap[edgeFilter.nodeId] = edges.filter(edge => edge.id !== edgeFilter.fieldId);
+      edgesMap[edgeFilter.nodeId] = edges.filter(
+        edge =>
+          edge.id !== edgeFilter.fieldId &&
+          nodeFilters.value.includes(edge.appId) === false &&
+          nodeFilters.value.includes(edge.referencedAppId) === false
+      );
     }
 
     return {
@@ -283,8 +288,8 @@
           @update-name="handleNameUpdate"
         />
         <GraphFilter
-          :nodes="graphData.data.nodes"
-          :edgesMap="graphData.data.edgesMap"
+          :nodes="graph.nodes"
+          :edgesMap="graph.edgesMap"
           @filter:node="handleNodeFilter"
           @filter:edge="handleEdgeFilter"
         />
