@@ -36,6 +36,23 @@ describe('Client', () => {
     expect(client.delete).toBeInstanceOf(Function);
   });
 
+  it('should retry requests if given an unauthorized response handler when a 401 status is returned', async () => {
+    const accessToken = 'token';
+    const retryResponse = new Response();
+    const unauthorizedResponseHandler = vi
+      .fn()
+      .mockReturnValueOnce({ response: retryResponse, accessToken });
+    const clientConfig = new ClientConfig(undefined, true, unauthorizedResponseHandler);
+    const client = new Client(clientConfig);
+
+    fetchMock.mockReturnValueOnce({ status: 401 });
+
+    await client.get({ url: 'http://example.com' });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(unauthorizedResponseHandler).toHaveBeenCalledWith(expect.any(Request));
+  });
+
   describe('get', () => {
     it('should make a get request using fetch using given url and config', async () => {
       const url = 'http://example.com';
