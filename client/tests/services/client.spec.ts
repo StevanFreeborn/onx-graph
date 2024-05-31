@@ -135,4 +135,26 @@ describe('Client', () => {
       expect(result).toBe(response);
     });
   });
+
+  describe('patch', () => {
+    it('should make a patch request using fetch using given url and config', async () => {
+      const url = 'http://example.com/';
+      const body = { data: 'test' };
+      const request = new ClientRequestWithBody(url, undefined, body);
+      const response = new Response();
+      fetchMock.mockReturnValue(response);
+
+      const result = await client.patch(request);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'PATCH',
+          url: url,
+          body: expect.any(Object),
+        })
+      );
+
+      expect(result).toBe(response);
+    });
+  });
 });
