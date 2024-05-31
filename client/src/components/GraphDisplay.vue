@@ -203,6 +203,35 @@
 
     edgeFilters.value.push({ nodeId, fieldId });
   }
+
+  function clearAllFilters() {
+    nodeFilters.value = [];
+    edgeFilters.value = [];
+  }
+
+  async function handleRefreshGraph() {
+    const status = graphData.value.status;
+
+    if (status === 'not-found' || status === 'loading') {
+      return;
+    }
+
+    const refreshResult = await graphsService.refreshGraph(props.graphId);
+
+    if (refreshResult.err) {
+      for (const error of refreshResult.val) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+
+      alert(refreshResult.val.reduce((acc, error) => `${error.message}\n${acc}`, ''));
+
+      return;
+    }
+
+    graphData.value.status = 'building';
+    clearAllFilters();
+  }
 </script>
 
 <template>
@@ -239,11 +268,10 @@
           @update-name="handleNameUpdate"
         />
       </div>
-      <GraphActionsMenu :graph-id="graphData.data.id" />
+      <GraphActionsMenu :graph-id="graphData.data.id" @refresh="handleRefreshGraph" />
       <div>
         <p>The graph has not been built yet.</p>
-        <!-- TODO: Implement request to build graph again -->
-        <button type="button" class="button">Build Graph</button>
+        <button type="button" class="button" @click="handleRefreshGraph">Build Graph</button>
       </div>
     </div>
     <div v-else-if="graph !== null" :data-testid="`graph-${graphData.data.id}`">
@@ -261,7 +289,7 @@
           @filter:edge="handleEdgeFilter"
         />
       </div>
-      <GraphActionsMenu :graph-id="graphData.data.id" />
+      <GraphActionsMenu :graph-id="graphData.data.id" @refresh="handleRefreshGraph" />
       <OnxGraph :graph="graph" @update:layout="handleLayoutUpdate" />
     </div>
   </Transition>

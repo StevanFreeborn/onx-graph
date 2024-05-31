@@ -47,6 +47,13 @@ class GraphService(IGraphRepository graphRepository) : IGraphService
 
   public async Task<Result<Graph>> UpdateGraphAsync(Graph graph)
   {
+    var existingGraph = await _graphRepository.GetGraphByNameAsync(graph.Name, graph.UserId);
+
+    if (existingGraph is not null && existingGraph.Id != graph.Id)
+    {
+      return Result.Fail(new GraphAlreadyExistsError(graph.Name));
+    }
+
     await _graphRepository.UpdateGraphAsync(graph);
     return Result.Ok();
   }

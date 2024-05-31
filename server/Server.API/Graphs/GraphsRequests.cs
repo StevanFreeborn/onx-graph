@@ -126,3 +126,14 @@ record UpdateGraphKeyRequest(
   [FromServices] IUserService UserService,
   [FromServices] IEncryptionService EncryptionService
 );
+
+/// <summary>
+/// Represents a request to refresh a graph
+/// </summary>
+record RefreshGraphRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromServices] IGraphService GraphService,
+  [FromServices] IGraphQueue GraphQueue,
+  [FromServices] IUserService UserService
+);

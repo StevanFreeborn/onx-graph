@@ -29,7 +29,7 @@ static class GraphsRoutes
     group
       .MapGet("{id}", GraphsController.GetGraph)
       .RequireAuthorization()
-      .Produces<Graph>((int)HttpStatusCode.OK)
+      .Produces<GraphDto>((int)HttpStatusCode.OK)
       .Produces((int)HttpStatusCode.Unauthorized)
       .Produces((int)HttpStatusCode.NotFound)
       .Produces((int)HttpStatusCode.InternalServerError)
@@ -61,9 +61,10 @@ static class GraphsRoutes
     group
       .MapPut("{id}", GraphsController.UpdateGraph)
       .RequireAuthorization()
-      .Produces((int)HttpStatusCode.NoContent)
+      .Produces<GraphDto>((int)HttpStatusCode.OK)
       .Produces((int)HttpStatusCode.Unauthorized)
       .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.Conflict)
       .Produces((int)HttpStatusCode.InternalServerError)
       .WithName("UpdateGraph")
       .WithDescription("Updates a graph by id");
@@ -77,6 +78,16 @@ static class GraphsRoutes
       .Produces((int)HttpStatusCode.InternalServerError)
       .WithName("UpdateGraphKey")
       .WithDescription("Updates a graph's key by graph id");
+
+    group
+      .MapPatch("{id}/refresh", GraphsController.RefreshGraph)
+      .RequireAuthorization()
+      .Produces((int)HttpStatusCode.NoContent)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("RefreshGraph")
+      .WithDescription("Refreshes a graph by id");
 
     return group;
   }

@@ -28,6 +28,7 @@ export interface IGraphsService {
   deleteGraph: (id: string) => Promise<Result<boolean, Error[]>>;
   updateGraph: (graph: Graph) => Promise<Result<Graph, Error[]>>;
   updateGraphKey: (id: string, key: string) => Promise<Result<boolean, Error[]>>;
+  refreshGraph: (id: string) => Promise<Result<boolean, Error[]>>;
 }
 
 export class GraphsService implements IGraphsService {
@@ -46,6 +47,10 @@ export class GraphsService implements IGraphsService {
     return `${this.baseURL}/graphs/${id}/key`;
   }
 
+  private createRefreshGraphEndpoint(id: string) {
+    return `${this.baseURL}/graphs/${id}/refresh`;
+  }
+
   private readonly endpoints = {
     addGraph: `${this.baseURL}/graphs/add`,
     getGraphs: (pageNumber: number, pageSize: number) =>
@@ -54,10 +59,29 @@ export class GraphsService implements IGraphsService {
     getGraphKey: (id: string) => this.createGraphKeyEndpoint(id),
     updateGraph: (id: string) => this.createGraphEndpoint(id),
     updateGraphKey: (id: string) => this.createGraphKeyEndpoint(id),
+    refreshGraph: (id: string) => this.createRefreshGraphEndpoint(id),
   };
 
   constructor(client: IClient) {
     this.client = client;
+  }
+
+  async refreshGraph(id: string) {
+    const request = new ClientRequestWithBody(this.endpoints.refreshGraph(id));
+
+    try {
+      const res = await this.client.patch(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Failed to refresh graph.')]);
+      }
+
+      return Ok(true);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return Err([new Error('Failed to refresh graph.')]);
+    }
   }
 
   async updateGraphKey(id: string, key: string) {
