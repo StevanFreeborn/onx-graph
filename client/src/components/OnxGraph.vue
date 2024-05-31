@@ -361,10 +361,7 @@
     },
   };
 
-  function handleMouseMove(event: MouseEvent) {
-    const containerHeight = containerRef.value?.clientHeight ?? 0;
-    const newExplorerContainerHeight = containerHeight - event.clientY + 20;
-
+  function handleMove(containerHeight: number, newExplorerContainerHeight: number) {
     if (newExplorerContainerHeight > containerHeight) {
       explorerContainerHeight.value = containerHeight;
       return;
@@ -378,6 +375,12 @@
     explorerContainerHeight.value = newExplorerContainerHeight;
   }
 
+  function handleMouseMove(event: MouseEvent) {
+    const containerHeight = containerRef.value?.clientHeight ?? 0;
+    const newExplorerContainerHeight = containerHeight - event.clientY + 20;
+    handleMove(containerHeight, newExplorerContainerHeight);
+  }
+
   function handleMouseDown(event: MouseEvent) {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
@@ -387,6 +390,25 @@
   function handleMouseUp(event: MouseEvent) {
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('mouseup', handleMouseUp);
+    event.preventDefault();
+  }
+
+  function handleTouchMove(event: TouchEvent) {
+    const touch = event.touches[0];
+    const containerHeight = containerRef.value?.clientHeight ?? 0;
+    const newExplorerContainerHeight = containerHeight - touch.clientY + 20;
+    handleMove(containerHeight, newExplorerContainerHeight);
+  }
+
+  function handleTouchStart(event: TouchEvent) {
+    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchend', handleTouchEnd);
+    event.preventDefault();
+  }
+
+  function handleTouchEnd(event: TouchEvent) {
+    window.removeEventListener('touchmove', handleTouchMove);
+    window.removeEventListener('touchend', handleTouchEnd);
     event.preventDefault();
   }
 </script>
@@ -402,7 +424,13 @@
       :eventHandlers="eventHandlers"
     />
     <div class="explorer-container" :style="explorerContainerStyles">
-      <div class="drag-bar" @mousedown="handleMouseDown" @mouseup="handleMouseUp">
+      <div
+        class="drag-bar"
+        @mousedown="handleMouseDown"
+        @mouseup="handleMouseUp"
+        @touchstart="handleTouchStart"
+        @touchend="handleTouchEnd"
+      >
         <div class="handle"></div>
       </div>
       <div class="explorer-table-container">
