@@ -21,7 +21,7 @@ describe('GraphHeading', () => {
   });
 
   it('should display the graph name', async () => {
-    const { getByText } = await customRender(GraphHeading, {
+    const { getByLabelText } = await customRender(GraphHeading, {
       props: {
         id: '1',
         name: 'Test Graph',
@@ -29,9 +29,10 @@ describe('GraphHeading', () => {
       },
     });
 
-    const name = getByText(/test graph/i);
+    const nameInput = getByLabelText(/graph name/i);
 
-    expect(name).toBeInTheDocument();
+    expect(nameInput).toBeInTheDocument();
+    expect(nameInput).toHaveValue('Test Graph');
   });
 
   it('should display graph status when built', async () => {

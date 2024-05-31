@@ -24,6 +24,7 @@ describe('GraphDisplay', () => {
     createdAt: '2021-01-01T00:00:00Z',
     updatedAt: '2021-01-01T00:00:00Z',
     status: 0,
+    nodes: [],
   };
 
   const mockGraphsService = {
@@ -117,6 +118,9 @@ describe('GraphDisplay', () => {
           },
           GraphActionsMenu: {
             template: `<div>actions menu</div>`,
+          },
+          GraphFilter: {
+            template: `<div>filter</div>`,
           },
         },
       },
