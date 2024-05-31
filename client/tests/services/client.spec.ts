@@ -53,6 +53,17 @@ describe('Client', () => {
     expect(unauthorizedResponseHandler).toHaveBeenCalledWith(expect.any(Request));
   });
 
+  it('should not include credentials in the request if includeCredentials is false', async () => {
+    const clientConfig = new ClientConfig(undefined, false, undefined);
+    const client = new Client(clientConfig);
+
+    fetchMock.mockReturnValueOnce(new Response());
+
+    await client.get({ url: 'http://example.com' });
+
+    expect(fetchMock).toHaveBeenCalledWith(expect.objectContaining({ credentials: 'omit' }));
+  });
+
   describe('get', () => {
     it('should make a get request using fetch using given url and config', async () => {
       const url = 'http://example.com';
