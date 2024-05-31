@@ -27,6 +27,7 @@
           id: edge.id,
           name: edge.name,
           show: true,
+          targetNode: edge.referencedAppId,
         })),
       }))
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -120,26 +121,40 @@
   }
 
   function handleNodeClick(nodeId: number) {
-    const node = filterTree.value.find(node => node.id === nodeId);
+    const clickedNode = filterTree.value.find(node => node.id === nodeId);
 
-    if (node === undefined) {
+    if (clickedNode === undefined) {
       return;
     }
 
-    node.show = !node.show;
-    node.fields.forEach(field => (field.show = node.show));
+    clickedNode.show = !clickedNode.show;
+    clickedNode.fields.forEach(field => {
+      field.show = clickedNode.show;
+      emit('filter:edge', clickedNode.id, field.id, field.show);
+    });
 
-    emit('filter:node', node.id, node.show);
+    emit('filter:node', clickedNode.id, clickedNode.show);
+
+    filterTree.value.forEach(node => {
+      node.fields.forEach(field => {
+        if (field.targetNode === clickedNode.id) {
+          field.show = clickedNode.show;
+          emit('filter:edge', node.id, field.id, field.show);
+        }
+      });
+    });
   }
 
   function handleFieldClick(fieldId: number) {
-    const node = filterTree.value.find(node => node.fields.some(field => field.id === fieldId));
+    const sourceNode = filterTree.value.find(node =>
+      node.fields.some(field => field.id === fieldId)
+    );
 
-    if (node === undefined) {
+    if (sourceNode === undefined) {
       return;
     }
 
-    const field = node.fields.find(field => field.id === fieldId);
+    const field = sourceNode.fields.find(field => field.id === fieldId);
 
     if (field === undefined) {
       return;
@@ -147,7 +162,7 @@
 
     field.show = !field.show;
 
-    emit('filter:edge', node.id, field.id, field.show);
+    emit('filter:edge', sourceNode.id, field.id, field.show);
   }
 </script>
 
@@ -219,8 +234,8 @@
           <li v-for="node in filteredFilterTree" :key="node.name" class="branch">
             <div class="filter-box">
               <input
-                :id="node.name"
-                :name="node.name"
+                :id="`${node.id}-${node.name}`"
+                :name="`${node.id}-${node.name}`"
                 type="checkbox"
                 :checked="node.show"
                 @click="() => handleNodeClick(node.id)"
@@ -255,20 +270,22 @@
                     <span class="sr-only">Expand</span>
                   </span>
                 </button>
-                <label :for="node.name" :title="node.name">{{ node.name }}</label>
+                <label :for="`${node.id}-${node.name}`" :title="node.name">{{ node.name }}</label>
               </div>
             </div>
             <ul class="filter-list" v-if="node.expand">
               <li v-for="field in node.fields" :key="field.name" class="leaf">
                 <div class="filter-box">
                   <input
-                    :id="field.name"
-                    :name="field.name"
+                    :id="`${field.id}-${field.name}`"
+                    :name="`${field.id}-${field.name}`"
                     type="checkbox"
                     :checked="field.show"
                     @click="() => handleFieldClick(field.id)"
                   />
-                  <label :for="field.name" title="field.name">{{ field.name }}</label>
+                  <label :for="`${field.id}-${field.name}`" :title="field.name">{{
+                    field.name
+                  }}</label>
                 </div>
               </li>
             </ul>
