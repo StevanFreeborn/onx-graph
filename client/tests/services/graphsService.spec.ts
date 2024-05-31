@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { GraphsService } from '../../src/services/graphsService';
+import { GraphNotFoundError, GraphsService } from '../../src/services/graphsService';
 
 describe('GraphsService', () => {
   let graphsService: GraphsService;
@@ -148,6 +148,15 @@ describe('GraphsService', () => {
   });
 
   describe('getGraph', () => {
+    it('should return a graph not found error if the response status is 404', async () => {
+      mockClient.get.mockReturnValueOnce({ status: 404 });
+
+      const result = await graphsService.getGraph('123');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new GraphNotFoundError()]);
+    });
+
     it('should return an error if the response status is not ok', async () => {
       vi.spyOn(console, 'error').mockImplementationOnce(() => {});
 
@@ -242,6 +251,108 @@ describe('GraphsService', () => {
       mockClient.delete.mockReturnValueOnce({ ok: true });
 
       const result = await graphsService.deleteGraph('123');
+
+      expect(result.err).toBe(false);
+      expect(result.val).toBe(true);
+    });
+  });
+
+  describe('updateGraph', () => {
+    it('should return an error if the response is unsuccessful', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+      mockClient.put.mockReturnValueOnce({ ok: false });
+
+      const result = await graphsService.updateGraph({});
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to update graph.')]);
+    });
+
+    it('should return an error if the request fails', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+      mockClient.put.mockRejectedValueOnce(new Error('Failed to update graph.'));
+
+      const result = await graphsService.updateGraph({});
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to update graph.')]);
+    });
+
+    it('should return the response body if the request is successful', async () => {
+      mockClient.put.mockReturnValueOnce({
+        ok: true,
+        json: async () => ({ id: '123' }),
+      });
+
+      const result = await graphsService.updateGraph({ id: '123' });
+
+      expect(result.err).toBe(false);
+      expect(result.val).toEqual({ id: '123' });
+    });
+  });
+
+  describe('updateGraphKey', () => {
+    it('should return an error if the response is unsuccessful', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+      mockClient.patch.mockReturnValueOnce({ ok: false });
+
+      const result = await graphsService.updateGraphKey('123', 'key');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to update graph key.')]);
+    });
+
+    it('should return an error if the request fails', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+      mockClient.patch.mockRejectedValueOnce(new Error('Failed to update graph key.'));
+
+      const result = await graphsService.updateGraphKey('123', 'key');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to update graph key.')]);
+    });
+
+    it('should return true if the request is successful', async () => {
+      mockClient.patch.mockReturnValueOnce({ ok: true });
+
+      const result = await graphsService.updateGraphKey('123', 'key');
+
+      expect(result.err).toBe(false);
+      expect(result.val).toBe(true);
+    });
+  });
+
+  describe('refreshGraph', () => {
+    it('should return an error if the response is unsuccessful', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+      mockClient.patch.mockReturnValueOnce({ ok: false });
+
+      const result = await graphsService.refreshGraph('123');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to refresh graph.')]);
+    });
+
+    it('should return an error if the request fails', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+      mockClient.patch.mockRejectedValueOnce(new Error('Failed to refresh graph.'));
+
+      const result = await graphsService.refreshGraph('123');
+
+      expect(result.err).toBe(true);
+      expect(result.val).toEqual([new Error('Failed to refresh graph.')]);
+    });
+
+    it('should return true if the request is successful', async () => {
+      mockClient.patch.mockReturnValueOnce({ ok: true });
+
+      const result = await graphsService.refreshGraph('123');
 
       expect(result.err).toBe(false);
       expect(result.val).toBe(true);
