@@ -23,12 +23,14 @@
         name: node.name,
         expand: false,
         show: true,
-        fields: props.edgesMap[node.id].map(edge => ({
-          id: edge.id,
-          name: edge.name,
-          show: true,
-          targetNode: edge.referencedAppId,
-        })),
+        fields: props.edgesMap[node.id]
+          ? props.edgesMap[node.id].map(edge => ({
+              id: edge.id,
+              name: edge.name,
+              show: true,
+              targetNode: edge.referencedAppId,
+            }))
+          : [],
       }))
       .sort((a, b) => a.name.localeCompare(b.name))
   );
@@ -83,11 +85,6 @@
     node.expand = !node.expand;
   }
 
-  // TODO: I honestly don't know if this is
-  // performant. Emitting an event for every
-  // node and field...feels like maybe
-  // there could be just filter all event
-  // that is emitted once.
   function handleSelectAllButtonClick() {
     if (filterCount.value === 0) {
       filterTree.value.forEach(node => {
