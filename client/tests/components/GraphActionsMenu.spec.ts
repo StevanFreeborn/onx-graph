@@ -226,4 +226,43 @@ describe('GraphActionsMenu', () => {
 
     expect(dialog).not.toBeInTheDocument();
   });
+
+  it('should display a menu with a refresh graph button', async () => {
+    const { getByRole } = await customRender(GraphActionsMenu, {
+      props: {
+        graphId: 'test-graph',
+      },
+    });
+
+    const menuButton = getByRole('button', { name: 'Toggle Actions Menu' });
+
+    await fireEvent.click(menuButton);
+
+    const menu = getByRole('menu');
+    const refreshButton = getByRole('button', { name: 'Refresh Graph' });
+
+    expect(refreshButton).toBeInTheDocument();
+    expect(menu).toBeInTheDocument();
+  });
+
+  it('should refresh graph and close menu when refresh graph button is clicked', async () => {
+    const { getByRole, emitted, queryByRole } = await customRender(GraphActionsMenu, {
+      props: {
+        graphId: 'test-graph',
+      },
+    });
+
+    const menuButton = getByRole('button', { name: 'Toggle Actions Menu' });
+
+    await fireEvent.click(menuButton);
+
+    expect(getByRole('menu')).toBeInTheDocument();
+
+    const refreshButton = getByRole('button', { name: 'Refresh Graph' });
+
+    await fireEvent.click(refreshButton);
+
+    expect(emitted().refresh).toHaveLength(1);
+    expect(queryByRole('menu')).not.toBeInTheDocument();
+  });
 });
