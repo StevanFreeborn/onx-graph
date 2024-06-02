@@ -80,6 +80,285 @@ describe('GraphFilter', () => {
     expect(searchInput).toBeInTheDocument();
   });
 
+  it('should filter nodes and edges based on search input', async () => {
+    const nodes = [
+      { id: 1, name: 'Users' },
+      { id: 2, name: 'Groups' },
+      { id: 3, name: 'Roles' },
+    ];
+
+    const edgesMap = {
+      1: [{ id: 1, name: 'Users to Groups', referencedAppId: 2 }],
+      2: [{ id: 2, name: 'Groups to Users', referencedAppId: 1 }],
+      3: [{ id: 3, name: 'Roles to Groups', referencedAppId: 1 }],
+    };
+
+    const { getByRole, getByPlaceholderText, getAllByRole } = await customRender(GraphFilter, {
+      props: {
+        nodes,
+        edgesMap,
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+    await fireEvent.click(openButton);
+
+    const expandAllButton = getByRole('button', { name: /expand all/i });
+    await fireEvent.click(expandAllButton);
+
+    const searchInput = getByPlaceholderText(/search/i);
+
+    const searchValue = 'User';
+    await fireEvent.update(searchInput, searchValue);
+
+    const listItems = getAllByRole('listitem');
+
+    expect(listItems).toHaveLength(4);
+  });
+
+  it('should display a select all checkbox in filter list', async () => {
+    const { getByRole } = await customRender(GraphFilter, {
+      props: {
+        nodes: [],
+        edgesMap: {},
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+
+    await fireEvent.click(openButton);
+
+    const selectAllCheckbox = getByRole('checkbox', { name: /select all/i });
+
+    expect(selectAllCheckbox).toBeInTheDocument();
+    expect(selectAllCheckbox).toBeChecked();
+  });
+
+  it('should deselect all checkboxes when select all checkbox is unchecked', async () => {
+    const nodes = [
+      { id: 1, name: 'Users' },
+      { id: 2, name: 'Groups' },
+    ];
+
+    const edgesMap = {
+      1: [{ id: 1, name: 'User to Group', referencedAppId: 2 }],
+      2: [{ id: 2, name: 'Group to User', referencedAppId: 1 }],
+    };
+
+    const { getByRole, getAllByRole } = await customRender(GraphFilter, {
+      props: {
+        nodes,
+        edgesMap,
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+
+    await fireEvent.click(openButton);
+
+    const selectAllCheckbox = getByRole('checkbox', { name: /select all/i });
+
+    await fireEvent.click(selectAllCheckbox);
+
+    const listItems = getAllByRole('listitem');
+
+    for (const node of nodes) {
+      const nodeItem = listItems.find(item => item.textContent?.includes(node.name));
+      expect(nodeItem).toBeInTheDocument();
+
+      const { getByRole } = within(nodeItem!);
+
+      const nodeCheckbox = getByRole('checkbox');
+      expect(nodeCheckbox).not.toBeChecked();
+
+      const expandButton = getByRole('button', { name: /expand/i });
+      await fireEvent.click(expandButton);
+
+      for (const edge of edgesMap[node.id]) {
+        const edgeCheckbox = getByRole('checkbox', { name: edge.name });
+        expect(edgeCheckbox).not.toBeChecked();
+      }
+    }
+  });
+
+  it('should check all checkboxes when select all checkbox is checked', async () => {
+    const nodes = [
+      { id: 1, name: 'Users' },
+      { id: 2, name: 'Groups' },
+    ];
+
+    const edgesMap = {
+      1: [{ id: 1, name: 'User to Group', referencedAppId: 2 }],
+      2: [{ id: 2, name: 'Group to User', referencedAppId: 1 }],
+    };
+
+    const { getByRole, getAllByRole } = await customRender(GraphFilter, {
+      props: {
+        nodes,
+        edgesMap,
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+
+    await fireEvent.click(openButton);
+
+    const selectAllCheckbox = getByRole('checkbox', { name: /select all/i });
+
+    await fireEvent.click(selectAllCheckbox);
+    await fireEvent.click(selectAllCheckbox);
+
+    const listItems = getAllByRole('listitem');
+
+    for (const node of nodes) {
+      const nodeItem = listItems.find(item => item.textContent?.includes(node.name));
+      expect(nodeItem).toBeInTheDocument();
+
+      const { getByRole } = within(nodeItem!);
+
+      const nodeCheckbox = getByRole('checkbox');
+      expect(nodeCheckbox).toBeChecked();
+
+      const expandButton = getByRole('button', { name: /expand/i });
+      await fireEvent.click(expandButton);
+
+      for (const edge of edgesMap[node.id]) {
+        const edgeCheckbox = getByRole('checkbox', { name: edge.name });
+        expect(edgeCheckbox).toBeChecked();
+      }
+    }
+  });
+
+  it('should display an expand all button in filter list', async () => {
+    const { getByRole } = await customRender(GraphFilter, {
+      props: {
+        nodes: [],
+        edgesMap: {},
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+
+    await fireEvent.click(openButton);
+
+    const expandAllButton = getByRole('button', { name: /expand all/i });
+
+    expect(expandAllButton).toBeInTheDocument();
+  });
+
+  it('should expand all nodes when expand all button is clicked', async () => {
+    const nodes = [
+      { id: 1, name: 'Users' },
+      { id: 2, name: 'Groups' },
+    ];
+
+    const edgesMap = {
+      1: [{ id: 1, name: 'User to Group', referencedAppId: 2 }],
+      2: [{ id: 2, name: 'Group to User', referencedAppId: 1 }],
+    };
+
+    const { getByRole, getAllByRole } = await customRender(GraphFilter, {
+      props: {
+        nodes,
+        edgesMap,
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+
+    await fireEvent.click(openButton);
+
+    const expandAllButton = getByRole('button', { name: /expand all/i });
+
+    await fireEvent.click(expandAllButton);
+
+    const listItems = getAllByRole('listitem');
+
+    for (const node of nodes) {
+      const nodeItem = listItems.find(item => item.textContent?.includes(node.name));
+      expect(nodeItem).toBeInTheDocument();
+
+      const { getByRole, queryByRole, getAllByRole } = within(nodeItem!);
+
+      const expandButton = queryByRole('button', { name: /expand/i });
+      expect(expandButton).not.toBeInTheDocument();
+
+      const collapseButton = getByRole('button', { name: /collapse/i });
+      expect(collapseButton).toBeInTheDocument();
+
+      const edgeListItems = getAllByRole('listitem');
+
+      expect(edgeListItems).toHaveLength(edgesMap[node.id].length);
+    }
+  });
+
+  it('should display a collapse all button in filter list', async () => {
+    const { getByRole } = await customRender(GraphFilter, {
+      props: {
+        nodes: [],
+        edgesMap: {},
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+
+    await fireEvent.click(openButton);
+
+    const collapseAllButton = getByRole('button', { name: /collapse all/i });
+
+    expect(collapseAllButton).toBeInTheDocument();
+  });
+
+  it('should collapse all nodes when collapse all button is clicked', async () => {
+    const nodes = [
+      { id: 1, name: 'Users' },
+      { id: 2, name: 'Groups' },
+    ];
+
+    const edgesMap = {
+      1: [{ id: 1, name: 'User to Group', referencedAppId: 2 }],
+      2: [{ id: 2, name: 'Group to User', referencedAppId: 1 }],
+    };
+
+    const { getByRole, getAllByRole } = await customRender(GraphFilter, {
+      props: {
+        nodes,
+        edgesMap,
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+
+    await fireEvent.click(openButton);
+
+    const expandAllButton = getByRole('button', { name: /expand all/i });
+
+    await fireEvent.click(expandAllButton);
+
+    const collapseAllButton = getByRole('button', { name: /collapse all/i });
+
+    await fireEvent.click(collapseAllButton);
+
+    const listItems = getAllByRole('listitem');
+
+    for (const node of nodes) {
+      const nodeItem = listItems.find(item => item.textContent?.includes(node.name));
+      expect(nodeItem).toBeInTheDocument();
+
+      const { getByRole, queryByRole, queryAllByRole } = within(nodeItem!);
+
+      const expandButton = getByRole('button', { name: /expand/i });
+      expect(expandButton).toBeInTheDocument();
+
+      const collapseButton = queryByRole('button', { name: /collapse/i });
+      expect(collapseButton).not.toBeInTheDocument();
+
+      const edgeItems = queryAllByRole('listitem');
+
+      expect(edgeItems).toHaveLength(0);
+    }
+  });
+
   it('should hide filter list when button is clicked again', async () => {
     const { getByRole, queryByRole } = await customRender(GraphFilter, {
       props: {
@@ -503,5 +782,122 @@ describe('GraphFilter', () => {
         expect(decrementedFilterText).toBeInTheDocument();
       }
     }
+  });
+
+  it('should hide and filter node when node checkbox is unchecked', async () => {
+    const nodes = [{ id: 1, name: 'Users' }];
+
+    const { getByRole, emitted } = await customRender(GraphFilter, {
+      props: {
+        nodes,
+        edgesMap: {},
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+    await fireEvent.click(openButton);
+
+    const checkbox = getByRole('checkbox', { name: /users/i });
+
+    await fireEvent.click(checkbox);
+
+    const emits = emitted();
+    const filterEvent = emits['filter:node'];
+    expect(filterEvent[0]).toEqual([1, false]);
+  });
+
+  it("should filter all of node's edges when node checkbox is unchecked", async () => {
+    const nodes = [
+      { id: 1, name: 'Users' },
+      { id: 2, name: 'Groups' },
+    ];
+
+    const edgesMap = {
+      1: [{ id: 1, name: 'User to Group', referencedAppId: 2 }],
+    };
+
+    const { getByRole, emitted } = await customRender(GraphFilter, {
+      props: {
+        nodes,
+        edgesMap,
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+    await fireEvent.click(openButton);
+
+    const checkbox = getByRole('checkbox', { name: /users/i });
+    await fireEvent.click(checkbox);
+
+    const emits = emitted();
+
+    const filterNodeEvent = emits['filter:node'];
+    expect(filterNodeEvent).toEqual([[1, false]]);
+
+    const filterEvent = emits['filter:edge'];
+    expect(filterEvent).toEqual([[1, 1, false]]);
+  });
+
+  it('should filter all edges which reference node when node checkbox is unchecked', async () => {
+    const nodes = [
+      { id: 1, name: 'Users' },
+      { id: 2, name: 'Groups' },
+    ];
+
+    const edgesMap = {
+      1: [{ id: 1, name: 'User to Group', referencedAppId: 2 }],
+      2: [{ id: 2, name: 'Group to User', referencedAppId: 1 }],
+    };
+
+    const { getByRole, emitted } = await customRender(GraphFilter, {
+      props: {
+        nodes,
+        edgesMap,
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+    await fireEvent.click(openButton);
+
+    const checkbox = getByRole('checkbox', { name: /users/i });
+    await fireEvent.click(checkbox);
+
+    const emits = emitted();
+    const filterNodeEvents = emits['filter:node'];
+    expect(filterNodeEvents).toEqual([[1, false]]);
+
+    const filterEdgeEvents = emits['filter:edge'];
+    expect(filterEdgeEvents).toEqual([
+      [1, 1, false],
+      [2, 2, false],
+    ]);
+  });
+
+  it('should filter edge when edge checkbox is unchecked', async () => {
+    const nodes = [{ id: 1, name: 'Users' }];
+
+    const edgesMap = {
+      1: [{ id: 1, name: 'User to Group', referencedAppId: 2 }],
+    };
+
+    const { getByRole, emitted } = await customRender(GraphFilter, {
+      props: {
+        nodes,
+        edgesMap,
+      },
+    });
+
+    const openButton = getByRole('button', { name: /open filters/i });
+    await fireEvent.click(openButton);
+
+    const expandAllButton = getByRole('button', { name: /expand all/i });
+    await fireEvent.click(expandAllButton);
+
+    const checkbox = getByRole('checkbox', { name: /user to group/i });
+    await fireEvent.click(checkbox);
+
+    const emits = emitted();
+    const filterEvent = emits['filter:edge'];
+    expect(filterEvent).toEqual([[1, 1, false]]);
   });
 });
