@@ -25,10 +25,14 @@ describe('GraphDisplay', () => {
     updatedAt: '2021-01-01T00:00:00Z',
     status: 0,
     nodes: [],
+    edgesMap: {},
+    layout: {},
   };
 
   const mockGraphsService = {
     getGraph: vi.fn(),
+    updateGraph: vi.fn(),
+    refreshGraph: vi.fn(),
   };
 
   const defaultProvide = {
@@ -127,7 +131,7 @@ describe('GraphDisplay', () => {
     });
 
     await waitFor(() => {
-      expect(getByTestId(`graph-${mockGraph.id}`)).toBeInTheDocument();
+      expect(getByTestId(`graph-display-${mockGraph.id}`)).toBeInTheDocument();
     });
   });
 
@@ -227,6 +231,249 @@ describe('GraphDisplay', () => {
 
     await waitFor(() => {
       expect(getByText(/hmm...doesn't look like that graph exists/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should retrieve graph when graph monitor emits graph processed', async () => {
+    mockGraphsService.getGraph.mockReturnValueOnce({
+      err: false,
+      val: { ...mockGraph, status: GraphStatus.Building },
+    });
+
+    const { getByText, getByTestId } = await customRender(GraphDisplay, {
+      props: {
+        graphId: mockGraph.id,
+      },
+      global: {
+        provide: defaultProvide,
+        stubs: {
+          GraphMonitor: {
+            template: `<div>graph monitor</div>`,
+          },
+        },
+      },
+    });
+
+    await waitFor(() => {
+      expect(mockGraphsService.getGraph).toHaveBeenCalledTimes(1);
+    });
+
+    await waitFor(() => {
+      expect(getByText(/graph monitor/i)).toBeInTheDocument();
+    });
+
+    mockGraphsService.getGraph.mockReturnValueOnce({
+      err: false,
+      val: { ...mockGraph, status: GraphStatus.Built },
+    });
+
+    const graphMonitor = getByText('graph monitor');
+    await fireEvent(graphMonitor, new CustomEvent('graph-processed'));
+
+    await waitFor(() => {
+      const graph = getByTestId(`graph-display-${mockGraph.id}`);
+
+      expect(graph).toBeInTheDocument();
+      expect(mockGraphsService.getGraph).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it("should not update graph's name when graph heading emits update:name event and graph name is unchanged", async () => {
+    mockGraphsService.getGraph.mockReturnValueOnce({
+      err: false,
+      val: { ...mockGraph, status: GraphStatus.Built },
+    });
+
+    const { getByLabelText } = await customRender(GraphDisplay, {
+      props: {
+        graphId: mockGraph.id,
+      },
+      global: {
+        provide: defaultProvide,
+      },
+    });
+
+    await waitFor(() => {
+      expect(getByLabelText(/graph name/i)).toBeInTheDocument();
+    });
+
+    const graphNameInput = getByLabelText(/graph name/i);
+
+    await fireEvent.update(graphNameInput, mockGraph.name);
+    await fireEvent.blur(graphNameInput);
+
+    expect(mockGraphsService.updateGraph).not.toHaveBeenCalled();
+  });
+
+  it("should update graph's name when graph heading emits update:name event and graph name is changed", async () => {
+    const testGraph = { ...mockGraph, status: GraphStatus.Built };
+
+    mockGraphsService.getGraph.mockReturnValueOnce({
+      err: false,
+      val: testGraph,
+    });
+
+    const { getByLabelText } = await customRender(GraphDisplay, {
+      props: {
+        graphId: mockGraph.id,
+      },
+      global: {
+        provide: defaultProvide,
+      },
+    });
+
+    await waitFor(() => {
+      expect(getByLabelText(/graph name/i)).toBeInTheDocument();
+    });
+
+    const newName = 'New Graph Name';
+    const updatedGraph = { ...testGraph, name: newName };
+
+    mockGraphsService.updateGraph.mockReturnValueOnce({
+      err: false,
+      val: updatedGraph,
+    });
+
+    const graphNameInput = getByLabelText(/graph name/i);
+
+    await fireEvent.update(graphNameInput, newName);
+    await fireEvent.blur(graphNameInput);
+
+    expect(mockGraphsService.updateGraph).toHaveBeenCalledWith(updatedGraph);
+    expect(graphNameInput).toHaveValue(newName);
+  });
+
+  it('should display alert and log error when graph name update fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    const testGraph = { ...mockGraph, status: GraphStatus.Built };
+
+    mockGraphsService.getGraph.mockReturnValueOnce({
+      err: false,
+      val: testGraph,
+    });
+
+    const { getByLabelText } = await customRender(GraphDisplay, {
+      props: {
+        graphId: mockGraph.id,
+      },
+      global: {
+        provide: defaultProvide,
+      },
+    });
+
+    await waitFor(() => {
+      expect(getByLabelText(/graph name/i)).toBeInTheDocument();
+    });
+
+    const newName = 'New Graph Name';
+    const updatedGraph = { ...testGraph, name: newName };
+
+    mockGraphsService.updateGraph.mockReturnValueOnce({
+      err: true,
+      val: [new Error('Failed to update graph name.')],
+    });
+
+    const graphNameInput = getByLabelText(/graph name/i);
+    await fireEvent.update(graphNameInput, newName);
+    await fireEvent.blur(graphNameInput);
+
+    await waitFor(() => {
+      expect(mockGraphsService.updateGraph).toHaveBeenCalledWith(updatedGraph);
+      expect(console.error).toHaveBeenCalled();
+      expect(window.alert).toHaveBeenCalledWith('Failed to update graph name.\n');
+    });
+  });
+
+  it('should rebuild graph when graph is refreshed', async () => {
+    const testGraph = { ...mockGraph, status: GraphStatus.Built };
+
+    mockGraphsService.getGraph.mockReturnValueOnce({
+      err: false,
+      val: testGraph,
+    });
+
+    const { getByRole, getByText, getByTestId } = await customRender(GraphDisplay, {
+      props: {
+        graphId: mockGraph.id,
+      },
+      global: {
+        provide: defaultProvide,
+        stubs: {
+          GraphMonitor: {
+            template: `<div>graph monitor</div>`,
+          },
+        },
+      },
+    });
+
+    await waitFor(() => {
+      expect(getByTestId(`graph-display-${testGraph.id}`)).toBeInTheDocument();
+    });
+
+    mockGraphsService.refreshGraph.mockReturnValueOnce({
+      err: false,
+      val: true,
+    });
+
+    const actionsMenu = getByRole('button', { name: /toggle actions menu/i });
+    await fireEvent.click(actionsMenu);
+
+    const refreshButton = getByRole('button', { name: /refresh graph/i });
+    await fireEvent.click(refreshButton);
+
+    await waitFor(() => {
+      expect(getByText(/graph monitor/i)).toBeInTheDocument();
+      expect(mockGraphsService.refreshGraph).toHaveBeenCalledWith(testGraph.id);
+    });
+  });
+
+  it('should display alert and log error when graph refresh fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    const testGraph = { ...mockGraph, status: GraphStatus.Built };
+
+    mockGraphsService.getGraph.mockReturnValueOnce({
+      err: false,
+      val: testGraph,
+    });
+
+    const { getByRole, getByTestId, queryByText } = await customRender(GraphDisplay, {
+      props: {
+        graphId: mockGraph.id,
+      },
+      global: {
+        provide: defaultProvide,
+        stubs: {
+          GraphMonitor: {
+            template: `<div>graph monitor</div>`,
+          },
+        },
+      },
+    });
+
+    await waitFor(() => {
+      expect(getByTestId(`graph-display-${testGraph.id}`)).toBeInTheDocument();
+    });
+
+    mockGraphsService.refreshGraph.mockReturnValueOnce({
+      err: true,
+      val: [new Error('Failed to refresh graph.')],
+    });
+
+    const actionsMenu = getByRole('button', { name: /toggle actions menu/i });
+    await fireEvent.click(actionsMenu);
+
+    const refreshButton = getByRole('button', { name: /refresh graph/i });
+    await fireEvent.click(refreshButton);
+
+    await waitFor(() => {
+      expect(mockGraphsService.refreshGraph).toHaveBeenCalledWith(testGraph.id);
+      expect(console.error).toHaveBeenCalled();
+      expect(window.alert).toHaveBeenCalledWith('Failed to refresh graph.\n');
+      expect(queryByText(/graph monitor/i)).not.toBeInTheDocument();
     });
   });
 });
