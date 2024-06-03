@@ -164,7 +164,7 @@
 </script>
 
 <template>
-  <div class="filter-container">
+  <div data-testid="graph-filter" class="filter-container">
     <div class="filter-toggle-container">
       <div>Filters ({{ filterCount }})</div>
       <button type="button" @click="handleFilterButtonClick">
