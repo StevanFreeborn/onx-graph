@@ -416,6 +416,7 @@
 <template>
   <div class="container" ref="containerRef">
     <v-network-graph
+      :data-testid="`graph-${props.graph.id}`"
       class="graph"
       :nodes="nodes"
       :edges="edges"
@@ -423,7 +424,7 @@
       :configs="configs"
       :eventHandlers="eventHandlers"
     />
-    <div class="explorer-container" :style="explorerContainerStyles">
+    <div data-testid="explorer" class="explorer-container" :style="explorerContainerStyles">
       <div
         class="drag-bar"
         @mousedown="handleMouseDown"
