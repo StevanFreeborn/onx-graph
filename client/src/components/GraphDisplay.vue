@@ -279,7 +279,7 @@
         <button type="button" class="button" @click="handleRefreshGraph">Build Graph</button>
       </div>
     </div>
-    <div v-else-if="graph !== null" :data-testid="`graph-${graphData.data.id}`">
+    <div v-else-if="graph !== null" :data-testid="`graph-display-${graphData.data.id}`">
       <div class="heading-filter-container">
         <GraphHeading
           :id="graphData.data.id"
