@@ -13,7 +13,7 @@
     'update:layout': [layout: GraphLayout];
   }>();
 
-  const graphLayout = ref(props.graph.layout);
+  const graphLayout = ref(props.graph.layout ?? {});
   const selectedNode = ref<number | null>(null);
   const selectedEdges = ref<number[]>([]);
 
@@ -288,7 +288,7 @@
       return props.graph.layout
         ? Object.keys(props.graph.layout).reduce(
             (layouts, node) => {
-              const currentNode = props.graph.layout[node];
+              const currentNode = props.graph.layout![node];
 
               layouts.nodes[`node${node}`] = {
                 x: currentNode.x,
