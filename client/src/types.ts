@@ -49,7 +49,7 @@ export type Graph = {
   status: GraphStatus;
   nodes: AppNode[];
   edgesMap: Record<string, FieldEdge[]>;
-  layout: GraphLayout;
+  layout: GraphLayout | null;
 };
 
 export type GraphLayout = Record<string, { x: number; y: number }>;
