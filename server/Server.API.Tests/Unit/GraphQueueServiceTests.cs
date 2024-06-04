@@ -5,11 +5,16 @@ public class GraphQueueServiceTests
   private readonly Mock<ILogger<GraphQueueService>> _loggerMock = new();
   private readonly Mock<IGraphQueue> _queueMock = new();
   private readonly Mock<IGraphProcessor> _processorMock = new();
+  private readonly Mock<TimeProvider> _timeProviderMock = new();
   private readonly GraphQueueService _sut;
 
   public GraphQueueServiceTests()
   {
-    _sut = new GraphQueueService(_loggerMock.Object, _queueMock.Object, _processorMock.Object);
+    _timeProviderMock
+      .Setup(x => x.GetUtcNow())
+      .Returns(DateTime.UtcNow);
+
+    _sut = new GraphQueueService(_loggerMock.Object, _queueMock.Object, _processorMock.Object, _timeProviderMock.Object);
   }
 
   [Fact]

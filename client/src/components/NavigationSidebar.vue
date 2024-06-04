@@ -6,7 +6,6 @@
   import { computed, onMounted, ref } from 'vue';
   import { useRouter } from 'vue-router';
 
-  // TODO: Save sidebar state to local storage
   const isMounted = useMounted();
   const router = useRouter();
   const userStore = useUserStore();
@@ -143,7 +142,7 @@
     --sidebar-width: 250px;
     --sidebar-x-padding: 1rem;
     --container-width: calc(var(--sidebar-width) - 2 * var(--sidebar-x-padding));
-    z-index: 2;
+    z-index: 3;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -168,6 +167,7 @@
       color: var(--color-text);
       background-color: var(--color-background-mute);
       border-radius: 50%;
+      border-color: var(--color-background);
       cursor: pointer;
       transition-property: transform;
       transition-duration: var(--transition-duration);
@@ -303,6 +303,7 @@
           background-color: inherit;
           color: var(--color-text);
           cursor: pointer;
+          border-color: var(--color-background);
 
           & svg {
             width: 1rem;

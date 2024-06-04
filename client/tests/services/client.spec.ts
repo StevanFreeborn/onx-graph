@@ -36,6 +36,34 @@ describe('Client', () => {
     expect(client.delete).toBeInstanceOf(Function);
   });
 
+  it('should retry requests if given an unauthorized response handler when a 401 status is returned', async () => {
+    const accessToken = 'token';
+    const retryResponse = new Response();
+    const unauthorizedResponseHandler = vi
+      .fn()
+      .mockReturnValueOnce({ response: retryResponse, accessToken });
+    const clientConfig = new ClientConfig(undefined, true, unauthorizedResponseHandler);
+    const client = new Client(clientConfig);
+
+    fetchMock.mockReturnValueOnce({ status: 401 });
+
+    await client.get({ url: 'http://example.com' });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(unauthorizedResponseHandler).toHaveBeenCalledWith(expect.any(Request));
+  });
+
+  it('should not include credentials in the request if includeCredentials is false', async () => {
+    const clientConfig = new ClientConfig(undefined, false, undefined);
+    const client = new Client(clientConfig);
+
+    fetchMock.mockReturnValueOnce(new Response());
+
+    await client.get({ url: 'http://example.com' });
+
+    expect(fetchMock).toHaveBeenCalledWith(expect.objectContaining({ credentials: 'omit' }));
+  });
+
   describe('get', () => {
     it('should make a get request using fetch using given url and config', async () => {
       const url = 'http://example.com';
@@ -104,6 +132,28 @@ describe('Client', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         expect.objectContaining({ method: 'DELETE', credentials: 'include' })
       );
+      expect(result).toBe(response);
+    });
+  });
+
+  describe('patch', () => {
+    it('should make a patch request using fetch using given url and config', async () => {
+      const url = 'http://example.com/';
+      const body = { data: 'test' };
+      const request = new ClientRequestWithBody(url, undefined, body);
+      const response = new Response();
+      fetchMock.mockReturnValue(response);
+
+      const result = await client.patch(request);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'PATCH',
+          url: url,
+          body: expect.any(Object),
+        })
+      );
+
       expect(result).toBe(response);
     });
   });

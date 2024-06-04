@@ -140,35 +140,6 @@ describe('NavigationSidebar', () => {
     expect(userIcon).toBeInTheDocument();
   });
 
-  it('should display loading while retrieving username', async () => {
-    const mockUsersService = {
-      getUser: vi.fn(),
-    };
-
-    const simulatedResponse = await new Promise(resolve =>
-      setTimeout(() => resolve({ err: false, val: { username: 'test-username' } }), 1000)
-    );
-
-    mockUsersService.getUser.mockResolvedValue(simulatedResponse);
-
-    const { getByText } = await customRender(NavigationSidebar, {
-      global: {
-        provide: {
-          [UsersServiceFactoryKey as symbol]: {
-            create: () => {
-              return mockUsersService;
-            },
-          },
-        },
-      },
-    });
-
-    waitFor(() => {
-      const loadingMessage = getByText(/loading/i);
-      expect(loadingMessage).toBeInTheDocument();
-    });
-  });
-
   it('should display username when it is successfully retrieved', async () => {
     const { getByText } = await customRender(NavigationSidebar, {
       global: {

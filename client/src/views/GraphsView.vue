@@ -138,7 +138,7 @@
       border-radius: 0.25rem;
       border-width: 2px;
       border-style: outset;
-      border-color: buttonborder;
+      border-color: var(--color-background);
       border-image: initial;
       color: var(--color-text);
       cursor: pointer;
@@ -177,7 +177,7 @@
       border-radius: 0.25rem;
       border-width: 2px;
       border-style: outset;
-      border-color: buttonborder;
+      border-color: var(--color-background);
       border-image: initial;
       color: var(--color-text);
       cursor: pointer;

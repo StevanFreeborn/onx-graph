@@ -10,7 +10,7 @@ test.describe('GraphView', () => {
     const graph = await insertGraphForUser(user.id);
     await page.goto(`/graphs/${graph._id}`);
 
-    const graphName = page.getByText(graph.name);
+    const graphName = page.getByLabel(/graph name/i);
 
     await expect(graphName).toBeVisible();
 
@@ -46,7 +46,7 @@ test.describe('GraphView', () => {
     const graph = await insertGraphForUser(user.id, 2);
     await page.goto(`/graphs/${graph._id}`);
 
-    const graphName = page.getByRole('heading', { name: graph.name });
+    const graphName = page.getByLabel(/graph name/i);
 
     await expect(graphName).toBeVisible();
 

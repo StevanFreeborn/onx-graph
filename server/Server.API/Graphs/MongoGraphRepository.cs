@@ -17,6 +17,8 @@ class MongoGraphRepository(MongoDbContext context, TimeProvider timeProvider) : 
     return graph;
   }
 
+  public async Task DeleteGraphAsync(string id) => await _context.Graphs.DeleteOneAsync(g => g.Id == id);
+
   public async Task<Graph?> GetGraphAsync(string id, string userId)
   {
     return await _context.Graphs

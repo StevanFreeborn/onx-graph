@@ -58,6 +58,7 @@ public static class MongoClassMapper
         cm.MapProperty(g => g.Status).SetElementName("status");
         cm.MapProperty(g => g.Nodes).SetElementName("nodes");
         cm.MapProperty(g => g.EdgesMap).SetElementName("edgesMap");
+        cm.MapProperty(g => g.Layout).SetElementName("layout");
       }
     );
 
@@ -93,6 +94,16 @@ public static class MongoClassMapper
         cm.SetIgnoreExtraElements(true);
         cm.MapProperty(f => f.Multiplicity).SetElementName("multiplicity");
         cm.MapProperty(f => f.ReferencedAppId).SetElementName("referencedAppId");
+      }
+    );
+
+    BsonClassMap.TryRegisterClassMap<Point>(
+      cm =>
+      {
+        cm.AutoMap();
+        cm.SetIgnoreExtraElements(true);
+        cm.MapProperty(p => p.X).SetElementName("x");
+        cm.MapProperty(p => p.Y).SetElementName("y");
       }
     );
   }

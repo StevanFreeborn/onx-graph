@@ -24,6 +24,11 @@ export interface IGraphsService {
     pageSize?: number
   ) => Promise<Result<PageWithData<Graph>, Error[]>>;
   getGraph: (id: string) => Promise<Result<Graph, Error[]>>;
+  getGraphKey: (id: string) => Promise<Result<GetGraphKeyResponse, Error[]>>;
+  deleteGraph: (id: string) => Promise<Result<boolean, Error[]>>;
+  updateGraph: (graph: Graph) => Promise<Result<Graph, Error[]>>;
+  updateGraphKey: (id: string, key: string) => Promise<Result<boolean, Error[]>>;
+  refreshGraph: (id: string) => Promise<Result<boolean, Error[]>>;
 }
 
 export class GraphsService implements IGraphsService {
@@ -34,19 +39,129 @@ export class GraphsService implements IGraphsService {
     return `${this.baseURL}/graphs?pageNumber=${pageNumber}&pageSize=${pageSize}`;
   }
 
-  private createGetGraphEndpoint(id: string) {
+  private createGraphEndpoint(id: string) {
     return `${this.baseURL}/graphs/${id}`;
+  }
+
+  private createGraphKeyEndpoint(id: string) {
+    return `${this.baseURL}/graphs/${id}/key`;
+  }
+
+  private createRefreshGraphEndpoint(id: string) {
+    return `${this.baseURL}/graphs/${id}/refresh`;
   }
 
   private readonly endpoints = {
     addGraph: `${this.baseURL}/graphs/add`,
     getGraphs: (pageNumber: number, pageSize: number) =>
       this.createGetGraphsEndpoint(pageNumber, pageSize),
-    getGraph: (id: string) => this.createGetGraphEndpoint(id),
+    getGraph: (id: string) => this.createGraphEndpoint(id),
+    getGraphKey: (id: string) => this.createGraphKeyEndpoint(id),
+    updateGraph: (id: string) => this.createGraphEndpoint(id),
+    updateGraphKey: (id: string) => this.createGraphKeyEndpoint(id),
+    refreshGraph: (id: string) => this.createRefreshGraphEndpoint(id),
   };
 
   constructor(client: IClient) {
     this.client = client;
+  }
+
+  async refreshGraph(id: string) {
+    const request = new ClientRequestWithBody(this.endpoints.refreshGraph(id));
+
+    try {
+      const res = await this.client.patch(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Failed to refresh graph.')]);
+      }
+
+      return Ok(true);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return Err([new Error('Failed to refresh graph.')]);
+    }
+  }
+
+  async updateGraphKey(id: string, key: string) {
+    const request = new ClientRequestWithBody(this.endpoints.updateGraphKey(id), undefined, {
+      key,
+    });
+
+    try {
+      const res = await this.client.patch(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Failed to update graph key.')]);
+      }
+
+      return Ok(true);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return Err([new Error('Failed to update graph key.')]);
+    }
+  }
+
+  async updateGraph(graph: Graph) {
+    const request = new ClientRequestWithBody(
+      this.endpoints.updateGraph(graph.id),
+      undefined,
+      graph
+    );
+
+    try {
+      const res = await this.client.put(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Failed to update graph.')]);
+      }
+
+      const body = await res.json();
+      return Ok(body as Graph);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return Err([new Error('Failed to update graph.')]);
+    }
+  }
+
+  async deleteGraph(id: string) {
+    const request = new ClientRequest(this.endpoints.getGraph(id));
+
+    try {
+      const res = await this.client.delete(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Failed to delete graph.')]);
+      }
+
+      return Ok(true);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return Err([new Error('Failed to delete graph.')]);
+    }
+  }
+
+  async getGraphKey(id: string) {
+    const request = new ClientRequest(this.endpoints.getGraphKey(id));
+
+    try {
+      const res = await this.client.get(request);
+
+      if (res.ok === false) {
+        return Err([new Error('Failed to get graph key.')]);
+      }
+
+      const body = await res.json();
+      return Ok(body as GetGraphKeyResponse);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return Err([new Error('Failed to get graph key.')]);
+    }
   }
 
   async getGraph(id: string) {
@@ -54,6 +169,10 @@ export class GraphsService implements IGraphsService {
 
     try {
       const res = await this.client.get(request);
+
+      if (res.status === 404) {
+        return Err([new GraphNotFoundError()]);
+      }
 
       if (res.ok === false) {
         return Err([new Error('Failed to get graph.')]);
@@ -128,3 +247,13 @@ export class GraphsService implements IGraphsService {
 type AddGraphResponse = {
   id: string;
 };
+
+type GetGraphKeyResponse = {
+  key: string;
+};
+
+export class GraphNotFoundError extends Error {
+  constructor() {
+    super('Graph not found.');
+  }
+}

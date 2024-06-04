@@ -14,7 +14,7 @@ class Graph(string name, string apiKey, User user)
   public GraphStatus Status { get; set; } = GraphStatus.Building;
   public List<App> Nodes { get; set; } = [];
   public Dictionary<string, List<ReferenceField>> EdgesMap { get; set; } = [];
-
+  public Dictionary<string, Point>? Layout { get; set; } = null;
   public Graph(AddGraphDto dto, User user) : this(dto.Name, dto.ApiKey, user) { }
   internal Graph() : this(string.Empty, string.Empty, new User()) { }
 }
@@ -27,4 +27,22 @@ enum GraphStatus
   NotBuilt,
   Building,
   Built,
+}
+
+/// <summary>
+/// Represents a node's position in a graph.
+/// </summary>
+record Point
+{
+  public double X { get; set; }
+  public double Y { get; set; }
+
+  public Point(double x, double y)
+  {
+    X = x;
+    Y = y;
+  }
+
+  [JsonConstructor]
+  public Point() { }
 }

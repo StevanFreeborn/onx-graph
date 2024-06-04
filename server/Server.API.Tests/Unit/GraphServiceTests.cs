@@ -91,4 +91,24 @@ public class GraphServiceTests
 
     result.Value.Should().BeEquivalentTo(graph);
   }
+
+  [Fact]
+  public async Task DeleteGraphAsync_WhenCalled_ItShouldCallRepository()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+
+    _graphRepositoryMock
+      .Setup(x => x.GetGraphAsync(graph.Id, graph.UserId))
+      .ReturnsAsync(graph);
+
+    _graphRepositoryMock
+      .Setup(x => x.DeleteGraphAsync(graph.Id))
+      .Returns(Task.CompletedTask);
+
+    var result = await _sut.DeleteGraphAsync(graph.Id);
+
+    result.IsSuccess.Should().BeTrue();
+
+    _graphRepositoryMock.Verify(x => x.DeleteGraphAsync(graph.Id), Times.Once);
+  }
 }

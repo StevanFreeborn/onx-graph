@@ -4,6 +4,7 @@
   },
   "dotnet.defaultSolution": "server/Server.sln",
   "cSpell.words": [
+    "alertdialog",
     "Bson",
     "buttonborder",
     "composables",
@@ -13,6 +14,7 @@
     "Encryptor",
     "Hmac",
     "Instantiator",
+    "listitem",
     "mailhog",
     "onxgraph",
     "Pinia",

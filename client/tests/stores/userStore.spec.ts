@@ -43,6 +43,7 @@ describe('userStore', () => {
     post: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),
+    patch: vi.fn(),
   };
 
   const authServiceMock: IAuthService = {
@@ -172,10 +173,10 @@ describe('userStore', () => {
 
       const store = useUserStore();
 
-      const response = await store.refreshAccessToken(new Request('https://test.com'));
+      const refreshResult = await store.refreshAccessToken(new Request('https://test.com'));
 
       expect(store.user).toBe(null);
-      expect(response.status).toBe(401);
+      expect(refreshResult.response.status).toBe(401);
     });
 
     it('should log user out if refreshing token fails and return 401 response', async () => {
@@ -191,10 +192,10 @@ describe('userStore', () => {
 
       const store = useUserStore();
 
-      const response = await store.refreshAccessToken(new Request('https://test.com'));
+      const refreshResult = await store.refreshAccessToken(new Request('https://test.com'));
 
       expect(store.user).toBe(null);
-      expect(response.status).toBe(401);
+      expect(refreshResult.response.status).toBe(401);
     });
 
     it('should log user in with new token and return 200 response', async () => {
@@ -225,10 +226,10 @@ describe('userStore', () => {
 
       const store = useUserStore();
 
-      const response = await store.refreshAccessToken(new Request('https://test.com'));
+      const refreshResult = await store.refreshAccessToken(new Request('https://test.com'));
 
       expect(store.user).toEqual(user);
-      expect(response.status).toBe(200);
+      expect(refreshResult.response.status).toBe(200);
     });
   });
 

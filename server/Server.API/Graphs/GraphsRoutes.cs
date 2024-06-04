@@ -29,7 +29,7 @@ static class GraphsRoutes
     group
       .MapGet("{id}", GraphsController.GetGraph)
       .RequireAuthorization()
-      .Produces<Graph>((int)HttpStatusCode.OK)
+      .Produces<GraphDto>((int)HttpStatusCode.OK)
       .Produces((int)HttpStatusCode.Unauthorized)
       .Produces((int)HttpStatusCode.NotFound)
       .Produces((int)HttpStatusCode.InternalServerError)
@@ -37,6 +37,57 @@ static class GraphsRoutes
       .WithDescription("Gets a graph by id");
 
     group.MapHub<GraphsHub>("/hub");
+
+    group
+      .MapGet("{id}/key", GraphsController.GetGraphKey)
+      .RequireAuthorization()
+      .Produces<GetGraphKeyResponse>((int)HttpStatusCode.OK)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("GetGraphKey")
+      .WithDescription("Gets a graph's key by graph id");
+
+    group
+      .MapDelete("{id}", GraphsController.DeleteGraph)
+      .RequireAuthorization()
+      .Produces((int)HttpStatusCode.NoContent)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("DeleteGraph")
+      .WithDescription("Deletes a graph by id");
+
+    group
+      .MapPut("{id}", GraphsController.UpdateGraph)
+      .RequireAuthorization()
+      .Produces<GraphDto>((int)HttpStatusCode.OK)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.Conflict)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("UpdateGraph")
+      .WithDescription("Updates a graph by id");
+
+    group
+      .MapPatch("{id}/key", GraphsController.UpdateGraphKey)
+      .RequireAuthorization()
+      .Produces((int)HttpStatusCode.NoContent)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("UpdateGraphKey")
+      .WithDescription("Updates a graph's key by graph id");
+
+    group
+      .MapPatch("{id}/refresh", GraphsController.RefreshGraph)
+      .RequireAuthorization()
+      .Produces((int)HttpStatusCode.NoContent)
+      .Produces((int)HttpStatusCode.Unauthorized)
+      .Produces((int)HttpStatusCode.NotFound)
+      .Produces((int)HttpStatusCode.InternalServerError)
+      .WithName("RefreshGraph")
+      .WithDescription("Refreshes a graph by id");
 
     return group;
   }

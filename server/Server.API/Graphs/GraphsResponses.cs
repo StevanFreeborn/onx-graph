@@ -11,12 +11,14 @@ record AddGraphResponse(string Id);
 record GraphDto
 {
   public string Id { get; init; } = string.Empty;
+  public string UserId { get; init; } = string.Empty;
   public string Name { get; init; } = string.Empty;
   public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
   public DateTime UpdatedAt { get; init; } = DateTime.UtcNow;
   public GraphStatus Status { get; init; } = GraphStatus.NotBuilt;
   public List<App> Nodes { get; init; } = [];
   public Dictionary<string, List<ReferenceField>> EdgesMap { get; init; } = [];
+  public Dictionary<string, Point>? Layout { get; init; } = null;
 
   [JsonConstructor]
   internal GraphDto()
@@ -26,13 +28,29 @@ record GraphDto
   public GraphDto(Graph graph)
   {
     Id = graph.Id;
+    UserId = graph.UserId;
     Name = graph.Name;
     CreatedAt = graph.CreatedAt;
     UpdatedAt = graph.UpdatedAt;
     Status = graph.Status;
     Nodes = graph.Nodes;
     EdgesMap = graph.EdgesMap;
+    Layout = graph.Layout;
   }
+
+  public Graph ToGraph(string apiKey) => new()
+  {
+    Id = Id,
+    UserId = UserId,
+    Name = Name,
+    CreatedAt = CreatedAt,
+    UpdatedAt = UpdatedAt,
+    Status = Status,
+    Nodes = Nodes,
+    EdgesMap = EdgesMap,
+    Layout = Layout,
+    ApiKey = apiKey
+  };
 }
 
 /// <summary>
@@ -60,3 +78,8 @@ record GetGraphsResponse
     Data = page.Data.Select(g => new GraphDto(g)).ToList();
   }
 }
+
+/// <summary>
+/// Represents a response to getting a graph key
+/// </summary>
+record GetGraphKeyResponse(string Key);

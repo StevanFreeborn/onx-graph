@@ -51,3 +51,89 @@ record GetGraphRequest(
   [FromRoute] string Id,
   [FromServices] IGraphService GraphService
 );
+
+/// <summary>
+/// Represents a request to get a graph key
+/// </summary>
+record GetGraphKeyRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromServices] IGraphService GraphService,
+  [FromServices] IUserService UserService,
+  [FromServices] IEncryptionService EncryptionService
+);
+
+/// <summary>
+/// Represents a request to delete a graph
+/// </summary>
+record DeleteGraphRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromServices] IUserService UserService,
+  [FromServices] IGraphService GraphService
+);
+
+/// <summary>
+/// Validator for <see cref="GraphDto"/>
+/// </summary>
+class GraphDtoValidator : AbstractValidator<GraphDto>
+{
+  public GraphDtoValidator()
+  {
+    RuleFor(dto => dto.Name).NotEmpty();
+  }
+}
+
+
+/// <summary>
+/// Represents a request to update a graph
+/// </summary>
+record UpdateGraphRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromBody] GraphDto Dto,
+  [FromServices] IValidator<GraphDto> Validator,
+  [FromServices] IGraphService GraphService,
+  [FromServices] IUserService UserService
+);
+
+/// <summary>
+/// Represents the data needed to update a graph key
+/// </summary>
+record UpdateGraphKeyDto(string Key);
+
+/// <summary>
+/// Validator for <see cref="UpdateGraphKeyDto"/>
+/// </summary>
+class UpdateGraphKeyDtoValidator : AbstractValidator<UpdateGraphKeyDto>
+{
+  public UpdateGraphKeyDtoValidator()
+  {
+    RuleFor(dto => dto.Key).NotEmpty();
+  }
+}
+
+
+/// <summary>
+/// Represents a request to update a graph key
+/// </summary>
+record UpdateGraphKeyRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromBody] UpdateGraphKeyDto Dto,
+  [FromServices] IValidator<UpdateGraphKeyDto> Validator,
+  [FromServices] IGraphService GraphService,
+  [FromServices] IUserService UserService,
+  [FromServices] IEncryptionService EncryptionService
+);
+
+/// <summary>
+/// Represents a request to refresh a graph
+/// </summary>
+record RefreshGraphRequest(
+  HttpContext HttpContext,
+  [FromRoute] string Id,
+  [FromServices] IGraphService GraphService,
+  [FromServices] IGraphQueue GraphQueue,
+  [FromServices] IUserService UserService
+);

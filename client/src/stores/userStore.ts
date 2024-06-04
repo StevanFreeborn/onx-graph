@@ -52,7 +52,7 @@ export const useUserStore = defineStore('userStore', () => {
 
     if (user.value === null || !clientFactory || !authServiceFactory) {
       logUserOut();
-      return unauthorizedResponse;
+      return { response: unauthorizedResponse, accessToken: '' };
     }
 
     const client = clientFactory.create(
@@ -65,14 +65,15 @@ export const useUserStore = defineStore('userStore', () => {
 
     if (refreshResult.err) {
       logUserOut();
-      return unauthorizedResponse;
+      return { response: unauthorizedResponse, accessToken: '' };
     }
 
     logUserIn(refreshResult.val.accessToken);
 
     originalRequest.headers.set('Authorization', `Bearer ${refreshResult.val.accessToken}`);
+    const response = await fetch(originalRequest);
 
-    return await fetch(originalRequest);
+    return { response, accessToken: refreshResult.val.accessToken };
   }
 
   function updateSidebarState(expanded: boolean) {

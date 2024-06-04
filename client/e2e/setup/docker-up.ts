@@ -7,7 +7,14 @@ setup('docker-compose up', async ({ request }) => {
 
   await setup.step('execute docker-compose up', async () => {
     const dockerComposePath = `${process.cwd()}/docker-compose.test.yml`;
-    exec(`docker compose -f ${dockerComposePath} up --build`);
+    exec(`docker compose -f ${dockerComposePath} up --build`, function (error) {
+      if (error !== null) {
+        // eslint-disable-next-line no-console
+        console.error('exec error: ' + error);
+
+        throw error;
+      }
+    });
   });
 
   await setup.step('wait for app to be ready', async () => {

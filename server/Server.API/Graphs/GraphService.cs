@@ -21,6 +21,12 @@ class GraphService(IGraphRepository graphRepository) : IGraphService
     return Result.Ok(createdGraph);
   }
 
+  public async Task<Result> DeleteGraphAsync(string id)
+  {
+    await _graphRepository.DeleteGraphAsync(id);
+    return Result.Ok();
+  }
+
   public async Task<Result<Graph>> GetGraphAsync(string id, string userId)
   {
     var graph = await _graphRepository.GetGraphAsync(id, userId);
@@ -37,5 +43,18 @@ class GraphService(IGraphRepository graphRepository) : IGraphService
   {
     var graphs = await _graphRepository.GetGraphsAsync(pageNumber, pageSize, userId);
     return Result.Ok(graphs);
+  }
+
+  public async Task<Result<Graph>> UpdateGraphAsync(Graph graph)
+  {
+    var existingGraph = await _graphRepository.GetGraphByNameAsync(graph.Name, graph.UserId);
+
+    if (existingGraph is not null && existingGraph.Id != graph.Id)
+    {
+      return Result.Fail(new GraphAlreadyExistsError(graph.Name));
+    }
+
+    await _graphRepository.UpdateGraphAsync(graph);
+    return Result.Ok();
   }
 }

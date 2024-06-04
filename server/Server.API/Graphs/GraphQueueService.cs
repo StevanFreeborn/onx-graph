@@ -3,12 +3,14 @@ namespace Server.API.Graphs;
 class GraphQueueService(
   ILogger<GraphQueueService> logger,
   IGraphQueue queue,
-  IGraphProcessor processor
+  IGraphProcessor processor,
+  TimeProvider timeProvider
 ) : BackgroundService
 {
   private readonly ILogger<GraphQueueService> _logger = logger;
   private readonly IGraphQueue _queue = queue;
   private readonly IGraphProcessor _processor = processor;
+  private readonly TimeProvider _timeProvider = timeProvider;
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
@@ -30,7 +32,7 @@ class GraphQueueService(
     // if the item was created less than 3 seconds ago, re-enqueue it
     // trying to prevent item being processed before user has had a
     // chance to connect for updates
-    if (item.CreatedAt.AddSeconds(3) > DateTime.UtcNow)
+    if (item.CreatedAt.AddSeconds(3) > _timeProvider.GetUtcNow())
     {
       await _queue.EnqueueAsync(item);
       _logger.LogInformation("Waiting to process item {ItemId} for graph {GraphId}", item.Id, item.GraphId);

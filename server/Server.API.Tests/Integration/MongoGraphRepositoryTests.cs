@@ -156,4 +156,22 @@ public class MongoGraphRepositoryTests : IClassFixture<TestDb>
       .Should()
       .BeNull();
   }
+
+  [Fact]
+  public async Task DeleteGraphAsync_WhenCalled_ItShouldDeleteGraph()
+  {
+    var testGraph = FakeDataFactory.Graph.Generate();
+
+    await _context.Graphs.InsertOneAsync(testGraph);
+
+    await _sut.DeleteGraphAsync(testGraph.Id);
+
+    var deletedGraph = await _context.Graphs
+      .Find(g => g.Id == testGraph.Id)
+      .SingleOrDefaultAsync();
+
+    deletedGraph
+      .Should()
+      .BeNull();
+  }
 }

@@ -303,4 +303,5 @@ export const exampleGraph: Graph = {
       },
     ],
   },
+  layout: null,
 };

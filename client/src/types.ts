@@ -24,7 +24,7 @@ const FieldEdgeType = {
 
 type FieldEdgeType = (typeof FieldEdgeType)[keyof typeof FieldEdgeType];
 
-type FieldEdge = {
+export type FieldEdge = {
   multiplicity: FieldEdgeMultiplicity;
   referencedAppId: number;
   id: number;
@@ -36,7 +36,7 @@ type FieldEdge = {
   isUnique: boolean;
 };
 
-type AppNode = {
+export type AppNode = {
   id: number;
   name: string;
 };
@@ -49,7 +49,10 @@ export type Graph = {
   status: GraphStatus;
   nodes: AppNode[];
   edgesMap: Record<string, FieldEdge[]>;
+  layout: GraphLayout | null;
 };
+
+export type GraphLayout = Record<string, { x: number; y: number }>;
 
 export const GraphStatus = {
   NotBuilt: 0,

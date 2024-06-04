@@ -34,7 +34,7 @@ export class ClientRequestWithBody<T> extends ClientRequest {
 }
 
 export type UnauthorizedResponseHandler =
-  | ((originalRequest: Request) => Promise<Response>)
+  | ((originalRequest: Request) => Promise<{ response: Response; accessToken: string }>)
   | undefined;
 
 export class ClientConfig {
@@ -57,6 +57,7 @@ export interface IClient {
   get: (req: ClientRequest) => Promise<Response>;
   post: <T>(req: ClientRequestWithBody<T>) => Promise<Response>;
   put: <T>(req: ClientRequestWithBody<T>) => Promise<Response>;
+  patch: <T>(req: ClientRequestWithBody<T>) => Promise<Response>;
   delete: (req: ClientRequest) => Promise<Response>;
 }
 
@@ -88,7 +89,9 @@ export class Client implements IClient {
     const response = await fetch(firstTryRequest);
 
     if (response.status === 401 && this._clientConfig?.unauthorizedResponseHandler) {
-      return await this._clientConfig.unauthorizedResponseHandler(secondTryRequest);
+      const retryResult = await this._clientConfig.unauthorizedResponseHandler(secondTryRequest);
+      this._clientConfig.authHeader = { Authorization: `Bearer ${retryResult.accessToken}` };
+      return retryResult.response;
     }
 
     return response;
@@ -117,6 +120,20 @@ export class Client implements IClient {
     const requestConfig = {
       ...req?.config,
       method: 'PUT',
+      body: JSON.stringify(req?.body),
+      headers: {
+        ...req?.config?.headers,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    return await this.request(req?.url, requestConfig);
+  }
+
+  async patch<T>(req: ClientRequestWithBody<T>) {
+    const requestConfig = {
+      ...req?.config,
+      method: 'PATCH',
       body: JSON.stringify(req?.body),
       headers: {
         ...req?.config?.headers,
