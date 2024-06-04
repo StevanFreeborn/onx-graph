@@ -156,6 +156,7 @@ jobs:
           echo "MongoDbOptions__ConnectionString=${{ secrets.MONGODBOPTIONS__CONNECTIONSTRING }}" >> .env
           echo "MongoDbOptions__DatabaseName=${{ secrets.MONGODBOPTIONS__DATABASENAME }}" >> .env
           echo "CorsOptions__AllowedOrigins__0=${{ secrets.CORSOPTIONS__ALLOWEDORIGINS__0 }}" >> .env
+          echo "CorsOptions__AllowedOrigins__1=${{ secrets.CORSOPTIONS__ALLOWEDORIGINS__1 }}" >> .env
           echo "LOKI_URL=${{ secrets.LOKI_URL }}" >> .env
           echo "EncryptionOptions__Key=${{ secrets.API_ENCRYPTION_KEY }}" >> .env
       - name: Copy files to server
