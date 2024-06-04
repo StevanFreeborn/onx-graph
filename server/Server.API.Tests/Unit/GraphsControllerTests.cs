@@ -8,6 +8,7 @@ public class GraphsControllerTests
   private readonly Mock<HttpContext> _contextMock = new();
   private readonly Mock<IValidator<AddGraphDto>> _addGraphDtoValidatorMock = new();
   private readonly Mock<IValidator<GraphDto>> _graphDtoValidatorMock = new();
+  private readonly Mock<IValidator<UpdateGraphKeyDto>> _updateGraphKeyDtoValidatorMock = new();
   private readonly Mock<IGraphService> _graphServiceMock = new();
   private readonly Mock<IUserService> _userServiceMock = new();
   private readonly Mock<IEncryptionService> _encryptionServiceMock = new();
@@ -736,5 +737,165 @@ public class GraphsControllerTests
     problemDetails.Title
       .Should()
       .Be("Failed to update graph");
+  }
+
+  private UpdateGraphKeyRequest CreateUpdateGraphKeyRequest(string id, UpdateGraphKeyDto dto) => new(
+    _contextMock.Object,
+    id,
+    dto,
+    _updateGraphKeyDtoValidatorMock.Object,
+    _graphServiceMock.Object,
+    _userServiceMock.Object,
+    _encryptionServiceMock.Object
+  );
+
+  [Fact]
+  public async Task UpdateGraphKey_WhenCalledByUnauthenticatedUser_ItShouldReturn401StatusCode()
+  {
+    _contextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal());
+
+    var request = CreateUpdateGraphKeyRequest("id", new UpdateGraphKeyDto("key"));
+
+    var result = await GraphsController.UpdateGraphKey(request);
+
+    result.Should()
+      .BeOfType<UnauthorizedHttpResult>();
+
+    result.As<UnauthorizedHttpResult>()
+      .StatusCode
+      .Should()
+      .Be(StatusCodes.Status401Unauthorized);
+  }
+
+  [Fact]
+  public async Task UpdateGraphKey_WhenUpdateFails_ItShouldReturn500StatusCodeWithProblemDetails()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var graph = FakeDataFactory.Graph.Generate();
+    graph.UserId = user.Id;
+
+    var updateGraphKeyDto = new UpdateGraphKeyDto("key");
+
+    _contextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal(new ClaimsIdentity(
+      [
+        new Claim(ClaimTypes.NameIdentifier, user.Id)
+      ])));
+
+    _updateGraphKeyDtoValidatorMock
+      .Setup(v => v.ValidateAsync(It.IsAny<UpdateGraphKeyDto>(), default))
+      .ReturnsAsync(new ValidationResult());
+
+    _userServiceMock
+      .Setup(s => s.GetUserByIdAsync(user.Id))
+      .ReturnsAsync(Result.Ok(user));
+
+    _graphServiceMock
+      .Setup(s => s.GetGraphAsync(graph.Id, user.Id))
+      .ReturnsAsync(Result.Ok(graph));
+
+    _graphServiceMock
+      .Setup(s => s.UpdateGraphAsync(It.IsAny<Graph>()))
+      .ReturnsAsync(Result.Fail(new Error("Update failed")));
+
+    var request = CreateUpdateGraphKeyRequest(graph.Id, updateGraphKeyDto);
+
+    var result = await GraphsController.UpdateGraphKey(request);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be(StatusCodes.Status500InternalServerError);
+
+    var problemDetails = result.As<ProblemHttpResult>().ProblemDetails;
+
+    problemDetails.Title
+      .Should()
+      .Be("Failed to update graph key");
+  }
+
+  private RefreshGraphRequest CreateRefreshGraphRequest(string id) => new(
+    _contextMock.Object,
+    id,
+    _graphServiceMock.Object,
+    _graphQueueMock.Object,
+    _userServiceMock.Object
+  );
+
+  [Fact]
+  public async Task RefreshGraph_WhenCalledByUnauthenticatedUser_ItShouldReturn401StatusCode()
+  {
+    _contextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal());
+
+    var request = CreateRefreshGraphRequest("id");
+
+    var result = await GraphsController.RefreshGraph(request);
+
+    result.Should()
+      .BeOfType<UnauthorizedHttpResult>();
+
+    result.As<UnauthorizedHttpResult>()
+      .StatusCode
+      .Should()
+      .Be(StatusCodes.Status401Unauthorized);
+  }
+
+  [Fact]
+  public async Task RefreshGraph_WhenRefreshFails_ItShouldReturn500StatusCodeWithProblemDetails()
+  {
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var graph = FakeDataFactory.Graph.Generate();
+    graph.UserId = user.Id;
+
+    _contextMock
+      .Setup(c => c.User)
+      .Returns(new ClaimsPrincipal(new ClaimsIdentity(
+      [
+        new Claim(ClaimTypes.NameIdentifier, user.Id)
+      ])));
+
+    _userServiceMock
+      .Setup(s => s.GetUserByIdAsync(user.Id))
+      .ReturnsAsync(Result.Ok(user));
+
+    _graphServiceMock
+      .Setup(s => s.GetGraphAsync(graph.Id, user.Id))
+      .ReturnsAsync(Result.Ok(graph));
+
+    _graphServiceMock
+      .Setup(s => s.UpdateGraphAsync(graph))
+      .ReturnsAsync(Result.Fail(new Error("Refresh failed")));
+
+    var request = CreateRefreshGraphRequest(graph.Id);
+
+    var result = await GraphsController.RefreshGraph(request);
+
+    result.Should()
+      .BeOfType<ProblemHttpResult>();
+
+    result.As<ProblemHttpResult>()
+      .StatusCode
+      .Should()
+      .Be(StatusCodes.Status500InternalServerError);
+
+    var problemDetails = result.As<ProblemHttpResult>().ProblemDetails;
+
+    problemDetails.Title
+      .Should()
+      .Be("Failed to refresh graph");
+
+    _graphQueueMock
+      .Verify(
+        q => q.EnqueueAsync(It.IsAny<GraphQueueItem>()),
+        Times.Never
+      );
   }
 }
