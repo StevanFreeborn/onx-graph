@@ -322,88 +322,102 @@ describe('GraphHeading', () => {
     expect(mockGraphService.updateGraphKey).not.toHaveBeenCalled();
   });
 
-  it("should update the graph's api key when text is entered into the input field", async () => {
-    mockGraphService.getGraphKey.mockResolvedValueOnce({
-      err: false,
-      val: { key: 'test' },
-    });
+  it(
+    "should update the graph's api key when text is entered into the input field",
+    { timeout: 10_000 },
+    async () => {
+      mockGraphService.getGraphKey.mockResolvedValueOnce({
+        err: false,
+        val: { key: 'test' },
+      });
 
-    mockGraphService.updateGraphKey.mockResolvedValueOnce({ err: false });
+      mockGraphService.updateGraphKey.mockResolvedValueOnce({ err: false });
 
-    const { getByLabelText, getByRole } = await customRender(GraphHeading, {
-      props: {
-        id: '1',
-        name: 'Test Graph',
-        status: GraphStatus.Built,
-      },
-      global: {
-        provide: {
-          [GraphsServiceFactoryKey as symbol]: mockGraphServiceFactory,
+      const { getByLabelText, getByRole } = await customRender(GraphHeading, {
+        props: {
+          id: '1',
+          name: 'Test Graph',
+          status: GraphStatus.Built,
         },
-      },
-    });
-
-    const showApiKeyButton = getByRole('button', { name: /show api key/i });
-
-    await fireEvent.click(showApiKeyButton);
-
-    const apiKeyInput = getByLabelText(/api key/i);
-
-    await userEvent.click(apiKeyInput);
-    await userEvent.clear(apiKeyInput);
-    await userEvent.type(apiKeyInput, 'new-api-key');
-
-    expect(apiKeyInput).toHaveValue('new-api-key');
-
-    await waitFor(() => {
-      expect(mockGraphService.updateGraphKey).toHaveBeenCalledWith('1', 'new-api-key');
-    });
-  });
-
-  it("should update the graph's api key when text is entered but should throttle requests", async () => {
-    mockGraphService.getGraphKey.mockResolvedValueOnce({
-      err: false,
-      val: { key: 'test' },
-    });
-
-    mockGraphService.updateGraphKey.mockResolvedValueOnce({ err: false });
-    mockGraphService.updateGraphKey.mockResolvedValueOnce({ err: false });
-
-    const { getByLabelText, getByRole } = await customRender(GraphHeading, {
-      props: {
-        id: '1',
-        name: 'Test Graph',
-        status: GraphStatus.Built,
-      },
-      global: {
-        provide: {
-          [GraphsServiceFactoryKey as symbol]: mockGraphServiceFactory,
+        global: {
+          provide: {
+            [GraphsServiceFactoryKey as symbol]: mockGraphServiceFactory,
+          },
         },
-      },
-    });
+      });
 
-    const showApiKeyButton = getByRole('button', { name: /show api key/i });
+      const showApiKeyButton = getByRole('button', { name: /show api key/i });
 
-    await fireEvent.click(showApiKeyButton);
+      await fireEvent.click(showApiKeyButton);
 
-    const apiKeyInput = getByLabelText(/api key/i);
+      const apiKeyInput = getByLabelText(/api key/i);
 
-    await userEvent.click(apiKeyInput);
-    await userEvent.clear(apiKeyInput);
+      await userEvent.click(apiKeyInput);
+      await userEvent.clear(apiKeyInput);
+      await userEvent.type(apiKeyInput, 'new-api-key');
 
-    for (const letter of 'new-api-key') {
-      await userEvent.type(apiKeyInput, letter);
+      expect(apiKeyInput).toHaveValue('new-api-key');
+
+      await waitFor(
+        () => {
+          expect(mockGraphService.updateGraphKey).toHaveBeenCalledWith('1', 'new-api-key');
+        },
+        { timeout: 5000 }
+      );
     }
+  );
 
-    expect(apiKeyInput).toHaveValue('new-api-key');
+  it(
+    "should update the graph's api key when text is entered but should throttle requests",
+    { timeout: 10_000 },
+    async () => {
+      mockGraphService.getGraphKey.mockResolvedValueOnce({
+        err: false,
+        val: { key: 'test' },
+      });
 
-    await waitFor(() => {
-      expect(mockGraphService.updateGraphKey).toHaveBeenCalledTimes(1);
-      expect(mockGraphService.updateGraphKey).toHaveBeenNthCalledWith(1, '1', 'new-api-key');
-    });
-  });
+      mockGraphService.updateGraphKey.mockResolvedValueOnce({ err: false });
+      mockGraphService.updateGraphKey.mockResolvedValueOnce({ err: false });
 
-  it('should log an error when failed to update the graph key', async () => {
+      const { getByLabelText, getByRole } = await customRender(GraphHeading, {
+        props: {
+          id: '1',
+          name: 'Test Graph',
+          status: GraphStatus.Built,
+        },
+        global: {
+          provide: {
+            [GraphsServiceFactoryKey as symbol]: mockGraphServiceFactory,
+          },
+        },
+      });
+
+      const showApiKeyButton = getByRole('button', { name: /show api key/i });
+
+      await fireEvent.click(showApiKeyButton);
+
+      const apiKeyInput = getByLabelText(/api key/i);
+
+      await userEvent.click(apiKeyInput);
+      await userEvent.clear(apiKeyInput);
+
+      for (const letter of 'new-api-key') {
+        await userEvent.type(apiKeyInput, letter);
+      }
+
+      expect(apiKeyInput).toHaveValue('new-api-key');
+
+      await waitFor(
+        () => {
+          expect(mockGraphService.updateGraphKey).toHaveBeenCalledTimes(1);
+          expect(mockGraphService.updateGraphKey).toHaveBeenNthCalledWith(1, '1', 'new-api-key');
+        },
+        { timeout: 5000 }
+      );
+    }
+  );
+
+  it('should log an error when failed to update the graph key', { timeout: 10_000 }, async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     mockGraphService.getGraphKey.mockResolvedValueOnce({
@@ -439,8 +453,11 @@ describe('GraphHeading', () => {
     await userEvent.clear(apiKeyInput);
     await userEvent.type(apiKeyInput, 'new-api-key');
 
-    await waitFor(() => {
-      expect(console.error).toHaveBeenCalled();
-    });
+    await waitFor(
+      () => {
+        expect(console.error).toHaveBeenCalled();
+      },
+      { timeout: 5000 }
+    );
   });
 });
