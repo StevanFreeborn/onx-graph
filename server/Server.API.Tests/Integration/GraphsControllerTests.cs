@@ -576,4 +576,117 @@ public class GraphsControllerTests(TestServerFactory serverFactory) : Integratio
 
     responseBody!.Errors["Name"].Should().Contain("'Name' must not be empty.");
   }
+
+  [Fact]
+  public async Task UpdateGraph_WhenCalledAndGraphsUserNotFound_ItShouldReturnNotFound()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+    graph.UserId = user.Id;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Graphs.InsertOneAsync(graph);
+
+    var response = await _client.PutAsJsonAsync($"/graphs/{graph.Id}", new { name = "Updated Graph" });
+
+    response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+  }
+
+  [Fact]
+  public async Task UpdateGraph_WhenCalledAndGraphDoesNotExist_ItShouldReturnNotFound()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+    graph.UserId = user.Id;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Users.InsertOneAsync(user);
+
+    var response = await _client.PutAsJsonAsync($"/graphs/{graph.Id}", new { name = "Updated Graph" });
+
+    response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+  }
+
+  [Fact]
+  public async Task UpdateGraph_WhenCalledAndGraphAlreadyExistsWithSameName_ItShouldReturnConflict()
+  {
+    var existingGraph = FakeDataFactory.Graph.Generate();
+    var updatedGraph = FakeDataFactory.Graph.Generate();
+    updatedGraph.Name = existingGraph.Name;
+
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+    existingGraph.UserId = user.Id;
+    updatedGraph.UserId = user.Id;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Users.InsertOneAsync(user);
+    await Context.Graphs.InsertOneAsync(existingGraph);
+    await Context.Graphs.InsertOneAsync(updatedGraph);
+
+    var graphDto = new GraphDto(updatedGraph);
+    var response = await _client.PutAsJsonAsync($"/graphs/{updatedGraph.Id}", graphDto);
+
+    response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+  }
+
+  [Fact]
+  public async Task UpdateGraph_WhenCalledAndUpdateSucceeds_ItShouldReturnOkWithUpdatedGraph()
+  {
+    var graph = FakeDataFactory.Graph.Generate();
+    var (_, user) = FakeDataFactory.TestUser.Generate();
+    var encryptionKey = EncryptionService.GenerateKey();
+    var encryptedUserEncryptionKey = await EncryptionService.EncryptAsync(encryptionKey);
+    user.EncryptionKey = encryptedUserEncryptionKey;
+    graph.UserId = user.Id;
+
+    var userJwtToken = TestJwtTokenBuilder
+      .Create()
+      .WithClaim(new(JwtRegisteredClaimNames.Sub, user.Id))
+      .Build();
+
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", userJwtToken);
+
+    await Context.Users.InsertOneAsync(user);
+    await Context.Graphs.InsertOneAsync(graph);
+
+    var updatedName = "Updated Graph";
+    graph.Name = updatedName;
+    var graphDto = new GraphDto(graph);
+    var response = await _client.PutAsJsonAsync($"/graphs/{graphDto.Id}", graphDto);
+
+    response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+    var responseBody = await response.Content.ReadFromJsonAsync<GraphDto>();
+
+    responseBody!.Id.Should().Be(graph.Id);
+    responseBody!.Name.Should().Be(graphDto.Name);
+    responseBody!.UpdatedAt.Should().BeAfter(graphDto.UpdatedAt);
+  }
 }

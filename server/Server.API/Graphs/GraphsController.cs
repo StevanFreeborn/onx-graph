@@ -225,17 +225,7 @@ static class GraphsController
       );
     }
 
-    var deleteGraphResult = await request.GraphService.DeleteGraphAsync(getGraphResult.Value.Id);
-
-    if (deleteGraphResult.IsFailed)
-    {
-      return Results.Problem(
-        title: title,
-        detail: detail,
-        statusCode: StatusCodes.Status500InternalServerError,
-        extensions: new Dictionary<string, object?> { { "Errors", deleteGraphResult.Errors } }
-      );
-    }
+    await request.GraphService.DeleteGraphAsync(getGraphResult.Value.Id);
 
     return Results.NoContent();
   }
