@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.RateLimiting;
+
 Log.Logger = new LoggerConfiguration()
   .WriteTo.Console()
   .CreateBootstrapLogger();
@@ -158,6 +160,7 @@ try
         .AllowAnyHeader()
         .AllowAnyMethod()
         .WithOrigins(corsOptions.AllowedOrigins)
+        .WithExposedHeaders("X-Retry-After")
     )
   );
 
@@ -202,12 +205,10 @@ try
   builder.Services
     .AddHttpClient(
       OnspringClientFactory.HttpClientName,
-      client =>
-      {
-        client.BaseAddress = new Uri("https://api.onspring.com");
-      }
+      client => client.BaseAddress = new Uri("https://api.onspring.com")
     )
     .AddStandardResilienceHandler();
+
   builder.Services.AddSingleton<IOnspringClientFactory, OnspringClientFactory>();
 
   // add rate limiting and whitelist client origin
@@ -215,17 +216,56 @@ try
   {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
+    options.OnRejected = async (context, rateLimit) =>
+    {
+      if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter) is false)
+      {
+        return;
+      }
+
+      var retryDate = DateTime.UtcNow.Add(retryAfter);
+      context.HttpContext.Response.Headers.Append("X-Retry-After", retryDate.ToString("o"));
+    };
+
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
       httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers["X-Forwarded-For"].ToString(),
-            factory: partition => new FixedWindowRateLimiterOptions
-            {
-              PermitLimit = 10000,
-              QueueLimit = 0,
-              Window = TimeSpan.FromMinutes(1)
-            }
-        )
+      {
+        var partitionKey = httpContext.User.Identity?.Name
+          ?? httpContext.Request.Headers["X-Forwarded-For"].ToString()
+          ?? httpContext.Connection.RemoteIpAddress?.ToString()
+          ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+          partitionKey: partitionKey,
+          factory: partition => new FixedWindowRateLimiterOptions
+          {
+            PermitLimit = 10000,
+            QueueLimit = 0,
+            Window = TimeSpan.FromMinutes(1)
+          }
+        );
+      }
+    );
+
+    options.AddPolicy(
+      RateLimitingPolicy.Fixed,
+      httpContext =>
+      {
+        var partitionKey = httpContext.User.Identity?.Name
+          ?? httpContext.Request.Headers["X-Forwarded-For"].ToString()
+          ?? httpContext.Connection.RemoteIpAddress?.ToString()
+          ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+          partitionKey: partitionKey,
+          factory: partition => new FixedWindowRateLimiterOptions
+          {
+            PermitLimit = 10,
+            QueueLimit = 0,
+            Window = TimeSpan.FromMinutes(1)
+          }
+        );
+      }
     );
   });
 
@@ -233,13 +273,6 @@ try
   Log.Information("Building the application");
 
   var app = builder.Build();
-
-
-  // add rate limiting middleware
-  if (app.Environment.IsProduction())
-  {
-    app.UseRateLimiter();
-  }
 
 
   // add request logging middleware
@@ -291,6 +324,13 @@ try
 
   // use cors
   app.UseCors("CORSpolicy");
+
+
+  // add rate limiting middleware
+  if (app.Environment.IsProduction())
+  {
+    app.UseRateLimiter();
+  }
 
 
   // wire up authentication and authorization
