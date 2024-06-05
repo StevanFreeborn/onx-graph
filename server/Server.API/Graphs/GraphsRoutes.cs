@@ -15,7 +15,8 @@ static class GraphsRoutes
       .Produces((int)HttpStatusCode.NotFound)
       .Produces((int)HttpStatusCode.InternalServerError)
       .WithName("AddGraph")
-      .WithDescription("Adds a graph");
+      .WithDescription("Adds a graph")
+      .RequireRateLimiting(RateLimitingPolicy.Fixed);
 
     group
       .MapGet(string.Empty, GraphsController.GetGraphs)
@@ -87,7 +88,8 @@ static class GraphsRoutes
       .Produces((int)HttpStatusCode.NotFound)
       .Produces((int)HttpStatusCode.InternalServerError)
       .WithName("RefreshGraph")
-      .WithDescription("Refreshes a graph by id");
+      .WithDescription("Refreshes a graph by id")
+      .RequireRateLimiting(RateLimitingPolicy.Fixed);
 
     return group;
   }

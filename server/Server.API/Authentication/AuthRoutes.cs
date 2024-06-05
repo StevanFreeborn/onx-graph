@@ -19,7 +19,8 @@ static class AuthRoutes
       .Produces<ProblemDetails>((int)HttpStatusCode.Conflict)
       .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("RegisterUser")
-      .WithDescription("Register a new user");
+      .WithDescription("Register a new user")
+      .RequireRateLimiting(RateLimitingPolicy.Fixed);
 
     group
       .MapPost("login", AuthController.Login)
@@ -29,7 +30,8 @@ static class AuthRoutes
       .Produces<ProblemDetails>((int)HttpStatusCode.Forbidden)
       .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("LoginUser")
-      .WithDescription("Login a user");
+      .WithDescription("Login a user")
+      .RequireRateLimiting(RateLimitingPolicy.Fixed);
 
     group
       .MapPost("logout", AuthController.Logout)
@@ -59,7 +61,8 @@ static class AuthRoutes
       .Produces<ProblemDetails>((int)HttpStatusCode.NotFound)
       .Produces<ProblemDetails>((int)HttpStatusCode.InternalServerError)
       .WithName("ResendVerificationEmail")
-      .WithDescription("Resend a user's verification email");
+      .WithDescription("Resend a user's verification email")
+      .RequireRateLimiting(RateLimitingPolicy.Fixed);
 
     group
       .MapPost("verify-account", AuthController.VerifyAccount)
