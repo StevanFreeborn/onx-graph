@@ -86,12 +86,24 @@ export class Client implements IClient {
 
     const firstTryRequest = new Request(url, requestConfig);
     const secondTryRequest = new Request(url, requestConfig);
-    const response = await fetch(firstTryRequest);
+    let response = await fetch(firstTryRequest);
 
     if (response.status === 401 && this._clientConfig?.unauthorizedResponseHandler) {
       const retryResult = await this._clientConfig.unauthorizedResponseHandler(secondTryRequest);
       this._clientConfig.authHeader = { Authorization: `Bearer ${retryResult.accessToken}` };
-      return retryResult.response;
+      response = retryResult.response;
+    }
+
+    if (response.status === 429) {
+      const retryDateString = response.headers.get('X-Retry-After');
+
+      if (retryDateString === null) {
+        alert('Too many requests. Please try again later.');
+      } else {
+        const retryDate = new Date(retryDateString);
+        const formattedRetryDate = retryDate.toLocaleTimeString();
+        alert(`Too many requests. Please try again after ${formattedRetryDate}.`);
+      }
     }
 
     return response;

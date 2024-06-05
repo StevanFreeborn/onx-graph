@@ -64,6 +64,42 @@ describe('Client', () => {
     expect(fetchMock).toHaveBeenCalledWith(expect.objectContaining({ credentials: 'omit' }));
   });
 
+  it('should display alert if request encounters a 429 status', async () => {
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    const client = new Client(new ClientConfig());
+
+    fetchMock.mockReturnValueOnce(
+      new Response(undefined, {
+        status: 429,
+      })
+    );
+
+    await client.get({ url: 'http://example.com' });
+
+    expect(alert).toHaveBeenCalledWith(expect.any(String));
+  });
+
+  it('should display alert that includes retry time if request encounters a 429 status and X-Retry-After is present', async () => {
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    const client = new Client(new ClientConfig());
+
+    const retryAfterDateString = '2022-01-01T00:00:00Z';
+    const expectedDateString = new Date(retryAfterDateString).toLocaleTimeString();
+
+    fetchMock.mockReturnValueOnce(
+      new Response(undefined, {
+        headers: { 'X-Retry-After': retryAfterDateString },
+        status: 429,
+      })
+    );
+
+    await client.get({ url: 'http://example.com' });
+
+    expect(alert).toHaveBeenCalledWith(expect.stringContaining(expectedDateString));
+  });
+
   describe('get', () => {
     it('should make a get request using fetch using given url and config', async () => {
       const url = 'http://example.com';
