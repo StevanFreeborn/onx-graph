@@ -218,13 +218,13 @@ try
 
     options.OnRejected = (context, rateLimit) =>
     {
-      if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter) is false)
+      if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
       {
-        return;
+        var retryDate = DateTime.UtcNow.Add(retryAfter);
+        context.HttpContext.Response.Headers.Append("X-Retry-After", retryDate.ToString("o"));
       }
 
-      var retryDate = DateTime.UtcNow.Add(retryAfter);
-      context.HttpContext.Response.Headers.Append("X-Retry-After", retryDate.ToString("o"));
+      return ValueTask.CompletedTask;
     };
 
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
