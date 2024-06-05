@@ -216,7 +216,7 @@ try
   {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-    options.OnRejected = async (context, rateLimit) =>
+    options.OnRejected = (context, rateLimit) =>
     {
       if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter) is false)
       {
